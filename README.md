@@ -1,7 +1,7 @@
 ![alt text](./docs/logo.png)
-QuantaNexus 是海文公司基于 Kubernetes（K8S）平台开发的云算力管理软件，已实现对主流 CNI 插件的基础适配，并支持 Kubernetes 集群管理、kube-virt 虚拟化、Ceph 存储集成及异构计算（GPU/AI 芯片）调度等核心能力。目前已经经过大规模集群测试，支持万卡集群。
 
-![alt text](image.png)
+
+QuantaNexus 是海文公司基于 Kubernetes（K8S）平台开发的云算力管理软件，已实现对主流 CNI 插件的基础适配，并支持 Kubernetes 集群管理、kube-virt 虚拟化、Ceph 存储集成及异构计算（GPU/AI 芯片）调度等核心能力。目前已经经过大规模集群测试，支持万卡集群。
 
 WEB Demo:  https://www.hi168.com   (公有云版)
 申请测试： dev@hwua.com  
