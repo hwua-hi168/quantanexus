@@ -1,10 +1,11 @@
-# QuantaNexus 支持文档
 
-为了方便你在 VS Code 中编辑这份文档，我已将内容优化为纯文本 Markdown 格式（去除了 canvas 标签包裹，保留完整结构），你可直接复制以下内容到 VS Code 的 `.md` 文件中，支持语法高亮、格式调整等编辑操作：
+QuantaNexus 是海文公司基于 Kubernetes（K8S）平台开发的管理软件，已实现对主流 CNI 插件的基础适配，并支持 Kubernetes 集群管理、kube-virt 虚拟化、Ceph 存储集成及异构计算（GPU/AI 芯片）调度等核心能力。
 
-# QuantaNexus 对主流 CNI 插件、Kubernetes、kube-virt 及 Ceph 的功能支持明细
 
-QuantaNexus 是海文公司基于 Kubernetes（K8S）平台开发的管理软件，已实现对主流 CNI 插件的基础适配，并支持 Kubernetes 集群管理、kube-virt 虚拟化、Ceph 存储集成及异构计算（GPU/AI 芯片）调度等核心能力。以下为详细功能支持详情：
+WEB Demo:  https://www.hi168.com   (公有云版)
+
+
+以下为详细功能支持详情：
 
 ## 一、QuantaNexus 对主流 CNI 插件的功能支持
 
