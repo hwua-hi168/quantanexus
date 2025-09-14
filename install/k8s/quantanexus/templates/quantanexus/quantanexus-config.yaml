@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: quantanexus-config
+  namespace: abc-platform
+data:
+  prod.conf: |
+    [options]
+    ; disable listdb menu item
+    list_db = False
+    ; This is the password that allows database operations:
+    ; admin_passwd = admin
+    db_host = quantanexus-postgresql
+    db_name = quantanexus001
+    db_port = 5432
+    db_user = quantanexus
+    db_password = quantanexus
+    addons_path = /var/lib/quantanexus/odoo/addons, /var/lib/quantanexus/addons, /var/lib/quantanexus/quantanexus-addons
+    data_dir= /opt/data/quantanexus
+    xmlrpc_port = 8069
+    ; redis
+    hwua_redis_enable=true
+    hwua_redis_url=redis-single
+    hwua_redis_port=6379
+    hwua_redis_timeout=604800
+    hwua_redis_password=hi168pass
+    hwua_redis_pool_max_connections=50
+    hwua_redis_pool_timeout=300
+    hwua_service_db=0
+  test.conf: |
+    [options]
+    ; disable listdb menu item
+    list_db = False
+    ; This is the password that allows database operations:
+    ; admin_passwd = admin
+    db_host = quantanexus-postgresql
+    db_name = quantanexustest001
+    db_port = 5432
+    db_user = quantanexus
+    db_password = quantanexus
+    ;addons_path = /opt/runtime/quantanexus/odoo/addons, /opt/runtime/quantanexus/addons, /opt/runtime/quantanexus/quantanexus_addons
+    addons_path = /var/lib/quantanexus/odoo/addons, /var/lib/quantanexus/addons, /opt/runtime/quantanexus/quantanexus_addons
+    data_dir= /opt/data/quantanexus
+    xmlrpc_port = 8069
+    ; redis
+    hwua_redis_enable=true
+    hwua_redis_url=redis-single
+    hwua_redis_port=6379
+    hwua_redis_timeout=604800
+    hwua_redis_password=hi168pass
+    hwua_redis_pool_max_connections=50
+    hwua_redis_pool_timeout=300
+    hwua_service_db=0
+  pre-start.sh: |
+    echo "quantanexus pre-start.sh called"
+

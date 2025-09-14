@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: abc-experiment-service
+  namespace: abc-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: abc-experiment-service
+  template:
+    metadata:
+      labels:
+        name: abc-experiment-service
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: {{ABC_MASTER_NODE}}
+      containers:
+      - name: abc-experiment-service
+        image: {{ABC_EXPERIMENT_SERVICE_DOCKER_IMAGE}}
+        imagePullPolicy: IfNotPresent
+        command: [ "/entrypoint.sh" ]
+        env:
+        - name: ABC_EXP_SERVICE
+          value: "/usr/local/hw_experiment_service"
+        - name: ABCExpPreStartShell
+          value: "/etc/abc-experiment-service/pre-start.sh"
+        volumeMounts:
+        - name: abc-experiment-service-config
+          mountPath: /etc/abc-experiment-service
+      volumes:
+      - name: abc-experiment-service-config
+        configMap:
+          name: abc-experiment-service-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: abc-experiment-service
+  namespace: abc-platform
+  labels:
+    name: abc-experiment-service
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8075
+    targetPort: 8075
+    protocol: TCP
+
+  selector:
+    name: abc-experiment-service
+
+

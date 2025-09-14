@@ -1,0 +1,246 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hi168-ttyd
+  namespace: abc-platform
+data:
+  t.sh: |
+    #!/bin/bash
+
+    # set -o errexit
+
+    echo "Installing ttyd on your machine..."
+    echo "ttyd serve on http port 7149"
+
+    # echo "wget or curl is manatory!"
+
+    echo '-----------------'
+    if [[ -f /etc/os-release ]]; then
+      head -n 2 /etc/os-release
+    fi
+    echo '-----------------'
+
+    # 函数：检查是否具有 root 权限
+    check_root() {
+        if [ "$(id -u)" -ne 0 ]; then
+            return 1 # 非 root 用户
+        else
+            return 0 # root 用户
+        fi
+    }
+
+    # 函数：检查是否安装了 sudo
+    check_sudo() {
+        if command -v sudo >/dev/null 2>&1; then
+            return 0 # sudo 存在
+        else
+            return 1 # sudo 不存在
+        fi
+    }
+
+    # 函数：检查命令是否存在
+    command_exists() {
+        type "$1" &> /dev/null
+    }
+
+    # 函数：安装软件包
+    install_package() {
+        if command_exists apt; then
+            # Debian/Ubuntu
+            apt-get update
+            apt-get install -y "$1"
+        elif command_exists yum; then
+            # CentOS/RHEL
+            yum install -y "$1"
+        elif command_exists dnf; then
+            # Fedora/CentOS 8+
+            dnf install -y "$1"
+        elif command_exists zypper; then
+            # openSUSE
+            zypper install -y "$1"
+        elif command_exists pacman; then
+            # Arch Linux
+            pacman -Syu "$1"
+        else
+            echo "Unsupported package manager. Cannot install $1"
+            exit 1
+        fi
+    }
+
+    function check_pre_confition {
+
+      # 检查是否为 root 用户
+      if ! check_root; then
+        echo "This script must be run as root privileges."
+        exit 1
+      fi  
+
+
+      # 检查 wget 是否存在，如果不存在则安装
+      if ! command_exists wget; then
+          echo "Installing wget..."
+          install_package "wget"
+      else
+          echo "wget is already installed."
+      fi
+
+      # 检查 crontab 命令是否存在（通过检查 cron 包）
+      if ! command_exists crontab && ! command_exists cronie; then
+          echo "Installing crontab..."
+          # 注意：某些系统可能使用 cronie 而不是 cron
+          install_package "cron" || install_package "cronie"
+      else
+          echo "crontab (cron) is already installed."
+      fi
+    }
+
+    function download_zip {
+      if [[ -f ttyd.20241115v2.tar.gz ]]; then
+        echo 'ttyd.20241115v2.tar.gz is there, continue'
+        return 0
+      fi
+      wget_exist_not=$(which wget)
+      if [[ -n $wget_exist_not ]]; then
+        wget https://d.hi168.com/hi168-public/ttyd.20241115v2.tar.gz
+        if [ X"$?" != X"0" ]; then
+          echo 'failed to downoad ttyd zip file, please contant admin. '
+          exit 1;
+        else
+          ls -lhs ttyd.20241115v2.tar.gz
+          return 0
+        fi
+      fi
+
+      curl_exist_not=$(which curl)
+
+      if [[ -n $curl_exist_not ]]; then
+        curl -O https://d.hi168.com/hi168-public/ttyd.20241115v2.tar.gz
+        if [ X"$?" != X"0" ]; then
+          echo 'failed to downoad ttyd zip file, please contant admin. '
+          exit 1;
+        else
+          ls -lhs ttyd.20241115v2.tar.gz
+          return 0
+        fi
+      fi
+      echo "wget or curl is manatory!, not found in this machine, exit..."
+    }
+
+    # 安装ttyd工具包
+    function installing {
+      if ! [[ -f /var/lib/ttyd/ttyd.i686 ]]; then
+        if ! [[ -f ttyd.20241115v2.tar.gz ]]; then
+          echo 'failed to downoad ttyd zip file, please contant admin. '
+          exit 1;
+        fi  
+        mv ttyd.20241115v2.tar.gz /var/lib
+
+        cd /var/lib
+
+        tar zxvf ttyd.20241115v2.tar.gz
+        # rm -f ttyd.20241115v2.tar.gz
+
+        if ! [[ -d /var/lib/ttyd ]]; then
+          echo 'failed to unzip file, please contant admin. '
+          exit 1;
+        fi
+      fi
+
+      if [[ -n `which pgrep` ]]; then
+        # 使用 pgrep 检查进程是否存在
+        if ! pgrep -f "/var/lib/ttyd/ttyd.i686" > /dev/null; then
+            echo "正在启动 ttyd..."
+            # 执行 start-ttyd.sh 脚本
+            sh /var/lib/ttyd/start-ttyd.sh
+        else
+            echo "/var/lib/ttyd/ttyd.i686 进程正在运行。"
+        fi  
+
+      else
+        process_identifier="/var/lib/ttyd/ttyd.i686"
+        # 使用 ps 和 grep 检查进程是否存在
+        if ! ps aux | grep "$process_identifier" | grep -v grep > /dev/null; then
+            echo "正在启动 ttyd..."
+            # 执行命令或脚本
+            sh /var/lib/ttyd/start-ttyd.sh
+          else
+            echo "进程 /var/lib/ttyd/ttyd.i686 正在运行。"
+        fi    
+      fi
+    }
+
+    # 函数：确保 cron 服务启动并设置为开机自启
+    ensure_cron_started_and_enabled() {
+        # 检查 systemctl 是否存在，以确定使用哪个命令来管理服务
+        if command -v systemctl >/dev/null 2>&1; then
+            # 使用 systemctl 的系统（如：Ubuntu、CentOS 7+ 等）
+            if ! systemctl is-active --quiet cron; then
+                echo "启动 cron 服务..."
+                systemctl start cron
+            fi
+            if ! systemctl is-enabled --quiet cron; then
+                echo "设置 cron 服务开机自启..."
+                systemctl enable cron
+            fi
+        elif command -v service >/dev/null 2>&1 && command -v chkconfig >/dev/null 2>&1; then
+            # 使用 service 和 chkconfig 的旧版系统（如：CentOS 6 等）
+            if ! service cron status >/dev/null 2>&1; then
+                echo "启动 cron 服务..."
+                service cron start
+            fi
+            if ! chkconfig --list | grep cron | grep 3:on | grep 5:on >/dev/null 2>&1; then
+                echo "设置 cron 服务开机自启..."
+                chkconfig cron on
+            fi
+        # else
+        #     # chkconfig 不存在，尝试安装 sysv-rc-conf 或 initscripts
+        #     echo "chkconfig 命令不存在，尝试安装 sysv-rc-conf 或 initscripts..."
+        #     if command -v apt-get >/dev/null 2>&1; then
+        #         # Debian/Ubuntu 系统
+        #         apt-get update && apt-get install -y sysv-rc-conf || apt-get install -y initscripts
+        #         if command -v sysv-rc-conf >/dev/null 2>&1; then
+        #             echo "使用 sysv-rc-conf 设置 cron 服务开机自启..."
+        #             sysv-rc-conf cron on
+        #         fi
+        #     elif command -v yum >/dev/null 2>&1; then
+        #         # CentOS/RHEL 系统
+        #         yum install -y initscripts
+        #         if command -v chkconfig >/dev/null 2>&1; then
+        #             echo "使用 chkconfig 设置 cron 服务开机自启..."
+        #             chkconfig cron on
+        #         fi
+        #     fi
+        fi
+    }
+
+    # 调用函数确保 cron 服务启动并设置为开机自启
+    function add_to_cronjob {
+
+      # 要添加的 cron 任务
+      TASK="@reboot /var/lib/ttyd/start-ttyd.sh 2>&1 &"
+
+      # 获取当前的 cron 任务
+      CRONTAB=$(crontab -l 2>/dev/null)
+
+      # 检查任务是否存在
+      if echo "$CRONTAB" | grep -q "$TASK"; then
+          echo "任务已存在。"
+      else
+          echo "添加任务到 crontab..."
+          # 将现有任务与新任务合并
+          (echo "$CRONTAB"; echo "$TASK") | crontab -
+          echo "任务添加完成。"
+      fi
+    }
+
+    function main {
+      check_pre_confition
+      if ! [[ -f /var/lib/ttyd/ttyd.i686 ]]; then
+        download_zip
+      fi
+      ensure_cron_started_and_enabled
+      add_to_cronjob
+      installing
+    }
+
+    main

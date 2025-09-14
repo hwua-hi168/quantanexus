@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quantanexus-postgresql
+  namespace: abc-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: quantanexus-postgresql
+  template:
+    metadata:
+      labels:
+        name: quantanexus-postgresql
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: com-cilium-master-2
+      containers:
+        - name: postgres
+          image: registry.cn-hangzhou.aliyuncs.com/hwua_namespace/quantanexus-postgres:13.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_USER
+              value: quantanexus
+            - name: POSTGRES_PASSWORD
+              value: quantanexus
+            - name: POSTGRES_DB
+              value: postgres
+            - name: PGDATA
+              value: "/var/lib/postgresql/data"
+          volumeMounts:
+            - name: postgres
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: postgres
+          hostPath:
+            path: /var/lib/quantanexus/postgresql
+            type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quantanexus-postgresql
+  namespace: abc-platform
+  labels:
+    name: quantanexus-postgresql
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: 5432
+      protocol: TCP
+  selector:
+    name: quantanexus-postgresql
+
+

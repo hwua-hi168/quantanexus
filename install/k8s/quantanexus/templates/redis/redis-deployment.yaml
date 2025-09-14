@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-single
+  namespace: abc-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: redis-single
+  template:
+    metadata:
+      labels:
+        name: redis-single
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: com-cilium-master-2
+      containers:
+        - name: redis-single
+          image: redis:7.2.4
+          imagePullPolicy: IfNotPresent
+          command: [ "redis-server" ]
+          args: [ "/etc/redis/redis.conf" ]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: conf
+              mountPath: /etc/redis
+      volumes:
+        - name: data
+          hostPath:
+            path: /var/lib/quantanexus/redis-single
+            type: DirectoryOrCreate
+        # 存放odoo启动配置文件
+        - name: conf
+          configMap:
+            name: redis-single-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-single
+  namespace: abc-platform
+  labels:
+    name: redis-single
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 6379
+      targetPort: 6379
+      protocol: TCP
+  selector:
+    name: redis-single
+
+

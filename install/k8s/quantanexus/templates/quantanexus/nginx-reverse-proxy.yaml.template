@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-reverse-proxy
+  namespace: abc-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-reverse-proxy
+  template:
+    metadata:
+      labels:
+        app: nginx-reverse-proxy
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: {{ABC_MASTER_NODE}}
+      initContainers:
+      - name: data-init-container
+        image: {{QUANTANEXUS_VUE_IMAGE}}
+        command: ["/entrypoint.sh"]
+        env:
+        - name: HI168_ENV_TYPE
+          value: "hi168slot"
+        - name: HI168_ENV_URL_BASE
+          value: "https://{{abc_domain_name}}"
+        - name: HI168_SHOW_MODULE_LIST
+          value: "basic"
+        - name: HI168_COMMON_VAR_1
+          value: "HI168_COMMON_VAR_1"
+        - name: HI168_COMMON_VAR_2
+          value: "HI168_COMMON_VAR_2"
+        - name: HI168_COMMON_VAR_3
+          value: "HI168_COMMON_VAR_3"
+        volumeMounts:
+        - name: app-code
+          mountPath: /wwwroot
+      containers:
+      - name: nginx
+        image: registry.cn-hangzhou.aliyuncs.com/hwua_namespace/nginx:reverse
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d
+        - name: app-code
+          mountPath: /wwwroot
+        - name: ttd-script
+          mountPath: /opt/t.sh
+          subPath: t.sh
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-reverse-proxy-config
+      - name: app-code
+        emptyDir: {}
+      - name: ttd-script
+        configMap:
+          name: hi168-ttyd

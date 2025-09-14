@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: default-http-backend
+  namespace: kube-system
+spec:
+  selector:
+    app: ingress-nginx-controller
+  ports:
+    - protocol: TCP
+      port: 443
+      targetPort: 443

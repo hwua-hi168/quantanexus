@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if [ ! $1 ] ;then
+        echo please enter ns name
+        exit 0
+fi
+echo hello
+urlstatus=$(curl -s -m 5 -IL localhost:8081|grep 200)  >/dev/null 2>&1
+echo hello
+
+if [ "$urlstatus" == "" ];then
+        echo "urlstatus is OFF"
+        kubectl proxy --port=18081 & 2> /dev/null
+else
+        echo proxy server has start up
+fi
+
+kubectl get ns $1 -o json >  /tmp/$1.tmp.yaml
+jq 'del(.spec.finalizers)' /tmp/$1.tmp.yaml > /tmp/$1.tmp.yaml_2
+curl  "http://127.0.0.1:18081/api/v1/namespaces/$1/finalize" -H "Content-Type: application/json"  -X PUT --data-binary @/tmp/$1.tmp.yaml_2
+
+rm /tmp/$1.tmp.yaml
+rm /tmp/$1.tmp.yaml_2
+# finally remove the service
+ps -ef|grep "kubectl proxy --port=8081" |grep -v grep |awk '{print $2}'|xargs kill -9   >/dev/null 2>&1
+
+
+kubectl get ns
+
+

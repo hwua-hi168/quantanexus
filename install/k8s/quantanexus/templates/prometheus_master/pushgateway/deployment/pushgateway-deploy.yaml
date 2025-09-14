@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: prom
+  name:  pushgateway
+  labels:
+    app:  pushgateway
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app:  pushgateway
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: "25%"
+      maxUnavailable: "25%"
+  template:
+    metadata:
+      name:  pushgateway
+      labels:
+        app:  pushgateway
+    spec:
+      nodeSelector:
+        abc_node_type: master
+      containers:
+        - name:  pushgateway
+          #image: prom/pushgateway
+          image: "prom/pushgateway"
+          livenessProbe:
+            initialDelaySeconds: 600
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 10
+            httpGet:
+              path: /
+              port: 9091
+          ports:
+            - name: "app-port"
+              containerPort: 9091
+          resources:
+            limits:
+              memory: "500Mi"
+              cpu: 1
+            requests:
+              memory: "500Mi"
+              cpu: 1

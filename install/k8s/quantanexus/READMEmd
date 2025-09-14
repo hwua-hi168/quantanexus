@@ -1,0 +1,15 @@
+# My System Helm Chart
+
+This chart deploys My System to Kubernetes.
+
+## Prerequisites
+
+- Kubernetes 1.12+
+- Helm 3.0+
+
+## Installing the Chart
+
+To install the chart with the release name `my-release`:
+
+```bash
+helm install my-release ./my-system

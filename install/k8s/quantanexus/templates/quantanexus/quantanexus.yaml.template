@@ -1,0 +1,127 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: abc-platform
+  namespace: abc-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: abc-platform
+  template:
+    metadata:
+      labels:
+        name: abc-platform
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: {{ABC_MASTER_NODE}}
+      initContainers:
+        - name: data-init-container
+          #image: harbor.hi168.com/abc/quantanexus-mgr:v1.0.0
+          image: {{QUANTANEXUS_MGR_IMAGE}}
+          command: [ "/entrypoint.sh" ]
+          volumeMounts:
+            - name: quantanexus-addons
+              #mountPath: /data/quantanexus/hwua
+              mountPath: /data/abc_platform/hwua
+      containers:
+        - name: quantanexus
+          image: {{QUANTANEXUS_RUNTIME_IMAGE}}
+          imagePullPolicy: IfNotPresent
+          command: [ "/entrypoint.sh" ]
+          livenessProbe:
+            httpGet:
+              path: /liveness
+              port: 8069
+              scheme: HTTP
+            initialDelaySeconds: 300
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 3
+            failureThreshold: 3
+          securityContext:
+            privileged: true
+          env:
+            - name: QUANTANEXUS_HOME
+              value: "/var/lib/quantanexus"
+              #value: "/opt/runtime/quantanexus"
+            - name: QuantaNexusConfigFilePath
+              #value: "/opt/etc/quantanexus/prod.conf"
+              value: "/opt/etc/quantanexus/test.conf"
+            - name: QuantaNexusUpdateOption
+              value: "-i muk_web_theme -u all"
+            - name: QuantaNexusPreStartShell
+              value: "/opt/etc/quantanexus/pre-start.sh"
+          volumeMounts:
+            - name: dmidecode
+              mountPath: /sbin/dmidecode
+            - name: mem
+              mountPath: /dev/mem
+            # 存放插件
+            - name: quantanexus-addons
+              mountPath: /var/lib/quantanexus/quantanexus-addons
+            # 存放odoo调试运行时
+            - name: quantanexus-runtime
+              mountPath: /opt/runtime/quantanexus
+            # 存放odoo启动配置文件
+            - name: quantanexus-config
+              mountPath: /opt/etc/quantanexus
+            # 存放odoo运行时数据
+            - name: quantanexus-data
+              mountPath: /opt/data/quantanexus
+            # 存放各种配置杂项
+            - name: quantanexus-misc
+              mountPath: /opt/misc/quantanexus
+      imagePullSecrets:
+        - name: hi168-harbor-secret
+      volumes:
+        - name: dmidecode
+          hostPath:
+            path: /sbin/dmidecode
+        - name: mem
+          hostPath:
+            path: /dev/mem
+        # 存放插件
+        - name: quantanexus-addons
+          emptyDir: { }
+        # 存放odoo调试运行时
+        - name: quantanexus-runtime
+          hostPath:
+            path: /mnt/quantanexus/runtime
+            type: DirectoryOrCreate
+        # 存放odoo启动配置文件
+        - name: quantanexus-config
+          configMap:
+            name: quantanexus-config
+        # 存放odoo运行时数据
+        - name: quantanexus-data
+          hostPath:
+            path: /var/lib/quantanexus/quantanexus
+            type: DirectoryOrCreate
+        # 存放各种配置杂项
+        - name: quantanexus-misc
+          hostPath:
+            path: /var/lib/quantanexus/quantanexus-misc
+            type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: abc-platform
+  namespace: abc-platform
+  labels:
+    name: abc-platform
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8069
+      targetPort: 8069
+      protocol: TCP
+    - name: longpolling
+      port: 8072
+      targetPort: 8072
+  selector:
+    name: abc-platform
+
+

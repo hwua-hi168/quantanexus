@@ -1,0 +1,200 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: abc-webshell
+  namespace: abc-platform
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kube-webshell-conf
+  namespace: abc-platform
+type: Opaque
+stringData:
+  app.conf: |-
+    #beego配置项，为空表示false，不配置这个选项为false
+    appname = abc-webshell
+    httpport = 8080
+    # 产品模式提高性能  dev模式增强错误输出
+    runmode = "prod"
+    # 如果配置了kubeconfig 则默认表示使用kubeconfig
+    kubeconfig =
+    # 配置是否打开pprof
+    beego.pprof = true
+    # 配置是否开启https
+    https = false
+    # 配置是否开启 nginx反向代理url前缀
+    url_prefix=
+    # 配置是否打开demo页面
+    enable_demo = true
+    #是否打开debug 为空表示默认info
+    debug = true
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: abc-webshell
+  namespace: abc-platform
+  labels:
+    app: abc-webshell
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: abc-webshell
+  template:
+    metadata:
+      labels:
+        app: abc-webshell
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: {{ABC_MASTER_NODE}}
+      containers:
+        - name: abc-webshell
+          image: {{ABC_UPLOADER_DOCKER_IMAGE}}
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: kube-webshell-conf
+              mountPath: "/opt/kube/conf"
+              readOnly: true
+      volumes:
+        - name: kube-webshell-conf
+          secret:
+            secretName: kube-webshell-conf
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - abc-webshell
+              topologyKey: kubernetes.io/hostname
+      serviceAccountName: abc-webshell
+---
+
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: abc-webshell-svc-nodeport
+#  namespace: abc-platform
+#  labels:
+#    name: abc-webshell
+#spec:
+#  type: NodePort
+#  ports:
+#  - port: 30022
+#    name: "30022"
+#    targetPort: 22
+#    protocol: TCP
+#    nodePort: 30022
+#  - port: 30080
+#    name: "30080"
+#    targetPort: 8080
+#    protocol: TCP
+#    nodePort: 30080
+#  selector:
+#    app: abc-webshell
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: abc-webshell
+  namespace: abc-platform
+  labels:
+    name: abc-webshell
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: abc-webshell
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: abc-webshell-ingress
+  namespace: abc-platform
+  annotations:
+    ingress.kubernetes.io/ingress.class: "nginx"
+    nginx.org/client-max-body-size: 100M
+    nginx.ingress.kubernetes.io/cors-allow-headers: >-
+      DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/session-cookie-name: "session_id"
+    # nginx.ingress.kubernetes.io/cors-allow-methods: 'PUT, GET, POST, OPTIONS'
+    # nginx.ingress.kubernetes.io/cors-allow-origin: '*'
+    # nginx.ingress.kubernetes.io/enable-cors: 'true'
+    # nginx.ingress.kubernetes.io/service-weight: ''
+
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: {{abc_domain_name}}
+      http:
+        paths:
+          - pathType: Prefix
+            path: /t(/|$)(.*)
+            backend:
+              service:
+                name: abc-webshell
+                port:
+                  number: 80
+          - pathType: Prefix
+            path: /demo
+            backend:
+              service:
+                name: abc-webshell
+                port:
+                  number: 80
+          - pathType: Prefix
+            path: /static/css/xterm.css
+            backend:
+              service:
+                name: abc-webshell
+                port:
+                  number: 80
+          - pathType: Prefix
+            path: /static/css/bootstrap.min.css
+            backend:
+              service:
+                name: abc-webshell
+                port:
+                  number: 80
+          - pathType: Prefix
+            path: /static/js/index.js
+            backend:
+              service:
+                name: abc-webshell
+                port:
+                  number: 80
+          - pathType: Prefix
+            path: /static/xml/app.xml
+            backend:
+              service:
+                name: abc-webshell
+                port:
+                  number: 80
+          - pathType: Prefix
+            path: /static/imgs/favicon.ico
+            backend:
+              service:
+                name: abc-webshell
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - {{abc_domain_name}}
+      secretName: abc-tls
+
+
