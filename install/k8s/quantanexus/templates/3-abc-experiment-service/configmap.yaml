@@ -1,0 +1,69 @@
+{{- if .Values.abcExperimentService.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: abc-experiment-service-config
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: abc-experiment-service
+    {{- include "abc-platform.labels" . | nindent 4 }}
+data:
+  service.conf: |
+    #本文件是配置文件，链接docker和kubernetes
+    [Docker]
+    docker_base_url={{ .Values.abcExperimentService.docker.baseUrl }}
+    
+    docker_cert = {{ .Values.abcExperimentService.docker.certPath }}
+    docker_key =  {{ .Values.abcExperimentService.docker.keyPath }}
+    docker_ca_cert = {{ .Values.abcExperimentService.docker.caCertPath }}
+    
+    #k8s的配置文件，链接K8s APIService 服务
+    [Kubernetes]
+    #优先采用配置文件的方式，如果不采用配置文件，则采用后边的参数host,ssl_ca_cert,verify_ssl,token,assert_hostname 等
+    # kube_config_file=96_admin.conf
+    kube_config_file={{ .Values.abcExperimentService.kubernetes.configFile }}
+    # kube_config_file=F:/DEV/odoo_original_14.0/odoo/debian/localhost_admin.conf
+    # api-server地址
+    kube_host= {{ .Values.abcExperimentService.kubernetes.host }}
+    # 指定CA证书
+    kube_ssl_ca_cert = {{ .Values.abcExperimentService.kubernetes.sslCaCert }}
+    # 启用证书验证,URL和IP都会被验证，一般不启用
+    kube_verify_ssl = {{ .Values.abcExperimentService.kubernetes.verifySsl }}
+    kube_token = {{ .Values.abcExperimentService.kubernetes.token }}
+    kube_assert_hostname = {{ .Values.abcExperimentService.kubernetes.assertHostname }}
+    [Service]
+    port={{ .Values.abcExperimentService.service.port }}
+    host={{ .Values.abcExperimentService.service.host }}
+    virt_vnc_node={{ .Values.abcExperimentService.virtVnc.node }}
+    virt_vnc_port={{ .Values.abcExperimentService.virtVnc.port }}
+    enable_auth={{ .Values.abcExperimentService.enableAuth }}
+    auth_url_base={{ .Values.abcExperimentService.authUrlBase }}
+  admin.conf: |
+    apiVersion: v1
+    clusters:
+    - cluster:
+        certificate-authority-data: {{ .Values.abcExperimentService.kubernetes.caData }}
+        server: {{ .Values.abcExperimentService.kubernetes.server }}
+      name: cluster1
+    contexts:
+    - context:
+        cluster: cluster1
+        user: admin
+      name: context-cluster1
+    current-context: context-cluster1
+    kind: Config
+    preferences: {}
+    users:
+    - name: admin
+      user:
+        client-certificate-data: {{ .Values.abcExperimentService.kubernetes.clientCertData }}
+  pre-start.sh: |
+    echo "abc-experiment-service pre-start.sh called"
+    mkdir -p /etc/kubernetes/
+    mkdir -p /etc/abc_platform/docker-ssl
+    cp /etc/abc-experiment-service/service.conf ${ABC_EXP_SERVICE}/service.conf
+    cp /etc/abc-experiment-service/admin.conf /etc/kubernetes/admin.conf
+    echo "abc-experiment-service pre-start.sh called finish"
+---
+{{- end }}

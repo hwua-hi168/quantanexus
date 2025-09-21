@@ -1,0 +1,122 @@
+{{- if .Values.quantanexus.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "abc-platform.fullname" . }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: abc-platform
+    {{- include "abc-platform.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.quantanexus.replicaCount }}
+  selector:
+    matchLabels:
+      app: abc-platform
+  template:
+    metadata:
+      labels:
+        app: abc-platform
+    spec:
+      hostAliases:
+        {{- toYaml .Values.quantanexus.hostAliases | nindent 8 }}
+      nodeSelector:
+        kubernetes.io/hostname: {{ .Values.global.masterNode }}
+      initContainers:
+        - name: data-init-container
+          image: {{ .Values.quantanexus.manager.image }}:{{ .Values.quantanexus.manager.tag }}
+          command: [ "/entrypoint.sh" ]
+          volumeMounts:
+            - name: quantanexus-addons
+              mountPath: /data/quantanexus/hwua
+      containers:
+        - name: quantanexus
+          image: {{ .Values.quantanexus.app.image }}:{{ .Values.quantanexus.app.tag }}
+          imagePullPolicy: {{ .Values.quantanexus.app.imagePullPolicy }}
+          command: [ "/entrypoint.sh" ]
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.quantanexus.livenessProbe.path }}
+              port: {{ .Values.quantanexus.livenessProbe.port }}
+              scheme: HTTP
+            initialDelaySeconds: {{ .Values.quantanexus.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.quantanexus.livenessProbe.periodSeconds }}
+            successThreshold: 1
+            timeoutSeconds: {{ .Values.quantanexus.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.quantanexus.livenessProbe.failureThreshold }}
+          securityContext:
+            privileged: true
+          env:
+            - name: QUANTANEXUS_HOME
+              value: {{ .Values.quantanexus.env.home | quote }}
+            - name: QuantaNexusConfigFilePath
+              value: {{ .Values.quantanexus.env.configPath | quote }}
+            - name: QuantaNexusUpdateOption
+              value: {{ .Values.quantanexus.env.updateOption | quote }}
+            - name: QuantaNexusPreStartShell
+              value: {{ .Values.quantanexus.env.preStartShell | quote }}
+          volumeMounts:
+            - name: dmidecode
+              mountPath: /sbin/dmidecode
+            - name: mem
+              mountPath: /dev/mem
+            - name: quantanexus-addons
+              mountPath: /var/lib/quantanexus/quantanexus-addons
+            - name: quantanexus-runtime
+              mountPath: /opt/runtime/quantanexus
+            - name: quantanexus-config
+              mountPath: /opt/etc/quantanexus
+            - name: quantanexus-data
+              mountPath: /opt/data/quantanexus
+            - name: quantanexus-misc
+              mountPath: /opt/misc/quantanexus
+      {{- if .Values.quantanexus.imagePullSecrets.enabled }}
+      imagePullSecrets:
+      {{- range .Values.quantanexus.imagePullSecrets.secrets }}
+        - name: {{ .name }}
+      {{- end }}
+      {{- end }}
+      volumes:
+        - name: dmidecode
+          hostPath:
+            path: /sbin/dmidecode
+        - name: mem
+          hostPath:
+            path: /dev/mem
+        - name: quantanexus-addons
+          emptyDir: {}
+        - name: quantanexus-runtime
+          hostPath:
+            path: {{ .Values.quantanexus.storage.runtime }}
+            type: DirectoryOrCreate
+        - name: quantanexus-config
+          configMap:
+            name: {{ include "abc-platform.fullname" . }}-config
+        - name: quantanexus-data
+          hostPath:
+            path: {{ .Values.quantanexus.storage.quantanexusData }}
+            type: DirectoryOrCreate
+        - name: quantanexus-misc
+          hostPath:
+            path: {{ .Values.quantanexus.storage.quantanexusMisc }}
+            type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "abc-platform.fullname" . }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: abc-platform
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8069
+      targetPort: 8069
+      protocol: TCP
+    - name: longpolling
+      port: 8072
+      targetPort: 8072
+  selector:
+    app: abc-platform
+{{- end }}

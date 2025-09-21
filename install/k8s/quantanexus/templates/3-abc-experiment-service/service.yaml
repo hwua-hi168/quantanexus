@@ -1,0 +1,19 @@
+{{- if .Values.abcExperimentService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: abc-experiment-service
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: abc-experiment-service
+    {{- include "abc-platform.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: {{ .Values.abcExperimentService.service.port }}
+    targetPort: {{ .Values.abcExperimentService.service.port }}
+    protocol: TCP
+  selector:
+    app: abc-experiment-service
+{{- end }}

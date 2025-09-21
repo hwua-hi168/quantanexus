@@ -1,0 +1,76 @@
+{{- if and .Values.components.quantanexus .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: abc-platform
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.ingress.className | default "nginx" }}
+    {{- range $key, $value := .Values.ingress.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+    nginx.ingress.kubernetes.io/client-body-buffer-size: 200M
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      if ($request_uri ~* \.(js|css|gif|jpe?g|png)) {
+        expires 1d;
+        add_header Cache-Control "public, max-age=86400";
+      }
+    nginx.ingress.kubernetes.io/cors-allow-headers: DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization
+    nginx.ingress.kubernetes.io/cors-allow-methods: PUT, GET, POST, OPTIONS
+    nginx.ingress.kubernetes.io/cors-allow-origin: '*'
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/enable-gzip: "true"
+    nginx.ingress.kubernetes.io/gzip-compress: "true"
+    nginx.ingress.kubernetes.io/gzip-proxied: any
+    nginx.ingress.kubernetes.io/gzip-types: application/json application/xml application/javascript text/css text/plain
+    nginx.ingress.kubernetes.io/proxy-body-size: 200M
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "6000"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "6000"
+    nginx.ingress.kubernetes.io/service-weight: ""
+    nginx.org/client-max-body-size: 200M
+    nginx.org/websocket-services: abc-experiment-service
+spec:
+  ingressClassName: {{ .Values.ingress.className | default "nginx" }}
+  rules:
+    - host: {{ .Values.global.domainName }}
+      http:
+        paths:
+          - backend:
+              service:
+                name: nginx-reverse-proxy
+                port:
+                  number: 8443
+            pathType: ImplementationSpecific
+          - pathType: Prefix
+            path: /longpolling
+            backend:
+              service:
+                name: abc-platform
+                port:
+                  number: 8072
+          - backend:
+              service:
+                name: abc-experiment-service
+                port:
+                  number: 8075
+            path: /certterminal
+            pathType: Prefix
+          - backend:
+              service:
+                name: abc-experiment-service
+                port:
+                  number: 8075
+            path: /websockify
+            pathType: Prefix
+          - pathType: Prefix
+            path: /hwua_node_service
+            backend:
+              service:
+                name: abc-experiment-service
+                port:
+                  number: 8075
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- toYaml .Values.ingress.tls | nindent 4 }}
+  {{- end }}
+{{- end }}

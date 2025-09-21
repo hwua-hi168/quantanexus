@@ -1,0 +1,39 @@
+{{- if .Values.abcExperimentService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: abc-experiment-service
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: abc-experiment-service
+    {{- include "abc-platform.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.abcExperimentService.replicaCount }}
+  selector:
+    matchLabels:
+      app: abc-experiment-service
+  template:
+    metadata:
+      labels:
+        app: abc-experiment-service
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: {{ .Values.global.masterNode }}
+      containers:
+      - name: abc-experiment-service
+        image: {{ .Values.abcExperimentService.app.image }}:{{ .Values.abcExperimentService.app.tag }}
+        imagePullPolicy: {{ .Values.abcExperimentService.app.imagePullPolicy }}
+        command: [ "/entrypoint.sh" ]
+        env:
+        - name: ABC_EXP_SERVICE
+          value: "/usr/local/hw_experiment_service"
+        - name: ABCExpPreStartShell
+          value: "/etc/abc-experiment-service/pre-start.sh"
+        volumeMounts:
+        - name: abc-experiment-service-config
+          mountPath: /etc/abc-experiment-service
+      volumes:
+      - name: abc-experiment-service-config
+        configMap:
+          name: abc-experiment-service-config
+{{- end }}

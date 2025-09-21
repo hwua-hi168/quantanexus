@@ -1,0 +1,78 @@
+{{- if .Values.components.ingressController }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: abc-platform-node-labeler
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    spec:
+      serviceAccountName: node-labeler
+      containers:
+      - name: kubectl
+        image: bitnami/kubectl:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          # 设置master节点标签
+          {{- range $node := splitList "," .Values.global.masterNodes }}
+          kubectl label node {{ $node }} node-role.kubernetes.io/master= --overwrite
+          kubectl label node {{ $node }} abc_node_type- --overwrite
+          kubectl label node {{ $node }} ingress_node=true --overwrite
+          kubectl label node {{ $node }} ha_node_type=master --overwrite
+          {{- end }}
+
+          # 设置worker节点标签
+          {{- range $node := splitList "," .Values.global.workerNodes }}
+          kubectl label node {{ $node }} ha_node_type=worker --overwrite
+          {{- end }}
+
+          # 设置ABC master节点标签
+          kubectl label node {{ .Values.global.masterNode }} mark_abc_node_type=true --overwrite
+          kubectl label node {{ .Values.global.masterNode }} abc_node_type=master --overwrite
+
+          # 移除taints
+          kubectl taint nodes --all node-role.kubernetes.io/master- || true
+          kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+      restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: node-labeler
+  namespace: {{ .Values.global.namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: node-labeler
+rules:
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "list", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: node-labeler
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: node-labeler
+subjects:
+- kind: ServiceAccount
+  name: node-labeler
+  namespace: {{ .Values.global.namespace }}
+{{- end }}

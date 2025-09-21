@@ -1,0 +1,342 @@
+# Global configuration
+global:
+  namespace: abc-platform
+  domainName: qntest001.hi168.com
+  masterNode: com-cilium-master-2
+  masterNodes: "com-cilium-master-1,com-cilium-master-2,com-cilium-worker-1"
+  workerNodes: "com-cilium-worker-1"
+
+# Component toggles
+components:
+  ingressController: true
+  quantanexus: true
+  abcExperimentService: true
+  abcWebShell: true
+  abcUploader: true
+  hwuaNodeService: true
+
+# Ingress Nginx configuration
+ingress-nginx:
+  className: "nginx"
+  defaultBackend:
+    enabled: true
+    image:
+      registry: k8s.gcr.io
+      image: defaultbackend-amd64
+      tag: "1.5"
+
+  controller:
+    image:
+      repository: k8s.gcr.io/ingress-nginx/controller
+      tag: v1.1.2
+    kind: DaemonSet
+    # nodeSelector:
+    #   kubernetes.io/hostname: "com-cilium-master-2"
+    # service:
+    #   externalTrafficPolicy: Local
+    hostNetwork: true
+    # 启用 Webhooks (推荐)
+    admissionWebhooks:
+      enabled: true
+    # 额外的 args, 如果需要
+    extraArgs:
+      enable-ssl-passthrough: true
+
+ingress:
+  enabled: true
+  className: "nginx"
+  tls:
+    - hosts:
+      - qntest001.hi168.com
+      secretName: abc-tls  
+  tlsSecret:
+    name: abc-tls
+    certificate: |
+      -----BEGIN CERTIFICATE-----
+      LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZBakNDQStxZ0F3SUJBZ0lTQmRxMXhWelA0TUd5K1A1WjBiMUhjWDN6TUEwR0NTcUdTSWIzRFFFQkN3VUEKTURNeEN6QUpCZ05WQkFZVEFsVlRNUll3RkFZRFZRUUtFdzFNWlhRbmN5QkZibU55ZVhCME1Rd3dDZ1lEVlFRRApFd05TTVRNd0hoY05NalV3T1RFd01EZ3pORE0wV2hjTk1qVXhNakE1TURnek5ETXpXakFlTVJ3d0dnWURWUVFECkV4TnhiblJsYzNRd01ERXVhR2t4TmpndVkyOXRNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUIKQ2dLQ0FRRUF3YkJRcFo4U1NHRHFJbXpVYk9nMXYwYnV2OXFOTHNTZjZ6cjlFVWFTNExTdmFrVU5pTE9zUXlwbwpqdUt6STlKWTcrVHFnODVzRUZhb25NbEgzNlN2VDBoZDNMcDlkL25vUHpYMzNTWE9rQUgyT09JdUpBLzhWV3U2CmY4bWlYZzZuSWozTGE3bkhsM0FQWG9qNExHVHdEcmdGYmZ3amZRQlE1ZEVEYkV1UTRRSTBqQlNXWExaSGNIeVEKaVBJMVprSWdQd2NnM04xbWlDS3lUQ0h5VEtyQjRhaUZrUDQvQTdEYVp3OEFrU1puRFZkRXlCTGc3WE83ZHRETgp6UHNldVB0KzdhVFhoN1JoL2VPWVRLYzNiUUprcHc2RXVLNmNoK3JrYzRnNVdCMWxnaDZLVTUvbnNWM2R3Vm5NCkdSdHIwSEQvWmRHME9zYllndFVBQTBjbE9QaXp1d0lEQVFBQm80SUNJekNDQWg4d0RnWURWUjBQQVFIL0JBUUQKQWdXZ01CMEdBMVVkSlFRV01CUUdDQ3NHQVFVRkJ3TUJCZ2dyQmdFRkJRY0RBakFNQmdOVkhSTUJBZjhFQWpBQQpNQjBHQTFVZERnUVdCQlFlQWYyeU1GZlJ1WEdKRzF3VE5RNzFydHNvdVRBZkJnTlZIU01FR0RBV2dCVG5xNThQCkxET2dVOU5lVDNqSXNvUU9POWFTTXpBekJnZ3JCZ0VGQlFjQkFRUW5NQ1V3SXdZSUt3WUJCUVVITUFLR0YyaDAKZEhBNkx5OXlNVE11YVM1c1pXNWpjaTV2Y21jdk1CNEdBMVVkRVFRWE1CV0NFM0Z1ZEdWemREQXdNUzVvYVRFMgpPQzVqYjIwd0V3WURWUjBnQkF3d0NqQUlCZ1puZ1F3QkFnRXdMd1lEVlIwZkJDZ3dKakFrb0NLZ0lJWWVhSFIwCmNEb3ZMM0l4TXk1akxteGxibU55TG05eVp5OHhNVFl1WTNKc01JSUJBd1lLS3dZQkJBSFdlUUlFQWdTQjlBU0IKOFFEdkFIVUFEZUh5TUN2VERjRkFZaElKNmxVdS9FZDBmTEhYNlREdkRrSWV0SDVPcWpRQUFBR1pNdmk0SUFBQQpCQU1BUmpCRUFpQU5jTDR2S0ZYVHNlbWVWN3FHdmI2RUNrK1gvbElaTXhhbk5ESk9CcDA0eEFJZ2FyZjdOTTdJCmRta3l1Z0N4Y0RTcndZd1YwUDhzcjRlN3lBUGJGbWFqNlljQWRnQWFCUDlKMEZRZFFLLzJvTU8vOGRqRVp5OU8KN080alFHaVlheGRBTHR5SmZRQUFBWmt5K0xnekFBQUVBd0JITUVVQ0lGSGtLVHNhQjQrUDI4ZEpid25uVFBpMApIRUd1QTl0OGJ3ZnU3Mk9FSnNQUkFpRUE4M0QxZUs2cFFNUE1GNVNCd2JHS1U0WFoxUmh4Ylg0UTRxcFNWMjE0CjRCVXdEUVlKS29aSWh2Y05BUUVMQlFBRGdnRUJBSGhheFA3eHBnQTR6L2ZtMit1dVprVWQxSTFmMm1wYWU5dDUKNmI4cjlKRFpJN0lWNGptcFZWTVFyY2VzSkRUVFYyQkY3OGhycTF3SC9YZWRZdGF0alVPOWlpMGcvUXNac2JuSgpWVGJ2Q2FMb1B3c1lZdWJuU3ZiWFVaTzNoYmp1TkNhWTR4eGgxUHYzbnBxenRySWN3WUREVUdBRVNUcHVQVUk3CnU5eTRWb09BTmpKV01oKy9ZUTkzblNKejRIUzN2WjQvRmFYMHpIY0Mzd2lkbkpIbFovV0tOL2xFa1B4T0t6dTAKT2ZINmpnSy9Nd1MxZDUzZnV0Nmxqd3VJVWg4QjM4VGJIa2RkaTE0YmQ4ZnNMbS9WRkJjQlJHMjRrTW1VdDNsNgpWUHZCNE56SFZyRGVYNVRya3ovY0RrNk5pVElsaXNrdkJ3ZUk2WWtMY0N0VmpRNmhrcU09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0KLS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZCVENDQXUyZ0F3SUJBZ0lRV2dEeUV0alV0SUR6a2tGWDZpbURCVEFOQmdrcWhraUc5dzBCQVFzRkFEQlAKTVFzd0NRWURWUVFHRXdKVlV6RXBNQ2NHQTFVRUNoTWdTVzUwWlhKdVpYUWdVMlZqZFhKcGRIa2dVbVZ6WldGeQpZMmdnUjNKdmRYQXhGVEFUQmdOVkJBTVRERWxUVWtjZ1VtOXZkQ0JZTVRBZUZ3MHlOREF6TVRNd01EQXdNREJhCkZ3MHlOekF6TVRJeU16VTVOVGxhTURNeEN6QUpCZ05WQkFZVEFsVlRNUll3RkFZRFZRUUtFdzFNWlhRbmN5QkYKYm1OeWVYQjBNUXd3Q2dZRFZRUURFd05TTVRNd2dnRWlNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUJEd0F3Z2dFSwpBb0lCQVFDbFozQ04wRmFCWkJVWFljMjVCdFN0R1pDTUpsQTNtQlpqa2xUYjJjeUVCWlBzMCt3SUc2QmdVVU5JCmZTdkhTSmFldEMzYW5jZ25PMWVobjZ2dzFnN1VEakRLYjV1eDBkYWtuVEkrV0U0MWIwVllhSEVYL0Q3WVhZS2cKTDdKUmJMQWFYYmhaempWbHlJdWhyeEEzLytPY1hjSkpGelQvakN1TGpmQzhjU3lUREIwRnhMckh6YXJKWG56Ugp5UUgzbkFQMi9BcGQ5TnA3NXR0MlFuRHI5RTBpMmdCM2I5YkpYeGY5Mm5VdXBWY005dXBjdHVCenBXalBvWFRpCmRZSitFSi9COWFMckFlazRzUXBFek5QQ2lmVkpOWUlLTkxNYzZZakNSMDZDRGdvMjhFZFBpdkVwQkhYYXplR2EKWFA5ZW5aaVZ1cHBEMEVxaUZ3VUJCRERUTXJPUEFnTUJBQUdqZ2Znd2dmVXdEZ1lEVlIwUEFRSC9CQVFEQWdHRwpNQjBHQTFVZEpRUVdNQlFHQ0NzR0FRVUZCd01DQmdnckJnRUZCUWNEQVRBU0JnTlZIUk1CQWY4RUNEQUdBUUgvCkFnRUFNQjBHQTFVZERnUVdCQlRucTU4UExET2dVOU5lVDNqSXNvUU9POWFTTXpBZkJnTlZIU01FR0RBV2dCUjUKdEZubWU3Ymw1QUZ6Z0FpSXlCcFk5dW1iYmpBeUJnZ3JCZ0VGQlFjQkFRUW1NQ1F3SWdZSUt3WUJCUVVITUFLRwpGbWgwZEhBNkx5OTRNUzVwTG14bGJtTnlMbTl5Wnk4d0V3WURWUjBnQkF3d0NqQUlCZ1puZ1F3QkFnRXdKd1lEClZSMGZCQ0F3SGpBY29CcWdHSVlXYUhSMGNEb3ZMM2d4TG1NdWJHVnVZM0l1YjNKbkx6QU5CZ2txaGtpRzl3MEIKQVFzRkFBT0NBZ0VBVVRkWVVxRWltelc3VGJyT3lwTHFDZkw3Vk93WWYvUTc5T0g1Y0hMQ1plZ2dmUWhEY29ubAprN0tnaDhiMHZpKy9YdVd1N0NOOG4vVVBlZzF2bzNHK3RhWGlycnl0dGhRaW5BSEd3Yy9VZGJPeWdKYTl6dUJjClZ5cW9IM0NYVFhESW5UKzhhK2MzYUVWTUoyU3QrcFNuNGVkK1drRHA4aWpzaWp2RXlGd0U0N2h1bFcwTHR6amcKOWZPVjVQbXJnL3p4V2JSdUwrazBEQkRIRUplbm5Dc0FlbjdjMzVQbXg3anBtSi9IdGdSaGNuejB5alNCdnlJdwo2TDFRSXVwa0N2MlNCT0RUL3hERDNnZlFReUt2NnJvVjRHMkVoZkV5QXNXcG1vanhqQ1VDR2l5Zzk3RnZEdG0vCk5LMkxTYzlseWJLeEI3M0kyK1AyRzNDYVdwdnZwQWlIQ1Z1MzBqVzhHQ3hLZGZoc1h0bkl5Mmltc2tRcVZaMm0KMFBteG9iYjI4VHVjcjd4Qks3Q3R3dlByYjc5b3M3dTJYUDNPNWY5Yi9INjZHTnlScmdsUlhscllqSTFvR1lMLwpmNEkxbi9TZ3VzZGE2V3ZBNkMxOTBreGpVMTVZMTJtSFU0K0J4eVI5Y3gyaGhHUzlmQWpNWktKc3MyOHF4dno2CkF4dTRDYURtUk5acEsvcFFyWEYxN3lYQ1hrbUVXZ3ZTT0VaeTZaOXBjYkxJVkVHY2tWL2lWZXEwQU9vMnBrZzkKcDRRUkl5MHRLMmRpUkVOTFNGMkt5c0Z3Ylk2QjI2QkZlRnMzdjFzWVZSaEZXOW5Ma09yUVZwb3JDUzBLeVptZgp3VkQ4OXFTVGxuY3RMY1puSWF2aktzS1V1MW5BMWlVMHlZTWRZZXBLUjdsV2Jud2hkeDNld29rPQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==   
+    privateKey: |
+      -----BEGIN CERTIFICATE-----
+      LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb3dJQkFBS0NBUUVBd2JCUXBaOFNTR0RxSW16VWJPZzF2MGJ1djlxTkxzU2Y2enI5RVVhUzRMU3Zha1VOCmlMT3NReXBvanVLekk5Slk3K1RxZzg1c0VGYW9uTWxIMzZTdlQwaGQzTHA5ZC9ub1B6WDMzU1hPa0FIMk9PSXUKSkEvOFZXdTZmOG1pWGc2bklqM0xhN25IbDNBUFhvajRMR1R3RHJnRmJmd2pmUUJRNWRFRGJFdVE0UUkwakJTVwpYTFpIY0h5UWlQSTFaa0lnUHdjZzNOMW1pQ0t5VENIeVRLckI0YWlGa1A0L0E3RGFadzhBa1NabkRWZEV5QkxnCjdYTzdkdEROelBzZXVQdCs3YVRYaDdSaC9lT1lUS2MzYlFKa3B3NkV1SzZjaCtya2M0ZzVXQjFsZ2g2S1U1L24Kc1YzZHdWbk1HUnRyMEhEL1pkRzBPc2JZZ3RVQUEwY2xPUGl6dXdJREFRQUJBb0lCQUdoNnk0WUx3TGo2VGxJegprb01NMzdGR2VoTlR1VVM1RytxdjcwTWFackIveHYvMEw5REYydTZBT2RhWnd6aFhoMUlna2NCMzRTTVBHL1UzClBtWU5WK1BValkwN3ErTEVFOXZGS09kS05ackk5Q0RMSVVpaXR1TDlNYVV0QjBEbGRwS3A4c2t4ZGREaXllZWMKeXdKbmtIYmdIVTJ1N1JYSXpkcXFYTVpXSE5qQ2Z4UUF5ZkZ4SVN2ZEswNEVhdHZwZDljc1lxZ2tCODJGQ1NrcwpQMXVkT1FkeFZOMnVLQW5odlI5OVJ0SnpKNzFwczRtdHVzeWs3bm04ZXF4T1lGNFNjRWtad005TWd3bFhrUFJECkVHZHVlQlhXcHpBTjMrWUg0TkdRTXNXYkRrdEx1enJkNUxucjRoVHZ6Y0tOaUUxVEZ5SEhQVWZpTnRyc09sLzQKc0hHUmRjRUNnWUVBMFZCSThYdnV1K2o1ZjUxTjlRRzRHcFljRVRBMEg2cHc0OTJ0RExMbDZTaFBJQ0dob0o1UQpzR3VhdUt2Qko2SXU0NFNJcFlqTURiM1RSWWxaNjVBL0owaHNoQWNlMHRVek9nQXVnS1hBMEd3ZmV0UGNvZVBZCmpLZkQ2OTJpSjFlVVJXaFV3cnhmQ2V4MHUzcFpabENhZU9xclJGNlZ5ZktwTVlza1VGTmFxVGNDZ1lFQTdPUGIKTDBLNE8yNS9YVThya3RPOGtidmpvZm9nR0ZYczl0S2pwTldGYjR0Vm1YYjhwSHFDQU5lRTYyR1dMeUs3azlCTwpBaktMeW5kajdHd2R4dWtiUHc2R1ozc29kUDFIZnRRZVRvcU5USmh4ejlzTkVkZmRPbHN5dnpiVlBZcDExSHZpCkFGaDFySnNmam00K3lSMG40eFFaL1F2QjFsVU8rZU02d1NBNis1MENnWUVBczdBTmZxbGE4QnYzbkRNcGlteDQKWlBKNms5TGkzRkJRYTMyUkluYXQ0clFGQVZ0OXlrbytrTVUvWk11bG5PV2hCUlp3ekZLY2dpdDBwSnhlQWxpcApyb3FCQmZLcTVtbTZlVTlRbklZdStYM29wR1FlWXlnYmJkeFQyRGRERGkwa0QxV2FkamFLREJYZXZGY3pTaDltCkRPbkFMNGhYWksrWnlmdGVLRXIyYUk4Q2dZQlJoK3E4VFY1VE5paW4yTVBLZVEyQnF3VWhqcERWVDEyTFpkdmsKczRpRlo1TkNpbTFSdnNoWHVkV0puY0N1NEdsbTZsNnU2dTZwOUlWenJaSmlENEROSnhhakx3UXhuNnFud0NIZQpMbG1MYnp4Y3Fhdko1RjNENC9lSFVEdjhQbGRubG11bWFzdTFhSDVuNnhHNDdrdjRIOGNDRExYZUt0Qkl1U2hUCnArQWxFUUtCZ0FieTJRbThYbVBWenE5MWlTdUtNcmlYZCs2NVJJaWQ3UjJaYTkwMDVWTHl4RHEwTldrMGZ6bUgKVHJiZDBLQ1U5OFZiVS9NVXkxYXVuOWJHVzU2MHdMdjkvV0F6ay9ua2pOUXh3L0hIbGRSY1RtNVBZcjJaRXl5TAo5d3ZOeUE1b0RQeERlejROaTh1MGVyS3c5cFA0SXN6b3c1RjhVYUFPbXdOeFhuaXhZV2srCi0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg==   
+
+# PostgreSQL configuration (如果使用子chart)
+postgresql:
+  enabled: true
+  auth:
+    username: quantanexus
+    password: quantanexus
+    database: quantanexus001
+
+redis:
+  enabled: true
+  auth:
+    password: hi168pass
+  path: /var/lib/quantanexus/redis-single
+
+
+quantanexus:
+  enabled: true
+  replicaCount: 1
+  
+  # Quantanexus core application
+  app:
+    image: "harbor.hi168.com/abc/quantanexus-basic"
+    tag: "0.1.5"
+    imagePullPolicy: "IfNotPresent"
+
+  # Image pull secrets configuration
+  imagePullSecrets:
+    enabled: true
+    secrets:
+      - name: hi168-harbor-secret    
+  
+  # Quantanexus manager (init container)
+  manager:
+    image: "harbor.hi168.com/abc/quantanexus-mgr"
+    tag: "v1.0.2.0"
+  
+  # Nginx reverse proxy
+  nginx:
+    enabled: true
+    image: "registry.cn-hangzhou.aliyuncs.com/hwua_namespace/nginx"
+    tag: "reverse"
+    port: 8443
+    
+    # Frontend (Vue) init container
+    frontend:
+      image: "harbor.hi168.com/abc/hi168-vue"
+      tag: "v8.3.6.qn001v2"
+      env:
+        type: "hi168slot"
+        urlBase: "https://qntest001.hi168.com"
+        moduleList: "basic"
+  
+  # Host aliases
+  hostAliases:
+    - ip: "192.168.103.120"
+      hostnames:
+        - "harbor.hi168.com"
+  
+  # Storage paths
+  storage:
+    quantanexusData: "/var/lib/quantanexus/quantanexus"
+    quantanexusMisc: "/var/lib/quantanexus/quantanexus-misc"
+    runtime: "/mnt/quantanexus/runtime"
+  
+  # Environment variables
+  env:
+    home: "/var/lib/quantanexus"
+    configPath: "/opt/etc/quantanexus/prod.conf"
+    updateOption: "-i muk_web_theme,hw_base,hw_frontend -u all"
+    preStartShell: "/opt/etc/quantanexus/pre-start.sh"
+  
+  # Liveness probe
+  livenessProbe:
+    path: "/liveness"
+    port: 8069
+    initialDelaySeconds: 300
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+# ABC Experiment Service configuration
+abcExperimentService:
+  enabled: true
+  replicaCount: 1
+  
+  # Application settings
+  app:
+    image: "registry.cn-hangzhou.aliyuncs.com/hwua_namespace/abc-experiment-service"
+    tag: "v1.3.2"
+    imagePullPolicy: "IfNotPresent"
+  
+  # Service configuration
+  service:
+    port: 8075
+    host: "0.0.0.0"
+  
+  # Docker configuration
+  docker:
+    baseUrl: "https://172.17.0.1:8088"
+    certPath: "/etc/abc_platform/docker-ssl/client-cert.pem"
+    keyPath: "/etc/abc_platform/docker-ssl/client-key.pem"
+    caCertPath: "/etc/abc_platform/docker-ssl/ca.pem"
+  
+  # Kubernetes configuration
+  kubernetes:
+    configFile: "/etc/kubernetes/admin.conf"
+    host: "https://172.17.0.1:6443"
+    sslCaCert: "/etc/kubernetes/pki/ca.crt"
+    verifySsl: "False"
+    token: "eyJhbGciOiJSUzI1NiIsImtpZCI6ImtPU1V1blRqb0lMVzdZZ1FsTFh4Z1lUZ1VnS1gzekNNOGJWVnFycTR3X3MifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkYXNoYm9hcmQtYWRtaW4tdG9rZW4tOTlyOHQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGFzaGJvYXJkLWFkbWluIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiYWQ3NTM1MjgtNmZmNS00MDU0LWEwNDEtNzBiNTc1ZmUxMTljIiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50Omt1YmUtc3lzdGVtOmRhc2hib2FyZC1hZG1pbiJ9.bDMwLeuyCv4p3neoYDzS4T24haCC8FPirYybh5oYyLrZiYfcaHnzzBBsMY4kJkNS2oM0CqPb2PrmBWy7-TLWDmWAcTrSMZy11hPJRJwJuG0dQsajoGn8NZ6u1_n8Qso5Y8Fik1kEOSwpOa7eXDrAOrCUS-HySMHXNBXML3v541vHlpI9Zxw2pe6ELgvhZqFYIzydrS0ur48gM6rwI3Rp25b3ZB9Oy5dGB_ZpQAuXoY-QK9ymE8dUWpRX9V0WrNzrFnHB1-O5bjtSY_5ONBNDSJuSHydh7c-WxT9InH2M1v-FU2h8EEgYPYMmeHoYNslEsQg2Fq9VU-tFrJfdbhnkMA"
+    assertHostname: "portal"
+    server: "https://192.168.103.151:6443"
+    caData: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURtakNDQW9LZ0F3SUJBZ0lVYU0zT2tLU3BPVjA5TnNzcWFjNHROcTNnU2trd0RRWUpLb1pJaHZjTkFRRUwKQlFBd1pERUxNQWtHQTFVRUJoTUNRMDR4RVRBUEJnTlZCQWdUQ0VoaGJtZGFhRzkxTVFzd0NRWURWUVFIRXdKWQpVekVNTUFvR0ExVUVDaE1EYXpoek1ROHdEUVlEVlFRTEV3WlRlWE4wWlcweEZqQVVCZ05WQkFNVERXdDFZbVZ5CmJtVjBaWE10WTJFd0lCY05NalV3T1RFd01EWXlPVEF3V2hnUE1qRXlOVEE0TVRjd05qSTVNREJhTUdReEN6QUoKQmdOVkJBWVRBa05PTVJFd0R3WURWUVFJRXdoSVlXNW5XbWh2ZFRFTE1Ba0dBMVVFQnhNQ1dGTXhEREFLQmdOVgpCQW9UQTJzNGN6RVBNQTBHQTFVRUN4TUdVM2x6ZEdWdE1SWXdGQVlEVlFRREV3MXJkV0psY201bGRHVnpMV05oCk1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBdk5FSVNqRENFZitLZ0hGbjNYaFkKcnFnU1M4UFc2QTh3ckwyb3phWkxkRmc5SEFSVjZ3T24zMC8weVVEUGFsSXlIdWF2UEJTeUVWOXlIL3Q1Wm9zTwozUkJjL1lLSW0ycmgvK1c5aTNpK0hBS3NiVWhSRVdJWDJ1MGxHbDZxZ0ltT1BFOVB5d3NzMno4SE9ZQjhaODBoCjV0ZWJQM3ZGWGV5SDB1OHM1bDk0Ri96UXNwWisxVVhWcWRURWhaMG4ybUlGUE9tdDNJK2lGRGpoNDFMdXFlb0gKUElhelRwUGFhTWlpcXNobTFNNzVIS3VGV1Yrdjk4UDVGZXVLYlBDY2hNb2hMUVFTVVJucmVyVWt4SW9MUDhKVwo3eTRFL2oxU3hiQjZFY1hhQ2xxUzN5WFNFZGpuQS9UVGNYMU1ZanlZZG4vUTRkTmVMcERsVUtITzNvZmN2VFJXCkxRSURBUUFCbzBJd1FEQU9CZ05WSFE4QkFmOEVCQU1DQVFZd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBZEJnTlYKSFE0RUZnUVVWSUg3K2d2VzhnaGVUandBOEFTZHFzMnhVQnN3RFFZSktvWklodmNOQVFFTEJRQURnZ0VCQUlCRApacTNZMzdtSUlMRkRacWV2WDEvbmQvZitPS2FKRHpTa1h6dmxRdkIyeWdsNHpJUjIrRTluWHorT3FZQ09iUHpkCnd4bGI3U1plNVVaazFsdXBNN3oxdlYyOEM3K2hUQmFiSkNTdW82RDd3ZncwNlFpQ3Fqa25WakxpUzRsT2o5ai8KTlYwMUZMVzNzL0RDREZwSzFRS21YUW1Kbkl6YVM5TXRmREF5ajFHOWRGMzd4aDU2dmJzZ3NrbC9GZG1pdFVHRQozSjZXeXBRUnN2UUVKYWRPdzA3VjAvUUgyYi9nSm52aVkzQlZJUzdEOVJoNHJkZ3pDOWJscm5SVUh5dnlkN3dMCjVxYWdYNzRIL0RpdEN0RXFKM3BMakV3aytiMDFsL0NEMld0ZzBxa3JPRTlMS3doMW9IYjE5bWltRUZ4ZnlzTUMKS2MzOWVGNDA3bGczUGVBV2RoOD0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo="
+    clientCertData: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUQyakNDQXNLZ0F3SUJBZ0lVR2g5bFMydStXM1NBOUJpQXd2ZGhNK0RscVlvd0RRWUpLb1pJaHZjTkFRRUwKQlFBd1pERUxNQWtHQTFVRUJoTUNRMDR4RVRBUEJnTlZCQWdUQ0VoaGJtZGFhRzkxTVFzd0NRWURWUVFIRXdKWQpVekVNTUFvR0ExVUVDaE1EYXpoek1ROHdEUVlEVlFRTEV3WlRlWE4wWlcweEZqQVVCZ05WQkFNVERXdDFZbVZ5CmJtVjBaWE10WTJFd0lCY05NalV3T1RFd01EWXpPVEF3V2hnUE1qQTNOVEE0TWprd05qTTVNREJhTUdjeEN6QUoKQmdOVkJBWVRBa05PTVJFd0R3WURWUVFJRXdoSVlXNW5XbWh2ZFRFTE1Ba0dBMVVFQnhNQ1dGTXhGekFWQmdOVgpCQW9URG5ONWMzUmxiVHB0WVhOMFpYSnpNUTh3RFFZRFZRUUxFd1pUZVhOMFpXMHhEakFNQmdOVkJBTVRCV0ZrCmJXbHVNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQXVzYU1WQ05rUFdZWVlkWjcKU0plNEV5bXBpU1FwSnlHNEtDQzBzQ0xaSU9yZXd2K0VlTGtUcGxCVStvM0tscldVOCtxOHdzTzJCUzlzejY5Zwp5eUVrdVdWK1ZKUzloZTNtZ09tNjcxckxlMzY0OG5XSkVCNnBDcyt6UG8rZVp6blVHY3dBajM5NHFJR2VrNmNhCnJ2L09SQU9QWWRlOStEeDdKK1VKQnlTUUg5a3NJL2ZGaUZhV3JmOWdLaVpPTGlMWGZPU2w5dU9xeFh3NTdGRWEKOWVFTWdYS0hxK1E2WEVYbkVkaGRUQ3hNMDFORzJjTnlkdDh1cnpzS1dsNFp3TUdZekxNZnBQdE0vOFJmWktoWApuelgwdURJQ2pBSkhLY09oeStpanBIaXpzV3diNmZtNDkxbk14bEpENk93cWRtUTJnUnRBdlRBY3dzQlN6MXdyCmt5YVNyd0lEQVFBQm8zOHdmVEFPQmdOVkhROEJBZjhFQkFNQ0JhQXdIUVlEVlIwbEJCWXdGQVlJS3dZQkJRVUgKQXdFR0NDc0dBUVVGQndNQ01Bd0dBMVVkRXdFQi93UUNNQUF3SFFZRFZSME9CQllFRk95SWJxV0RYdXF6eFZmMAphanZMK2J2MjhHbENNQjhHQTFVZEl3UVlNQmFBRkZTQisvb0wxdklJWGs0OEFQQUVuYXJOc1ZBYk1BMEdDU3FHClNJYjNEUUVCQ3dVQUE0SUJBUUNpZjJONjZ1WURpRTJyWHV4QlI5YWRhSmlTSURDY2JUelVlc1ZjUytiREprNWIKM3lNdDkwOTMycmhFaEMrbk1FakEwSTNhMFZMaGtxa2ROTmRtb0dFRkVVTE1aUjNsRnR6L3Z4Wng4M1NaRTEwYQpCaElDNExOMHBkdllCUW91ZUxjWGZ4Wm9VRjhGSEZPeCthdk5EM1NTbzhvcWE1dUVVTkhwZnB5UUVLUHV1ZTF0Cll2eTZtMnlTTUhkbTIreHhXeTQyWXNjMXJhaTNpcFhQbVo1T2kzLzc0MTJqbHZDMHhldW9JSXZobGhYUFdGbjcKRitsRkpNeDNFU0luVWVaSTh3VTFObklSMldBdlEzTUhEWEcwOGt6ek9wV0lES2FxTUR3clduV1pmc3V5OVFPeQppTDNYK2ZqVFpxS3VnNDlUMnR1d1ZGa095TkkxM3VScThzQjJwYTN5Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+        client-key-data: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcEFJQkFBS0NBUUVBdXNhTVZDTmtQV1lZWWRaN1NKZTRFeW1waVNRcEp5RzRLQ0Mwc0NMWklPcmV3ditFCmVMa1RwbEJVK28zS2xyV1U4K3E4d3NPMkJTOXN6NjlneXlFa3VXVitWSlM5aGUzbWdPbTY3MXJMZTM2NDhuV0oKRUI2cENzK3pQbytlWnpuVUdjd0FqMzk0cUlHZWs2Y2Fydi9PUkFPUFlkZTkrRHg3SitVSkJ5U1FIOWtzSS9mRgppRmFXcmY5Z0tpWk9MaUxYZk9TbDl1T3F4WHc1N0ZFYTllRU1nWEtIcStRNlhFWG5FZGhkVEN4TTAxTkcyY055CmR0OHVyenNLV2w0WndNR1l6TE1mcFB0TS84UmZaS2hYbnpYMHVESUNqQUpIS2NPaHkraWpwSGl6c1d3YjZmbTQKOTFuTXhsSkQ2T3dxZG1RMmdSdEF2VEFjd3NCU3oxd3JreWFTcndJREFRQUJBb0lCQUdtdkRScFN5RmFCbll4Rwp5NDJBNDlSYi82VXRBK2d6aVR1VGZnb29QY29GZkRURVZsWGxDM3hRK2pTbjVKa3dkKzhveE5SRDM0dkJrUVZYClRDTEVSejVzY25Zemo2WG52a1QxZkNRUnNRL1kzWmU3NytsaUgrNlJKZkJoWFpVMVFKRzBRQ0R5VlBpc0YybWUKNVZkZVFYMTBzajMvMEd0VTlhN1dSeXgyZ09LemkxOE5mRk41eWZhMS9RZ3FQR2E3R0l4MGR1TFBXV1h2NmpjawoyZVkxVExwMFduYkJrcVUvZDhMelpHZnV0elF2U3NrQXIrUUNuMWdRNjM1TVI0SjVWUTlmQitjbTJPS1NHQy9zCkwyVkV6QTZRdWFJNXBPNDJnd2hXcHlOeXltRjVxM3RFd0I2YktkVUQ5WUtna0RoZkEyakRIOE5zOURhZE1RU2EKOUxjMlprRUNnWUVBK090UUM2NGZ6WVpSWWsvMCs5TVFqZmc4SWxQY3FDWmZudEIxdy9zS01tYUVqRXFYZzlxNwp3YXd1ZzE5dURmZVYvRTJtek0vZmFxTmNIZlpuaGoydUdDOGw0RUJPdm5mUEpOV2ViUDR2Z0F5cjJaSWEyUjFpClZTUGp0OGU1L3dVNFo3TGFnRytIZGJqWVIrUEduOTh4OEJ4Ty95bHRBTERVVWFtT0MrT1ZEYUVDZ1lFQXdCYXcKOTVIQk9XTTNGckpicGs4QitQSEdHWmRmYlkrRmlYb2ZhZ293N2F2VkJRdEw0MzF4OHhGMkZIaDEvSUtaVDRzWgp5aS81TklGa25JWHQvVnR1VExDYXhzWjB2RC9vTFEvNmZmZEJNZDZ4bmFVQThhSzcyWjVaaFFWcDN1S2tZQXlSClRlVHJYS24xUXlmck1kSGZ1MjNmU1FrNEZ6OWJoS2NPN2xUK25rOENnWUVBcjB5NUFLRE9FT1hKSnQxOGdHU3kKUWVsU0lETERNVUJsRXVsb0ptOERUVjlaZFp1S2ZQZHNSd2JGY3d1ZjdBSXpCSTZESzdZeGQxNDRuM2xLaXdXaApON0xzajdONlFUVUxFcnZHYUtmU04vRzBqUE1TS1ZsQ1NRZVBkWHdaQnZwY01OdUtlZTBSanR4d3BLQkszNGhHCkdQMDJ2UWdsbGRqeWpkaEZDeVpwY0VFQ2dZQkI2d2VMemM3N1BKcjVCUGdDbUhaYTBjMWpsdGkrcGxQekc1K1EKS2pNa1BLVjdkNmJ4U0dsRU9xZkUycG5TcjVhZy8yRTRTMEkvekcrVWJ6bCtpbFBOcVlWVDFXTFYvekJUMW5ubApwR1lSRVJUdXZtTVdpUHZoOEQ5VU1NbG1IV3kvTVZEajVEMElyYUpuQzFuZzNON2tXUTRZNkRzQmIxS2VzUjJrCm1ESlFiUUtCZ1FDbmR6dVNYczlnU2NWOUJFS01DdThoa0Q2TkUrK1V6WUFUekdnVzlNY3dramREeW1OY0hadDkKcGVNOUJlWjF5WUdqZFU3aWxDL1NCNzZMRUpmUm1CZjhscUg5SEZVYTlSWmFXa0dsZnBPSXpFVzFnRU03YUhWTQozejBKV1JKSWphLzBRNTdkZ1NwZzFwdEhsa1Vkc1BXRElYSVZtZXd5SmM2ejN4UzhtUVg3cHc9PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo="    
+  
+  # Virtual VNC configuration
+  virtVnc:
+    node: "192.168.103.170"
+    port: 32211
+  
+  # Authentication
+  enableAuth: false
+  authUrlBase: "http://auth1.hi168.com:31069/vue/user/auth"
+
+# ABC WebShell configuration
+abcWebShell:
+  enabled: true
+  replicaCount: 1
+  
+  # Image configuration
+  image:
+    repository: registry.cn-hangzhou.aliyuncs.com/hwua_namespace/abc-webshell
+    tag: v2.2.4.8
+    pullPolicy: IfNotPresent
+  
+  # Service account configuration
+  serviceAccount:
+    create: true
+    name: abc-webshell
+  
+  # Node selector for master nodes
+  nodeSelector:
+    ha_node_type: master
+  
+  # App configuration
+  config:
+    appname: abc-webshell
+    httpport: 8080
+    runmode: "prod"
+    kubeconfig: ""
+    beego_pprof: true
+    https: true
+    url_prefix: ""
+    enable_demo: true
+    debug: true
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  
+  # Ingress configuration
+  ingress:
+    enabled: true
+    className: nginx
+    host: "qntest001.hi168.com"
+    paths:
+      - /t(/|$)(.*)
+      - /demo
+      - /static/css/xterm.css
+      - /static/css/bootstrap.min.css
+      - /static/js/index.js
+      - /static/xml/app.xml
+      - /static/imgs/favicon.ico
+    annotations:
+      ingress.kubernetes.io/ingress.class: "nginx"
+      nginx.org/client-max-body-size: 100M
+      nginx.ingress.kubernetes.io/cors-allow-headers: >-
+        DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization
+      nginx.ingress.kubernetes.io/affinity: "cookie"
+      nginx.ingress.kubernetes.io/session-cookie-name: "session_id"
+    tls:
+      enabled: true
+      secretName: abc-tls  
+# ABC Uploader configuration
+abcUploader:
+  enabled: true
+  replicaCount: 1
+  
+  # Image configuration
+  image:
+    repository: registry.cn-hangzhou.aliyuncs.com/hwua_namespace/abc-uploader
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+  
+  # Service account configuration (复用 WebShell 的 service account)
+  serviceAccountName: abc-webshell
+  
+  # Node selector for master nodes
+  nodeSelector:
+    ha_node_type: master
+  
+  # App configuration
+  config:
+    appname: abc-uploader
+    httpport: 8080
+    runmode: "prod"
+    kubeconfig: ""
+    beego_pprof: true
+    enable_allow_origin: false
+    https: false
+    url_prefix: ""
+    enable_demo: true
+    debug: true
+    uploader_home: "/var/abc-uploader/upload"
+    orm_debug: false
+    clean_chunk_duration: 8
+    sqlite_db_path: "/var/abc-uploader/datas/abc_uploader.db"
+  
+  # Host path volumes
+  hostPaths:
+    upload: "/usr/local/abc-uploader/upload"
+    datas: "/usr/local/abc-uploader/datas"
+    upload_david: "/usr/local/abc-uploader/upload-david"
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  
+  # Ingress configuration
+  ingress:
+    enabled: true
+    className: nginx
+    host: "qntest001.hi168.com"
+    paths:
+      - /file/upload
+    annotations:
+      ingress.kubernetes.io/ingress.class: "nginx"
+      nginx.org/client-max-body-size: 100M
+      nginx.ingress.kubernetes.io/cors-allow-headers: >-
+        DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization
+      nginx.ingress.kubernetes.io/affinity: "cookie"
+      nginx.ingress.kubernetes.io/session-cookie-name: "session_id"
+    tls:
+      enabled: true
+      secretName: abc-tls
+
+# HWUA Node Service configuration
+hwuaNodeService:
+  enabled: true
+  
+  # Image configuration
+  image:
+    repository: harbor.hi168.com/abc/hwua-node-service
+    tag: 0.0.4
+    pullPolicy: IfNotPresent
+  
+  # Configuration
+  config:
+    appname: "HWNodeService"
+    logfile: "/var/log/hwua-node-service/service.log"
+    cri:
+      type: "containerd"
+      socket_addr: "/run/containerd/containerd.sock"
+      namespace: "k8s.io"
+    server:
+      ip: "0.0.0.0"
+      port: 168
+  
+  # Host aliases
+  hostAliases:
+    - ip: "192.168.103.120"
+      hostnames:
+        - "harbor.hi168.com"
+  
+  # Image pull secrets
+  imagePullSecrets: "hi168-harbor-secret"
+  
