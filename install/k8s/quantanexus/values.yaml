@@ -122,7 +122,6 @@ quantanexus:
       tag: "v8.3.6.qn001v2"
       env:
         type: "hi168slot"
-        urlBase: "https://qntest001.hi168.com"
         moduleList: "basic"
   
   # Host aliases
@@ -240,7 +239,6 @@ abcWebShell:
   ingress:
     enabled: true
     className: nginx
-    host: "qntest001.hi168.com"
     paths:
       - /t(/|$)(.*)
       - /demo
@@ -310,7 +308,6 @@ abcUploader:
   ingress:
     enabled: true
     className: nginx
-    host: "qntest001.hi168.com"
     paths:
       - /file/upload
     annotations:
