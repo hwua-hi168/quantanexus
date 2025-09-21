@@ -65,13 +65,28 @@ postgresql:
     username: quantanexus
     password: quantanexus
     database: quantanexus001
+  # 主数据库镜像配置
+  image:
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: 14.4.0-debian-11-r23
+    pullPolicy: IfNotPresent
+    # digest: ""
+
+  # Prometheus Exporter 镜像配置 (如果启用了 metrics)
+  metrics:
+    enabled: true
+    image:
+      registry: docker.io
+      repository: bitnami/postgres-exporter
+      tag: 0.10.1-debian-11-r24
+      pullPolicy: IfNotPresent
 
 redis:
   enabled: true
   auth:
     password: hi168pass
   path: /var/lib/quantanexus/redis-single
-
 
 quantanexus:
   enabled: true
