@@ -80,7 +80,24 @@ postgresql:
     tag: 14.4.0-debian-11-r23
     pullPolicy: IfNotPresent
     # digest: ""
-
+  primary:
+    persistence:
+      enabled: true
+      # 必须空，才能匹配 hostPath PV
+      storageClass: ""
+      size: 40Gi
+    # 让 Pod 也落在同一块节点
+    nodeSelector:
+      kubernetes.io/hostname: com-calino-master-2
+    podSecurityContext:
+      fsGroup: 1001 # 让 kubelet 把卷目录 chown 成 1001 
+  # 新增 hostPath PV 控制段
+  hostPath:
+    # true=生成 hostPath PV；false=走集群默认动态供给
+    enabled: true    
+    node: com-calino-master-2   # 目标节点
+    path: /var/lib/quantanexus/postgresql
+    storage: 40Gi
   # Prometheus Exporter 镜像配置 (如果启用了 metrics)
   metrics:
     enabled: true
