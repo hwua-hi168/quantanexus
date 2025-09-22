@@ -2,12 +2,13 @@
 global:
   namespace: abc-platform
   domainName: qntest001.hi168.com
-  masterNode: com-cilium-master-2
-  masterNodes: "com-cilium-master-1,com-cilium-master-2,com-cilium-worker-1"
-  workerNodes: "com-cilium-worker-1"
+  masterNode: com-calino-master-1
+  masterNodes: "com-calino-master-1,com-calino-master-2"
+  workerNodes: "com-calino-worker-1"
 
 # Component toggles
 components:
+  createNamespace: true
   ingressController: true
   quantanexus: true
   abcExperimentService: true
@@ -39,6 +40,13 @@ ingress-nginx:
     # 启用 Webhooks (推荐)
     admissionWebhooks:
       enabled: true
+      patch:
+        enabled: true
+        image:
+          registry: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/k8s.gcr.io
+          image: ingress-nginx/kube-webhook-certgen
+          tag: v1.1.1
+          digest: ""
     # 额外的 args, 如果需要
     extraArgs:
       enable-ssl-passthrough: true
@@ -72,7 +80,24 @@ postgresql:
     tag: 14.4.0-debian-11-r23
     pullPolicy: IfNotPresent
     # digest: ""
-
+  primary:
+    persistence:
+      enabled: true
+      # 必须空，才能匹配 hostPath PV
+      storageClass: ""
+      size: 40Gi
+    # 让 Pod 也落在同一块节点
+    nodeSelector:
+      kubernetes.io/hostname: com-calino-master-2
+    podSecurityContext:
+      fsGroup: 1001 # 让 kubelet 把卷目录 chown 成 1001 
+  # 新增 hostPath PV 控制段
+  hostPath:
+    # true=生成 hostPath PV；false=走集群默认动态供给
+    enabled: true    
+    node: com-calino-master-2   # 目标节点
+    path: /var/lib/quantanexus/postgresql
+    storage: 40Gi
   # Prometheus Exporter 镜像配置 (如果启用了 metrics)
   metrics:
     enabled: true
