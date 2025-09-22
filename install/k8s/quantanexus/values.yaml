@@ -2,12 +2,13 @@
 global:
   namespace: abc-platform
   domainName: qntest001.hi168.com
-  masterNode: com-cilium-master-2
-  masterNodes: "com-cilium-master-1,com-cilium-master-2,com-cilium-worker-1"
-  workerNodes: "com-cilium-worker-1"
+  masterNode: com-calino-master-1
+  masterNodes: "com-calino-master-1,com-calino-master-2"
+  workerNodes: "com-calino-worker-1"
 
 # Component toggles
 components:
+  createNamespace: true
   ingressController: true
   quantanexus: true
   abcExperimentService: true
