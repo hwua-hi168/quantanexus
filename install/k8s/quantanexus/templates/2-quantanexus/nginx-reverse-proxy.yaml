@@ -27,7 +27,7 @@ spec:
         - name: HI168_ENV_TYPE
           value: {{ .Values.quantanexus.nginx.frontend.env.type | quote }}
         - name: HI168_ENV_URL_BASE
-          value: {{ .Values.quantanexus.nginx.frontend.env.urlBase | quote }}
+          value: "https://{{ include "abc-platform.domainName" . }}"
         - name: HI168_SHOW_MODULE_LIST
           value: {{ .Values.quantanexus.nginx.frontend.env.moduleList | quote }}
         - name: HI168_COMMON_VAR_1

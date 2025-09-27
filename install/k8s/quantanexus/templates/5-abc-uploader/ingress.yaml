@@ -11,7 +11,7 @@ metadata:
 spec:
   ingressClassName: {{ .Values.abcUploader.ingress.className }}
   rules:
-    - host: {{ .Values.abcUploader.ingress.host }}
+    - host: {{ include "abc-platform.domainName" . }}
       http:
         paths:
           {{- range .Values.abcUploader.ingress.paths }}
@@ -26,7 +26,7 @@ spec:
   {{- if .Values.abcUploader.ingress.tls.enabled }}
   tls:
     - hosts:
-        - {{ .Values.abcUploader.ingress.host }}
+        - {{ include "abc-platform.domainName" . }}
       secretName: {{ .Values.abcUploader.ingress.tls.secretName }}
   {{- end }}
 {{- end }}
