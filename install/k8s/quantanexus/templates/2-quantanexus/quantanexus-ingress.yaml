@@ -45,7 +45,7 @@ spec:
             path: /longpolling
             backend:
               service:
-                name: abc-platform
+                name: {{ include "abc-platform.fullname" . }}
                 port:
                   number: 8072
           - backend:
@@ -71,6 +71,8 @@ spec:
                   number: 8075
   {{- if .Values.ingress.tls }}
   tls:
-    {{- toYaml .Values.ingress.tls | nindent 4 }}
+    - hosts:
+      - {{ include "abc-platform.domainName" . }}
+      secretName: {{ .Values.ingress.tlsSecret.name }}     
   {{- end }}
 {{- end }}
