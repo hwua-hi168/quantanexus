@@ -27,6 +27,10 @@ Issue: 您可以在issue提出问题，我们会尽快回复，并解答。
 
 QuantaNexus 提供多种安装方式，以满足不同环境和需求：
 
+### 1.0 Helm 一键安装 安装（你必须拥有k8s环境）
+
+
+
 ### 1.1 All-in-One 安装（从0开始）
 
 适用于全新环境，一键安装完整的 Kubernetes 集群和 QuantaNexus 平台：
