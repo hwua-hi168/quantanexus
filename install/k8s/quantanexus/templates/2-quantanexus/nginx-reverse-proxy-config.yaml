@@ -76,6 +76,15 @@ data:
         proxy_hide_header Set-Cookie;
       }
 
+      location /hwua/ {
+          rewrite ^/hwua/(.*)$ /odoo/$1 break;
+          proxy_pass http://{{ include "abc-platform.fullname" . }}:8069;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
       # 缓存静态资源
       location ~* ^.+\.(js|css|ico|gif|jpg|jpeg|png|ttf|woff2)$ {
         log_not_found off;
