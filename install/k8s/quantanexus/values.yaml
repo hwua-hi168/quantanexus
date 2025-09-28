@@ -123,6 +123,10 @@ quantanexus:
   enabled: true
   replicaCount: 1
 
+  # 新增：Odoo 核心运行参数
+  config:
+    maxCronThreads: 8
+    workers: 16
   # Quantanexus core application
   app:
     image: "harbor.hi168.com/abc/quantanexus-basic"
