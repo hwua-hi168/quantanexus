@@ -4,20 +4,32 @@
 
 QuantaNexus 是海文公司基于 Kubernetes（K8S）平台开发的云算力管理软件，已实现对主流 CNI 插件的基础适配，并支持 Kubernetes 集群管理、kube-virt 虚拟化、Ceph 存储集成及异构计算（GPU/AI 芯片）调度等核心能力。目前已经经过大规模集群测试，支持万卡集群；支持C2C商业运营，用户自己注册，充值算力自动申请VM和算力。支持声明式调度，支持队列式AI任务调度。
 
+请帮忙点亮小星星和克隆.
+
+gitee 镜像： https://gitee.com/hwua/quantanexus.git
 
 WEB Demo:  https://www.hi168.com   (公有云版)
+
+加入我们的[Slack](https://join.slack.com/t/hwua/shared_invite/zt-3e8immsaf-DQlHsdEfWsBpIe2UtttieQ) 
+
+QQ支持群： 574087153
+
 测试： 您可以根据本文档进行测试。
-Issue: 您可以在issue提出问题，我们会尽快回答。
+Issue: 您可以在issue提出问题，我们会尽快回复，并解答。
 开发计划： 我们会持续的开发底层基础设施。
 
 个人版定义： 安装本平台默认是个人版，如果您想要企业版，请联系我们的客服。
-个人版限制： 1000个cpu核心，50个用户，已经足够个人使用。
+个人版限制： 500个cpu核心，50个用户，已经足够个人使用。
 
 以下为详细功能支持详情：
 
 ## 一、安装选项
 
 QuantaNexus 提供多种安装方式，以满足不同环境和需求：
+
+### 1.0 Helm 一键安装 安装（你必须拥有k8s环境）
+
+
 
 ### 1.1 All-in-One 安装（从0开始）
 
@@ -124,5 +136,3 @@ QuantaNexus 支持主流 AI 运算芯片的虚拟化与调度能力，可满足�
 
 4.  **持续迭代规划**：后续将逐步扩展 K8s 更高版本（如 1.29、1.30）的适配，优化 AI 芯片性能监控、Ceph 存储灾备、kube-virt 高可用等功能，进一步完善生态支持。
 
-欢迎加入我们的开发：
-QQ 群： 574087153
