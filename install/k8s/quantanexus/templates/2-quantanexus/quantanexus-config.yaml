@@ -34,8 +34,8 @@ data:
     limit_memory_soft = 8000000000
     ;max_cron_threads = 1
     ;workers = 4
-    max_cron_threads = 8
-    workers = 16
+    max_cron_threads = {{ .Values.quantanexus.config.maxCronThreads }}
+    workers          = {{ .Values.quantanexus.config.workers }}    
   test.conf: |
     [options]
     ; disable listdb menu item
@@ -65,8 +65,8 @@ data:
     limit_memory_soft = 8000000000
     ;max_cron_threads = 1
     ;workers = 4
-    max_cron_threads = 8
-    workers = 16
+    max_cron_threads = {{ .Values.quantanexus.config.maxCronThreads }}
+    workers          = {{ .Values.quantanexus.config.workers }}    
   pre-start.sh: |
     echo "quantanexus pre-start.sh called"
 {{- end }}
