@@ -156,9 +156,9 @@ quantanexus:
 
   # Host aliases
   hostAliases:
-    - ip: "192.168.103.120"
-      hostnames:
-        - "harbor.hi168.com"
+    # - ip: "192.168.103.120"
+    #   hostnames:
+    #     - "harbor.hi168.com"
 
   # Storage paths
   storage:
@@ -224,7 +224,7 @@ abcExperimentService:
 
   # Authentication
   enableAuth: false
-  authUrlBase: "http://auth1.hi168.com:31069/vue/user/auth"
+  authUrlBase: ""
 
 # ABC WebShell configuration
 abcWebShell:
@@ -374,9 +374,9 @@ hwuaNodeService:
 
   # Host aliases
   hostAliases:
-    - ip: "192.168.103.120"
-      hostnames:
-        - "harbor.hi168.com"
+    # - ip: "192.168.103.120"
+    #   hostnames:
+    #     - "harbor.hi168.com"
 
   # Image pull secrets
   imagePullSecrets: "hi168-harbor-secret"
