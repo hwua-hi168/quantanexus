@@ -29,6 +29,13 @@ data:
     hwua_redis_pool_max_connections=50
     hwua_redis_pool_timeout=300
     hwua_service_db=0
+    ; memory
+    limit_memory_hard = 10000000000
+    limit_memory_soft = 8000000000
+    ;max_cron_threads = 1
+    ;workers = 4
+    max_cron_threads = 8
+    workers = 16
   test.conf: |
     [options]
     ; disable listdb menu item
@@ -53,6 +60,13 @@ data:
     hwua_redis_pool_max_connections=50
     hwua_redis_pool_timeout=300
     hwua_service_db=0
+    ; memory
+    limit_memory_hard = 10000000000
+    limit_memory_soft = 8000000000
+    ;max_cron_threads = 1
+    ;workers = 4
+    max_cron_threads = 8
+    workers = 16
   pre-start.sh: |
     echo "quantanexus pre-start.sh called"
 {{- end }}

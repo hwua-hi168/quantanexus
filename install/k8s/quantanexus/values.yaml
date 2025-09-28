@@ -16,6 +16,51 @@ components:
   abcUploader: true
   hwuaNodeService: true
 
+# PostgreSQL configuration (如果使用子chart)
+postgresql:
+  enabled: true
+  auth:
+    username: quantanexus
+    password: quantanexus
+    database: quantanexus001
+  # 主数据库镜像配置
+  image:
+    registry: harbor.hi168.com/quantanexus
+    repository: postgresql
+    tag: 14.4.0-debian-11-r23
+    pullPolicy: IfNotPresent
+    # digest: ""
+  primary:
+    persistence:
+      enabled: true
+      # 必须空，才能匹配 hostPath PV
+      storageClass: ""
+      size: 40Gi
+    # 让 Pod 也落在同一块节点
+    nodeSelector:
+      kubernetes.io/hostname: com-calino-master-1
+    podSecurityContext:
+      enabled: true
+      fsGroup: 0 
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 0
+    hostNetwork: true
+  hostPath:
+    # true=生成 hostPath PV；false=走集群默认动态供给
+    enabled: true
+    node: com-calino-master-1   # 目标节点
+    path: /var/lib/quantanexus/postgresql
+    storage: 40Gi
+  # Prometheus Exporter 镜像配置 (如果启用了 metrics)
+  metrics:
+    enabled: true
+    image:
+      registry: harbor.hi168.com/quantanexus
+      repository: postgres-exporter
+      tag: 0.10.1-debian-11-r24
+      pullPolicy: IfNotPresent  
+
 # Ingress Nginx configuration
 ingress-nginx:
   className: "nginx"
@@ -67,50 +112,6 @@ ingress:
     name: abc-tls-hwua-common-4
     certificate: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZCRENDQSt5Z0F3SUJBZ0lTQlpSanh2bmVIUDBNcW1lNHM0T0pWYWVrTUEwR0NTcUdTSWIzRFFFQkN3VUEKTURNeEN6QUpCZ05WQkFZVEFsVlRNUll3RkFZRFZRUUtFdzFNWlhRbmN5QkZibU55ZVhCME1Rd3dDZ1lEVlFRRApFd05TTVRNd0hoY05NalV3T1RJME1ESTBPRFUxV2hjTk1qVXhNakl6TURJME9EVTBXakFnTVI0d0hBWURWUVFECkRCVXFMbkZ1ZEdWemREQXdNaTVvYVRFMk9DNWpiMjB3Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXcKZ2dFS0FvSUJBUURHYkxRc3F0T1E3dmdxUFZmY0g4YTR2TGkxYkJWSG02WWlpUTdQQmJzdkRVQWZLcTFxQWJWdQpveUlCc2ZsZVZiYWF3cUloSzJiZGcvaktodlpKMGhlYTdmaXFyNzdxOVkzcCswZU56S2poUmdOMXl2NmlIaTVVCmF1SEJhMG1XYUNlS3RKUUhKc1g5d09OZ1dzaGVuWkN5TVBiUWk1MW9YT3JLR2lVU080MUtFZk1WSE9NaW5aR1QKSS9FcVo5bkVTckVGNU84ZFZsRWJFODU4N29uZ3hOQkZiMWJ3aWZja3lUa1ozYy9zczRwRUZrQlNjVGRxc042WgplQVpUdWhCQ2xhaisvc2tjdVVIQTRlSE9vVFIvRTNEVW5tQkNKZjJmNWVOakhsTG8vL2UxQXNvUmo0M2RuZDl3Cm91SXQ1SFF3akIwamkzMGtYTWpEM0FpTUFkNFduL0twQWdNQkFBR2pnZ0lqTUlJQ0h6QU9CZ05WSFE4QkFmOEUKQkFNQ0JhQXdIUVlEVlIwbEJCWXdGQVlJS3dZQkJRVUhBd0VHQ0NzR0FRVUZCd01DTUF3R0ExVWRFd0VCL3dRQwpNQUF3SFFZRFZSME9CQllFRkxlYzE0MzRZYU51ZUd0bFZudHVrQXZvdFZ0MU1COEdBMVVkSXdRWU1CYUFGT2VyCm53OHNNNkJUMDE1UGVNaXloQTQ3MXBJek1ETUdDQ3NHQVFVRkJ3RUJCQ2N3SlRBakJnZ3JCZ0VGQlFjd0FvWVgKYUhSMGNEb3ZMM0l4TXk1cExteGxibU55TG05eVp5OHdJQVlEVlIwUkJCa3dGNElWS2k1eGJuUmxjM1F3TURJdQphR2t4TmpndVkyOXRNQk1HQTFVZElBUU1NQW93Q0FZR1o0RU1BUUlCTUM0R0ExVWRId1FuTUNVd0k2QWhvQitHCkhXaDBkSEE2THk5eU1UTXVZeTVzWlc1amNpNXZjbWN2TXpjdVkzSnNNSUlCQWdZS0t3WUJCQUhXZVFJRUFnU0IKOHdTQjhBRHVBSFVBRXZGT05MMVRja3lFQmhuRGp6OTZFL2pudFdLSGlKeHRNQVdFNitXR0pqb0FBQUdaZWRWTApiUUFBQkFNQVJqQkVBaUE2MStQYVRkU0owSzJHVWk2RExLbmo0eEhmOUlZZ3Q0ZGxSRlpiNXRvQ3hnSWdGazU2ClRZdm1KUG1DWXFvZkUzZGRJT2hSay9GU2RUNExGeU80Z3ppMmRkWUFkUUR0UEV2VzZBYkNwS0lBVjl2TEpPSTQKQWQ5UkwrM0Voc1Z3RHlEZHR6NC80QUFBQVpsNTFWTThBQUFFQXdCR01FUUNJQVpOQVBuMFloVXlwS2w0VDBSYQpiV0FWOUduZGg0MXpKeGFZYVpKR0FaTnRBaUJacTl3L2txY1Jua0plMEI2L3NDNFJSWXZDeVFjdi9XQTlkRU5yCktod2JlVEFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBUlNBRW5IRm1DckZsNjhaZURFMXMrZjZQcjBObEx5N20Kd2JvRElPNFVFaWJENFZ0RWZyeFRSMmhudFpEWXhZd0YzTWEvLysxbkJnWUZocEUrSnV6SFlRZ1R0eWRPRGVDcAo5ZFJvNURlWkZCdWFxOE9QZXQzenJGcVlCMnZhY1NCTnZqaHp6UXgxeEZlcnllc2lJUUhpVjI0dWZDelpQemZSCmpSTzBWdGptTk9QSWlaME52cFdzczMycnA0UjhjRkluSFV5Qzh2N3h2aWRxdkZPSWhFSFpUS3FsUEhWTytybzcKVVRHN1dzUnU0bWNETDd5UVhqcDNyYVQwRHNiV1Q5WmdBTkVHLy85dGVjOWhLMmJhaGdvS0IyMmhMMVhhaUl5bgp6NXdIYXlUcDRHNkRQLzYzb0hxU3VGc3lHc1cwVnlUaW42OGl6bFkyMjk0UVdpdWlNbXpLTHc9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCi0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLQpNSUlGQlRDQ0F1MmdBd0lCQWdJUVdnRHlFdGpVdElEemtrRlg2aW1EQlRBTkJna3Foa2lHOXcwQkFRc0ZBREJQCk1Rc3dDUVlEVlFRR0V3SlZVekVwTUNjR0ExVUVDaE1nU1c1MFpYSnVaWFFnVTJWamRYSnBkSGtnVW1WelpXRnkKWTJnZ1IzSnZkWEF4RlRBVEJnTlZCQU1UREVsVFVrY2dVbTl2ZENCWU1UQWVGdzB5TkRBek1UTXdNREF3TURCYQpGdzB5TnpBek1USXlNelU1TlRsYU1ETXhDekFKQmdOVkJBWVRBbFZUTVJZd0ZBWURWUVFLRXcxTVpYUW5jeUJGCmJtTnllWEIwTVF3d0NnWURWUVFERXdOU01UTXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUsKQW9JQkFRQ2xaM0NOMEZhQlpCVVhZYzI1QnRTdEdaQ01KbEEzbUJaamtsVGIyY3lFQlpQczArd0lHNkJnVVVOSQpmU3ZIU0phZXRDM2FuY2duTzFlaG42dncxZzdVRGpES2I1dXgwZGFrblRJK1dFNDFiMFZZYUhFWC9EN1lYWUtnCkw3SlJiTEFhWGJoWnpqVmx5SXVocnhBMy8rT2NYY0pKRnpUL2pDdUxqZkM4Y1N5VERCMEZ4THJIemFySlhuelIKeVFIM25BUDIvQXBkOU5wNzV0dDJRbkRyOUUwaTJnQjNiOWJKWHhmOTJuVXVwVmNNOXVwY3R1QnpwV2pQb1hUaQpkWUorRUovQjlhTHJBZWs0c1FwRXpOUENpZlZKTllJS05MTWM2WWpDUjA2Q0RnbzI4RWRQaXZFcEJIWGF6ZUdhClhQOWVuWmlWdXBwRDBFcWlGd1VCQkREVE1yT1BBZ01CQUFHamdmZ3dnZlV3RGdZRFZSMFBBUUgvQkFRREFnR0cKTUIwR0ExVWRKUVFXTUJRR0NDc0dBUVVGQndNQ0JnZ3JCZ0VGQlFjREFUQVNCZ05WSFJNQkFmOEVDREFHQVFILwpBZ0VBTUIwR0ExVWREZ1FXQkJUbnE1OFBMRE9nVTlOZVQzaklzb1FPTzlhU016QWZCZ05WSFNNRUdEQVdnQlI1CnRGbm1lN2JsNUFGemdBaUl5QnBZOXVtYmJqQXlCZ2dyQmdFRkJRY0JBUVFtTUNRd0lnWUlLd1lCQlFVSE1BS0cKRm1oMGRIQTZMeTk0TVM1cExteGxibU55TG05eVp5OHdFd1lEVlIwZ0JBd3dDakFJQmdabmdRd0JBZ0V3SndZRApWUjBmQkNBd0hqQWNvQnFnR0lZV2FIUjBjRG92TDNneExtTXViR1Z1WTNJdWIzSm5MekFOQmdrcWhraUc5dzBCCkFRc0ZBQU9DQWdFQVVUZFlVcUVpbXpXN1Rick95cExxQ2ZMN1ZPd1lmL1E3OU9INWNITENaZWdnZlFoRGNvbmwKazdLZ2g4YjB2aSsvWHVXdTdDTjhuL1VQZWcxdm8zRyt0YVhpcnJ5dHRoUWluQUhHd2MvVWRiT3lnSmE5enVCYwpWeXFvSDNDWFRYREluVCs4YStjM2FFVk1KMlN0K3BTbjRlZCtXa0RwOGlqc2lqdkV5RndFNDdodWxXMEx0empnCjlmT1Y1UG1yZy96eFdiUnVMK2swREJESEVKZW5uQ3NBZW43YzM1UG14N2pwbUovSHRnUmhjbnoweWpTQnZ5SXcKNkwxUUl1cGtDdjJTQk9EVC94REQzZ2ZRUXlLdjZyb1Y0RzJFaGZFeUFzV3Btb2p4akNVQ0dpeWc5N0Z2RHRtLwpOSzJMU2M5bHliS3hCNzNJMitQMkczQ2FXcHZ2cEFpSENWdTMwalc4R0N4S2RmaHNYdG5JeTJpbXNrUXFWWjJtCjBQbXhvYmIyOFR1Y3I3eEJLN0N0d3ZQcmI3OW9zN3UyWFAzTzVmOWIvSDY2R055UnJnbFJYbHJZakkxb0dZTC8KZjRJMW4vU2d1c2RhNld2QTZDMTkwa3hqVTE1WTEybUhVNCtCeHlSOWN4MmhoR1M5ZkFqTVpLSnNzMjhxeHZ6NgpBeHU0Q2FEbVJOWnBLL3BRclhGMTd5WENYa21FV2d2U09FWnk2WjlwY2JMSVZFR2NrVi9pVmVxMEFPbzJwa2c5CnA0UVJJeTB0SzJkaVJFTkxTRjJLeXNGd2JZNkIyNkJGZUZzM3Yxc1lWUmhGVzluTGtPclFWcG9yQ1MwS3labWYKd1ZEODlxU1RsbmN0TGNabklhdmpLc0tVdTFuQTFpVTB5WU1kWWVwS1I3bFdibndoZHgzZXdvaz0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
     privateKey: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb3dJQkFBS0NBUUVBeG15MExLclRrTzc0S2oxWDNCL0d1THk0dFd3VlI1dW1Jb2tPendXN0x3MUFIeXF0CmFnRzFicU1pQWJINVhsVzJtc0tpSVN0bTNZUDR5b2IyU2RJWG11MzRxcSsrNnZXTjZmdEhqY3lvNFVZRGRjcisKb2g0dVZHcmh3V3RKbG1nbmlyU1VCeWJGL2NEallGcklYcDJRc2pEMjBJdWRhRnpxeWhvbEVqdU5TaEh6RlJ6agpJcDJSa3lQeEttZlp4RXF4QmVUdkhWWlJHeFBPZk82SjRNVFFSVzlXOEluM0pNazVHZDNQN0xPS1JCWkFVbkUzCmFyRGVtWGdHVTdvUVFwV28vdjdKSExsQndPSGh6cUUwZnhOdzFKNWdRaVg5bitYall4NVM2UC8zdFFMS0VZK04KM1ozZmNLTGlMZVIwTUl3ZEk0dDlKRnpJdzl3SWpBSGVGcC95cVFJREFRQUJBb0lCQUE5RE0wU3dTeCs5MGVibAoyd2s2aEgyWFBwbnQyMkVycnNhL1JoMVVjb1oyL1hTb1FyaUJzeVAwZGx3dEJXSmxNMnVLQnhDSUZ4eDQxejAwCnptTDFQdzJTdW1yZW84L00zWUtlNm0wVXpmU3QvdndqaGh5UU43NFVqcExqSHNEcitBYXFSeXlacGVjVDNDbUEKTWlOYytWRkxoT0NickpybmNzUGk2UEVURlpZWjBvejFldVpDbm1BT2F5b1hRTlpBcTRnanBvMUtZNUV6M3ZSMwpleTlXbi9SajloSG1tOUJPQ3BNbE5TQVJ5U2VUTXV2bG5xYkw0OXY1M1JhaFJTeUlFcEZ6RWJySmtaRmEvRndFCloxVDJoUTdWVUhTc3dMMWF6d2ZVZW9WaFdQSFJaUHVjTXNFUDg2YkFiUkV0ZzNTaW9nK1M5bkh0YzQ2ekphMFgKMjNGZ3ZJVUNnWUVBenRoOG42bnNSUHZNekJCdHZQQjJiMlIyRzZIWldpNmdXZ3d3eEIzSlYzdlR6d1dDM3BqQQpPSGZoQTQxTktHRVJLYUJlVE85TUdXNWFCdFFDaWFRQk5FNmU0cVg0bENvemk4eWgrckVRNlFwb1Z1YnlQUUxDCjZiRGg3bDR4TzExTlh1dlcvS2Q3bzRNWXBrN2NrOUlndkhsT01sRGdNOWNHaXR1QkFwYnNGNk1DZ1lFQTlaUHIKNHpMd3Z4TG9SZTY5TFExeFYwWXFZckh1WHhuN1N2dmR1Nm8xcDZqMVBmdjBlUXBLWGZhbm50dEQvWkluaTZVeQp1cmxzZEx2cVRBNHlpSnd1T1RIa0lhOVBkcVVHVHI3ZmhPVWZ1dHc0YUtCMTJnQUpBV0lGMVZiMjFwYmR3RFdvClpraytSL3FKWVRlZVhlWDAwRG5hcTJ3THQweEZjeDFCTXNpcllVTUNnWUVBa0hIeHBYWCtQcll3Y0JqUTZXNXEKNXFNYkwzUzQyaGRSZDFDb0JXeGZuQzRtM1owVnBPaTY0elFqK0YwR2tyb21TQkZyaVFKYS9DOXB3dmJ1eHJ1Mgo4NVlyc2s4QTVrY0tOQWcwM1dJbFV2Z25vUGdxRlowR0REZXZyc3dzU1M2QXgxYWVqVlZRTEFGeWgwRHZISE5TCjFRdEpKaTRBUTNOWGFFU2ROUGU3NjAwQ2dZQVJKNDRZeHR3dVhNSEE4TlppS1VnN2tua3ZmOEpvL2tXaGpVcUYKNjNQb0RGTmxTdzVlemlzM3VSMG9hYVNzTitOdlM5RHBYajZIUVFFeTR1TUF5L2dtb3FlTyt0SVFOYUxsS1V3dgoybG1IRWc4V3IrN0xsYWtMWWErS29aS0lsdTFTbWV6emlEWkRqT3EvMGNUTVJsMzlsYTBDd0g5cEJIanRlNk9zClNudytSUUtCZ0Ixbm5iMjEzNzljQXFYOVhUS3Z2b1hNNVRWSWJhUXhYdURFU0IrWHJ3S3dxSThsTEpwZHc0UG8KNWxWRXg2TDZ0TENCTFlhYXlvTmE1NFVRSmQ4Z1Izelc0ZFBkVXlHa3VFU0htT0RienZkUzBPV1pkUWJyNjl0UwpFMTJrNU9LTlhkMnU5YTJUa3kxSkg3MkhLUnFZbUYyYjVwakJ2RllFNHBYZ3VJeVVNVEN6Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg==
-# PostgreSQL configuration (如果使用子chart)
-postgresql:
-  enabled: true
-  auth:
-    username: quantanexus
-    password: quantanexus
-    database: quantanexus001
-  # 主数据库镜像配置
-  image:
-    registry: harbor.hi168.com/quantanexus
-    repository: postgresql
-    tag: 14.4.0-debian-11-r23
-    pullPolicy: IfNotPresent
-    # digest: ""
-  primary:
-    persistence:
-      enabled: true
-      # 必须空，才能匹配 hostPath PV
-      storageClass: ""
-      size: 40Gi
-    # 让 Pod 也落在同一块节点
-    nodeSelector:
-      kubernetes.io/hostname: com-calino-master-1
-    podSecurityContext:
-      enabled: true
-      fsGroup: 0 
-    containerSecurityContext:
-      enabled: true
-      runAsUser: 0
-    hostNetwork: true
-  hostPath:
-    # true=生成 hostPath PV；false=走集群默认动态供给
-    enabled: true
-    node: com-calino-master-1   # 目标节点
-    path: /var/lib/quantanexus/postgresql
-    storage: 40Gi
-  # Prometheus Exporter 镜像配置 (如果启用了 metrics)
-  metrics:
-    enabled: true
-    image:
-      registry: harbor.hi168.com/quantanexus
-      repository: postgres-exporter
-      tag: 0.10.1-debian-11-r24
-      pullPolicy: IfNotPresent
 
 redis:
   enabled: true
@@ -156,9 +157,9 @@ quantanexus:
 
   # Host aliases
   hostAliases:
-    - ip: "192.168.103.120"
-      hostnames:
-        - "harbor.hi168.com"
+    # - ip: "192.168.103.120"
+    #   hostnames:
+    #     - "harbor.hi168.com"
 
   # Storage paths
   storage:
@@ -224,7 +225,7 @@ abcExperimentService:
 
   # Authentication
   enableAuth: false
-  authUrlBase: "http://auth1.hi168.com:31069/vue/user/auth"
+  authUrlBase: ""
 
 # ABC WebShell configuration
 abcWebShell:
@@ -374,9 +375,9 @@ hwuaNodeService:
 
   # Host aliases
   hostAliases:
-    - ip: "192.168.103.120"
-      hostnames:
-        - "harbor.hi168.com"
+    # - ip: "192.168.103.120"
+    #   hostnames:
+    #     - "harbor.hi168.com"
 
   # Image pull secrets
   imagePullSecrets: "hi168-harbor-secret"
