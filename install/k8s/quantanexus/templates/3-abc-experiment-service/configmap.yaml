@@ -58,6 +58,7 @@ data:
     - name: admin
       user:
         client-certificate-data: {{ .Values.abcExperimentService.kubernetes.clientCertData }}
+        client-key-data: {{ .Values.abcExperimentService.kubernetes.clientKeyData }}
   pre-start.sh: |
     echo "abc-experiment-service pre-start.sh called"
     mkdir -p /etc/kubernetes/
