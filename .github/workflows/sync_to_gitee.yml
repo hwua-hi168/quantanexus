@@ -17,6 +17,9 @@ jobs:
     # 新增：修复目录所有权，必须在 checkout 之后立即执行
     - name: Fix dubious ownership
       run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+        ssh-add - <<< "${{ secrets.GITEE_SSH_PRIVATE_KEY }}"
         git config --global --add safe.directory /github/workspace
         # 验证配置是否生效
         git config --global --get safe.directory
