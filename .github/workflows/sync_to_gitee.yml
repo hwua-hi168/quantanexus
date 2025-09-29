@@ -14,6 +14,9 @@ jobs:
       with:
         fetch-depth: 0
         
+    - name: Fix dubious ownership
+      run: git config --global --add safe.directory /github/workspace
+        
     - name: Sync to Gitee
       uses: wearerequired/git-mirror-action@master
       env:
