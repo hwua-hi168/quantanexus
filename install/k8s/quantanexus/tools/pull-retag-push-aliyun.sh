@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# pull-retag-push.sh
+# pull-retag-push-aliyun.sh
 # 拉取 values.yaml 中所有镜像并转存到 registry.cn-hangzhou.aliyuncs.com
 
 set -euo pipefail
