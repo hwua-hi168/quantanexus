@@ -2,7 +2,8 @@
 global:
   namespace: abc-platform
   domainName: qntest002.hi168.com
-  registry: "harbor.hi168.com"
+  # registry: harbor.hi168.com
+  registry: registry.cn-hangzhou.aliyuncs.com
   masterNode: com-calino-master-1
   masterNodes: "com-calino-master-1,com-calino-master-2"
   workerNodes: "com-calino-worker-1"
@@ -26,7 +27,7 @@ postgresql:
     database: quantanexus001
   # 主数据库镜像配置
   image:
-    registry: harbor.hi168.com/quantanexus
+    registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
     repository: postgresql
     tag: 14.4.0-debian-11-r23
     pullPolicy: IfNotPresent
@@ -57,7 +58,7 @@ postgresql:
   metrics:
     enabled: true
     image:
-      registry: harbor.hi168.com/quantanexus
+      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
       repository: postgres-exporter
       tag: 0.10.1-debian-11-r24
       pullPolicy: IfNotPresent  
@@ -68,13 +69,13 @@ ingress-nginx:
   defaultBackend:
     enabled: true
     image:
-      registry: harbor.hi168.com/quantanexus
+      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
       image: defaultbackend-amd64
       tag: "1.5"
 
   controller:
     image:
-      repository: harbor.hi168.com/quantanexus/controller
+      repository: registry.cn-hangzhou.aliyuncs.com/quantanexus/controller
       tag: v1.1.2
       digest: ""
     kind: DaemonSet
@@ -134,7 +135,7 @@ quantanexus:
   # Quantanexus core application
   app:
     repository: "abc/quantanexus-basic"
-    tag: "1.0.2"
+    tag: "1.0.5"
     imagePullPolicy: "IfNotPresent"
 
   # Image pull secrets configuration
@@ -146,7 +147,7 @@ quantanexus:
   # Quantanexus manager (init container)
   manager:
     repository: "abc/quantanexus-mgr"
-    tag: "v8.3.7.3"
+    tag: "v8.3.7.5"
 
   # Nginx reverse proxy
   nginx:
@@ -158,7 +159,7 @@ quantanexus:
     # Frontend (Vue) init container
     frontend:
       repository: "abc/hi168-vue"
-      tag: "v8.3.7.qn001v11"
+      tag: "v8.3.7.qn5"
       env:
         type: "hi168slot"
         moduleList: "basic"
