@@ -1,5 +1,0 @@
-- name: Test SSH connection to GitHub
-  run: |
-    ssh -vT git@github.com
-    # 查看 SSH 密钥加载情况
-    ssh-add -l
