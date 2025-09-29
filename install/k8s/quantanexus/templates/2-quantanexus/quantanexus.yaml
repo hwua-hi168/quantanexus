@@ -23,14 +23,15 @@ spec:
         kubernetes.io/hostname: {{ .Values.global.masterNode }}
       initContainers:
         - name: data-init-container
-          image: {{ .Values.quantanexus.manager.image }}:{{ .Values.quantanexus.manager.tag }}
+          image: {{ .Values.global.registry }}/{{ .Values.quantanexus.manager.repository }}:{{ .Values.quantanexus.manager.tag }}
           command: [ "/entrypoint.sh" ]
           volumeMounts:
             - name: quantanexus-addons
               mountPath: /data/quantanexus/hwua
       containers:
         - name: quantanexus
-          image: {{ .Values.quantanexus.app.image }}:{{ .Values.quantanexus.app.tag }}
+          image: {{ .Values.global.registry }}/{{ .Values.quantanexus.app.repository }}:{{ .Values.quantanexus.app.tag }}
+
           imagePullPolicy: {{ .Values.quantanexus.app.imagePullPolicy }}
           command: [ "/entrypoint.sh" ]
           livenessProbe:
