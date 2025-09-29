@@ -21,7 +21,7 @@ spec:
         kubernetes.io/hostname: {{ .Values.global.masterNode }}
       initContainers:
       - name: data-init-container
-        image: {{ .Values.quantanexus.nginx.frontend.image }}:{{ .Values.quantanexus.nginx.frontend.tag }}
+        image: {{ .Values.global.registry }}/{{ .Values.quantanexus.nginx.frontend.repository }}:{{ .Values.quantanexus.nginx.frontend.tag }}
         command: ["/entrypoint.sh"]
         env:
         - name: HI168_ENV_TYPE
@@ -41,7 +41,7 @@ spec:
           mountPath: /wwwroot
       containers:
       - name: nginx
-        image: {{ .Values.quantanexus.nginx.image }}:{{ .Values.quantanexus.nginx.tag }}
+        image: {{ .Values.global.registry }}/{{ .Values.quantanexus.nginx.repository }}:{{ .Values.quantanexus.nginx.tag }}
         imagePullPolicy: {{ .Values.quantanexus.app.imagePullPolicy }}
         ports:
         - containerPort: {{ .Values.quantanexus.nginx.port }}
