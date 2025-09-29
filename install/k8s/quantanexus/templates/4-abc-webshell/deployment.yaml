@@ -20,7 +20,8 @@ spec:
         {{- toYaml .Values.abcWebShell.nodeSelector | nindent 8 }}
       containers:
         - name: abc-webshell
-          image: "{{ .Values.abcWebShell.image.repository }}:{{ .Values.abcWebShell.image.tag }}"
+          # 统一使用 global.registry/repository:tag 格式
+          image: "{{ .Values.global.registry }}/{{ .Values.abcWebShell.image.repository }}:{{ .Values.abcWebShell.image.tag }}"
           imagePullPolicy: {{ .Values.abcWebShell.image.pullPolicy }}
           volumeMounts:
             - name: kube-webshell-conf

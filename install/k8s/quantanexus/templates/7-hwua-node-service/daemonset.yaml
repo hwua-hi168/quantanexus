@@ -19,7 +19,7 @@ spec:
       {{- end }}
       containers:
       - name: hwua-node-service-container
-        image: "{{ .Values.hwuaNodeService.image.repository }}:{{ .Values.hwuaNodeService.image.tag }}"
+        image: "{{ .Values.global.registry }}/{{ .Values.hwuaNodeService.image.repository }}:{{ .Values.hwuaNodeService.image.tag }}"
         imagePullPolicy: {{ .Values.hwuaNodeService.image.pullPolicy }}
         command: [ "/entrypoint.sh" ]
         volumeMounts:

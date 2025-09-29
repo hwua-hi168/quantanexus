@@ -2,6 +2,7 @@
 global:
   namespace: abc-platform
   domainName: qntest002.hi168.com
+  registry: "harbor.hi168.com"
   masterNode: com-calino-master-1
   masterNodes: "com-calino-master-1,com-calino-master-2"
   workerNodes: "com-calino-worker-1"
@@ -118,6 +119,9 @@ redis:
   auth:
     password: hi168pass
   path: /var/lib/quantanexus/redis-single
+  repository: "quantanexus/redis"
+  tag: "7.2.4"
+  imagePullPolicy: "IfNotPresent"
 
 quantanexus:
   enabled: true
@@ -129,7 +133,7 @@ quantanexus:
     workers: 16
   # Quantanexus core application
   app:
-    image: "harbor.hi168.com/abc/quantanexus-basic"
+    repository: "abc/quantanexus-basic"
     tag: "1.0.2"
     imagePullPolicy: "IfNotPresent"
 
@@ -141,19 +145,19 @@ quantanexus:
 
   # Quantanexus manager (init container)
   manager:
-    image: "harbor.hi168.com/abc/quantanexus-mgr"
+    repository: "abc/quantanexus-mgr"
     tag: "v8.3.7.3"
 
   # Nginx reverse proxy
   nginx:
     enabled: true
-    image: "registry.cn-hangzhou.aliyuncs.com/hwua_namespace/nginx"
+    repository: "quantanexus/nginx"
     tag: "reverse"
     port: 8443
 
     # Frontend (Vue) init container
     frontend:
-      image: "harbor.hi168.com/abc/hi168-vue"
+      repository: "abc/hi168-vue"
       tag: "v8.3.7.qn001v11"
       env:
         type: "hi168slot"
@@ -194,7 +198,7 @@ abcExperimentService:
 
   # Application settings
   app:
-    image: "harbor.hi168.com/quantanexus/abc-experiment-service"
+    repository: "quantanexus/abc-experiment-service"
     tag: "v1.3.2"
     imagePullPolicy: "IfNotPresent"
 
@@ -238,7 +242,7 @@ abcWebShell:
 
   # Image configuration
   image:
-    repository: harbor.hi168.com/quantanexus/abc-webshell
+    repository: quantanexus/abc-webshell
     tag: v2.2.4.8
     pullPolicy: IfNotPresent
 
@@ -298,7 +302,7 @@ abcUploader:
 
   # Image configuration
   image:
-    repository: harbor.hi168.com/quantanexus/abc-uploader
+    repository: quantanexus/abc-uploader
     tag: v1.0.0
     pullPolicy: IfNotPresent
 
@@ -361,7 +365,7 @@ hwuaNodeService:
 
   # Image configuration
   image:
-    repository: harbor.hi168.com/quantanexus/hwua-node-service
+    repository: quantanexus/hwua-node-service
     tag: 0.0.4
     pullPolicy: IfNotPresent
 

@@ -22,7 +22,8 @@ spec:
         kubernetes.io/hostname: {{ .Values.global.masterNode }}
       containers:
         - name: redis-single
-          image: redis:7.2.4
+          # image: {{ .Values.global.registry }}/{{ .Values.redis.repository }}:{{ .Values.redis.tag }}
+          image: {{ .Values.global.registry }}/{{ .Values.redis.repository }}:{{ .Values.redis.tag }}
           imagePullPolicy: IfNotPresent
           command: [ "redis-server" ]
           args: [ "/etc/redis/redis.conf" ]

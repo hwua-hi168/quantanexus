@@ -20,7 +20,7 @@ spec:
         {{- toYaml .Values.abcUploader.nodeSelector | nindent 8 }}
       containers:
         - name: abc-uploader
-          image: "{{ .Values.abcUploader.image.repository }}:{{ .Values.abcUploader.image.tag }}"
+          image: "{{ .Values.global.registry }}/{{ .Values.abcUploader.image.repository }}:{{ .Values.abcUploader.image.tag }}"
           imagePullPolicy: {{ .Values.abcUploader.image.pullPolicy }}
           volumeMounts:
             - name: kube-uploader-conf
