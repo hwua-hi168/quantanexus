@@ -1,6 +1,6 @@
 ### 安装Chart
 
-1. 添加必要的仓库（如果使用子chart）:
+1. 添加必要的仓库:
 ```bash
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
