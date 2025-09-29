@@ -2,8 +2,11 @@
 global:
   namespace: abc-platform
   domainName: qntest002.hi168.com
-  # registry: harbor.hi168.com
-  registry: registry.cn-hangzhou.aliyuncs.com
+  # registry: harbor.hi168.com/quantanexus
+  # In China, please use aliyuncs
+  registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+  # outside of China, please use docker.io
+  # registry: docker.io/hwua
   masterNode: com-calino-master-1
   masterNodes: "com-calino-master-1,com-calino-master-2"
   workerNodes: "com-calino-worker-1"
@@ -120,7 +123,7 @@ redis:
   auth:
     password: hi168pass
   path: /var/lib/quantanexus/redis-single
-  repository: "quantanexus/redis"
+  repository: "redis"
   tag: "7.2.4"
   imagePullPolicy: "IfNotPresent"
 
@@ -134,7 +137,7 @@ quantanexus:
     workers: 16
   # Quantanexus core application
   app:
-    repository: "quantanexus/quantanexus-basic"
+    repository: "quantanexus-basic"
     tag: "1.0.5"
     imagePullPolicy: "IfNotPresent"
 
@@ -146,19 +149,19 @@ quantanexus:
 
   # Quantanexus manager (init container)
   manager:
-    repository: "quantanexus/quantanexus-mgr"
+    repository: "quantanexus-mgr"
     tag: "v8.3.7.5"
 
   # Nginx reverse proxy
   nginx:
     enabled: true
-    repository: "quantanexus/nginx"
+    repository: "nginx"
     tag: "reverse"
     port: 8443
 
     # Frontend (Vue) init container
     frontend:
-      repository: "quantanexus/hi168-vue"
+      repository: "hi168-vue"
       tag: "v8.3.7.qn5"
       env:
         type: "hi168slot"
@@ -199,7 +202,7 @@ abcExperimentService:
 
   # Application settings
   app:
-    repository: "quantanexus/abc-experiment-service"
+    repository: "abc-experiment-service"
     tag: "v1.3.2"
     imagePullPolicy: "IfNotPresent"
 
@@ -243,7 +246,7 @@ abcWebShell:
 
   # Image configuration
   image:
-    repository: quantanexus/abc-webshell
+    repository: abc-webshell
     tag: v2.2.4.8
     pullPolicy: IfNotPresent
 
@@ -303,7 +306,7 @@ abcUploader:
 
   # Image configuration
   image:
-    repository: quantanexus/abc-uploader
+    repository: abc-uploader
     tag: v1.0.0
     pullPolicy: IfNotPresent
 
@@ -366,7 +369,7 @@ hwuaNodeService:
 
   # Image configuration
   image:
-    repository: quantanexus/hwua-node-service
+    repository: hwua-node-service
     tag: 0.0.4
     pullPolicy: IfNotPresent
 
