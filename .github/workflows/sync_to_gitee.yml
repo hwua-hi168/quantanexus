@@ -19,5 +19,5 @@ jobs:
       env:
         SSH_PRIVATE_KEY: ${{ secrets.GITEE_SSH_PRIVATE_KEY }}
       with:
-        source-repo: "git@github.com:username/repo.git"
-        destination-repo: "git@gitee.com:username/repo.git"
+        source-repo: "git@github.com:hwua-hi168/quantanexus.git"
+        destination-repo: "git@gitee.com:hwua/quantanexus.git"
