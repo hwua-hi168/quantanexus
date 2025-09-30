@@ -14,10 +14,20 @@ jobs:
       with:
         fetch-depth: 0
         
+    # 新增：修复目录所有权，必须在 checkout 之后立即执行
+    - name: Fix dubious ownership
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+        ssh-add - <<< "${{ secrets.GITEE_SSH_PRIVATE_KEY }}"
+        git config --global --add safe.directory /github/workspace
+        # 验证配置是否生效
+        git config --global --get safe.directory
+        
     - name: Sync to Gitee
       uses: wearerequired/git-mirror-action@master
       env:
         SSH_PRIVATE_KEY: ${{ secrets.GITEE_SSH_PRIVATE_KEY }}
       with:
-        source-repo: "git@github.com:username/repo.git"
-        destination-repo: "git@gitee.com:username/repo.git"
+        source-repo: "git@github.com:hwua-hi168/quantanexus.git"
+        destination-repo: "git@gitee.com:hwua/quantanexus.git"
