@@ -1,0 +1,150 @@
+# 本文件是 argocd + qn + longhorn+ harbor的一键部署测试环境
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: quantanexus
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://helm.hi168.com/charts/
+    chart: quantanexus
+    targetRevision: 1.0.0
+    helm:
+      values: |
+        {{- include "quantanexus.values" . | nindent 8 }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: quantanexus
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: harbor
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://helm.goharbor.io
+    chart: harbor
+    targetRevision: 1.14.0
+    helm:
+      values: |
+        expose:
+          type: ingress
+          tls:
+            enabled: true
+            certSource: secret
+            secret:
+              name: harbor-tls
+          ingress:
+            hosts:
+              core: harbor.{{ .Values.global.domainName }}
+        externalURL: https://harbor.{{ .Values.global.domainName }}
+        persistence:
+          storageClass: longhorn  # 使用Longhorn存储类
+          persistentVolumeClaim:
+            registry:
+              size: 100Gi
+            chartmuseum:
+              size: 5Gi
+            jobservice:
+              size: 1Gi
+            database:
+              size: 10Gi
+            redis:
+              size: 1Gi
+        harborAdminPassword: "Harbor12345"  # 建议通过secret管理
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: harbor
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: longhorn
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://charts.longhorn.io
+    chart: longhorn
+    targetRevision: 1.6.0
+    helm:
+      values: |
+        ingress:
+          enabled: true
+          hostname: longhorn.{{ .Values.global.domainName }}
+          tls:
+            enabled: true
+            secretName: longhorn-tls
+        defaultSettings:
+          defaultDataPath: /var/lib/longhorn/
+          backupTarget: ""
+          backupTargetCredentialSecret: ""
+          createDefaultDiskLabeledNodes: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: longhorn-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+# 配置Longhorn为默认StorageClass
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: set-longhorn-default-sc
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://helm.hi168.com/charts/  # 可替换为你的Git仓库
+    targetRevision: HEAD
+    path: storageclass  # 建议在Git仓库中创建此目录存放storageclass配置
+    plugin:
+      name: kustomize
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    hooks:
+      - repoURL: https://helm.hi168.com/charts/
+        path: storageclass
+        targetRevision: HEAD
+        hook: PostSync
+        manifest: |
+          apiVersion: storage.k8s.io/v1
+          kind: StorageClass
+          metadata:
+            name: longhorn
+            annotations:
+              storageclass.kubernetes.io/is-default-class: "true"
+          provisioner: driver.longhorn.io
+          allowVolumeExpansion: true
+          reclaimPolicy: Delete
+          volumeBindingMode: Immediate
+          parameters:
+            numberOfReplicas: "3"
+            staleReplicaTimeout: "30"
+            fromBackup: ""
+
