@@ -1,0 +1,46 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gpu-operator
+  namespace: argocd          # Argo CD 自身命名空间
+spec:
+  project: default
+
+  # 1. 指定 Helm 仓库源
+  source:
+    repoURL: https://helm.ngc.nvidia.com/nvidia
+    chart: gpu-operator
+    targetRevision: v25.3.4   # 可改成最新版本
+    helm:
+      releaseName: gpu-operator
+      values: |
+        # ---- 常用自定义 ----
+        # 节点已预装驱动则关闭驱动容器
+        # driver:
+        #   enabled: false
+        # toolkit:
+        #   enabled: false
+        # MIG 场景示例
+        # mig:
+        #   strategy: single
+        # ---------------------
+        operator:
+          defaultRuntime: containerd   # 与 containerd 集成
+        daemonsets:
+          labels:
+            app.kubernetes.io/part-of: nvidia-gpu
+
+  # 2. 目标集群（本地当前集群）
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: gpu-operator
+
+  # 3. 同步策略：手动/自动任选
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true   # 自动建 ns
+    retry:
+      limit: 5
