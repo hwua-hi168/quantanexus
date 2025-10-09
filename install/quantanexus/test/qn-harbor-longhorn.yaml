@@ -96,6 +96,11 @@ spec:
           backupTarget: ""
           backupTargetCredentialSecret: ""
           createDefaultDiskLabeledNodes: true
+        persistence:
+          defaultClass: true          # ★ 设为默认 StorageClass
+          defaultClassReplicaCount: 2 # 每个卷副本数
+          reclaimPolicy: Delete       # PVC 删除后 PV 也删除
+          defaultFsType: ext4
   destination:
     server: https://kubernetes.default.svc
     namespace: longhorn-system
@@ -105,46 +110,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
----
-# 配置Longhorn为默认StorageClass
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: set-longhorn-default-sc
-  namespace: argocd
-spec:
-  project: default
-  source:
-    repoURL: https://helm.hi168.com/charts/  # 可替换为你的Git仓库
-    targetRevision: HEAD
-    path: storageclass  # 建议在Git仓库中创建此目录存放storageclass配置
-    plugin:
-      name: kustomize
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: kube-system
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    hooks:
-      - repoURL: https://helm.hi168.com/charts/
-        path: storageclass
-        targetRevision: HEAD
-        hook: PostSync
-        manifest: |
-          apiVersion: storage.k8s.io/v1
-          kind: StorageClass
-          metadata:
-            name: longhorn
-            annotations:
-              storageclass.kubernetes.io/is-default-class: "true"
-          provisioner: driver.longhorn.io
-          allowVolumeExpansion: true
-          reclaimPolicy: Delete
-          volumeBindingMode: Immediate
-          parameters:
-            numberOfReplicas: "3"
-            staleReplicaTimeout: "30"
-            fromBackup: ""
-
