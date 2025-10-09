@@ -1,0 +1,4 @@
+# local test scripts, do not commit 
+install_test.sh
+uninstall_test.sh
+upgrade_test.sh

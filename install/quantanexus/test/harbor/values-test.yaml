@@ -1,0 +1,51 @@
+# ========== 暴露方式 & 域名 ==========
+expose:
+  type: ingress
+  tls:
+    enabled: true
+    certSource: auto          # Helm 自签名
+    auto:
+      enabled: true
+      commonName: harbor.qn.io   # 证书主体
+  ingress:
+    className: nginx          # 指定 nginx 控制器
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"   # 取消上传大小限制
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    hosts:
+      core: harbor.qn.io      # 唯一入口域名
+# 外部访问地址（与上面一致）
+externalURL: https://harbor.qn.io
+
+# ========== 管理员密码 ==========
+harborAdminPassword: admin
+
+# ========== 持久化：全部 Longhorn ==========
+persistence:
+  enabled: true
+  persistentVolumeClaim:
+    registry:
+      storageClass: longhorn
+      accessMode: ReadWriteOnce
+      size: 15Gi
+    jobservice:
+      storageClass: longhorn
+      accessMode: ReadWriteOnce
+      size: 10Gi
+    database:
+      storageClass: longhorn
+      accessMode: ReadWriteOnce
+      size: 10Gi
+    redis:
+      storageClass: longhorn
+      accessMode: ReadWriteOnce
+      size: 5Gi
+
+# ========== 数据库初始化权限 ==========
+database:
+  internal:
+    initContainer:
+      permissions:
+        enabled: true
