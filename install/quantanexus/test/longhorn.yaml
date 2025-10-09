@@ -18,6 +18,7 @@ spec:
         #   tls:
         #     enabled: false
         #     # secretName: longhorn-tls
+        namespace: longhorn-system
         defaultSettings:
           defaultDataPath: /var/lib/longhorn/
           backupTarget: ""
