@@ -1,2 +1,2 @@
-helm uninstall longhorn --namespace longhorn-system 
+helm uninstall harbor --namespace harbor 
     
