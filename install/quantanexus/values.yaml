@@ -251,7 +251,6 @@ abcExperimentService:
 
 # ABC WebShell configuration
 abcWebShell:
-  enabled: true
   replicaCount: 1
 
   # Image configuration
