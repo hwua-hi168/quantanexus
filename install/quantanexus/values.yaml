@@ -66,42 +66,7 @@ postgresql:
       tag: 0.10.1-debian-11-r24
       pullPolicy: IfNotPresent  
 
-# Ingress Nginx configuration
-ingress-nginx:
-  enabled: false
-  className: "nginx"
-  defaultBackend:
-    enabled: true
-    image:
-      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
-      image: defaultbackend-amd64
-      tag: "1.5"
 
-  controller:
-    image:
-      repository: registry.cn-hangzhou.aliyuncs.com/quantanexus/controller
-      tag: v1.1.2
-      digest: ""
-    kind: DaemonSet
-    # nodeSelector:
-    #   kubernetes.io/hostname: "com-cilium-master-2"
-    # service:
-    #   externalTrafficPolicy: Local
-    hostNetwork: true
-    # 启用 Webhooks (推荐)
-    admissionWebhooks:
-      enabled: true
-      patch:
-        enabled: true
-        image:
-          registry: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/k8s.gcr.io
-          image: ingress-nginx/kube-webhook-certgen
-          tag: v1.1.1
-          digest: ""
-    # 额外的 args, 如果需要
-    extraArgs:
-      enable-ssl-passthrough: true
-      default-ssl-certificate: "abc-platform/abc-tls"
 
 ingress:
   enabled: true

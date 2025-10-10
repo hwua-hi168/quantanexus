@@ -1,4 +1,6 @@
+# Ingress Nginx configuration
 ingress-nginx:
+  enabled: false
   className: "nginx"
   defaultBackend:
     enabled: true
@@ -13,6 +15,12 @@ ingress-nginx:
       tag: v1.1.2
       digest: ""
     kind: DaemonSet
+    tolerations:                 # 让 master 也调度
+    - key: "node-role.kubernetes.io/master"
+      operator: "Exists"
+      effect: "NoSchedule"
+    nodeSelector:                # 仅调度到打标签节点
+      ingress: "true"
     # nodeSelector:
     #   kubernetes.io/hostname: "com-cilium-master-2"
     # service:
@@ -31,4 +39,4 @@ ingress-nginx:
     # 额外的 args, 如果需要
     extraArgs:
       enable-ssl-passthrough: true
-      default-ssl-certificate: "abc-platform/abc-tls"
+      default-ssl-certificate: "ingress-nginx/default-tls"
