@@ -173,11 +173,22 @@ quantanexus:
     #   hostnames:
     #     - "harbor.hi168.com"
 
-  # Storage paths
+  # Storage paths and PVC configuration
   storage:
+    # 新增开关: 控制是否使用 hostPath 卷。false 表示使用 PVC (Longhorn 自动分配)
+    hostPathEnabled: false 
+    
+    # 路径配置 (hostPathEnabled: true 时使用)
     quantanexusData: "/var/lib/quantanexus/quantanexus"
     quantanexusMisc: "/var/lib/quantanexus/quantanexus-misc"
     runtime: "/mnt/quantanexus/runtime"
+    
+    # PVC 大小配置 (hostPathEnabled: false 时使用)
+    # 请根据您的实际需求调整这些存储大小
+    pvcSizes:
+      runtime: 30Gi  # QuantaNexus 运行时卷大小
+      data: 40Gi     # QuantaNexus 数据卷大小
+      misc: 20Gi     # QuantaNexus 杂项卷大小    
 
   # Environment variables
   env:

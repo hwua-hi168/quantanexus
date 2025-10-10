@@ -85,21 +85,44 @@ spec:
             path: /dev/mem
         - name: quantanexus-addons
           emptyDir: {}
+        
+        # --- quantanexus-runtime 卷定义 (动态切换) ---
         - name: quantanexus-runtime
+{{- if .Values.quantanexus.storage.hostPathEnabled }}
           hostPath:
             path: {{ .Values.quantanexus.storage.runtime }}
             type: DirectoryOrCreate
+{{- else }}
+          persistentVolumeClaim:
+            claimName: {{ include "abc-platform.fullname" . }}-quantanexus-runtime-pvc 
+{{- end }}
+
         - name: quantanexus-config
           configMap:
             name: {{ include "abc-platform.fullname" . }}-config
+            
+        # --- quantanexus-data 卷定义 (动态切换) ---
         - name: quantanexus-data
+{{- if .Values.quantanexus.storage.hostPathEnabled }}
           hostPath:
             path: {{ .Values.quantanexus.storage.quantanexusData }}
             type: DirectoryOrCreate
+{{- else }}
+          persistentVolumeClaim:
+            claimName: {{ include "abc-platform.fullname" . }}-quantanexus-data-pvc
+{{- end }}
+
+        # --- quantanexus-misc 卷定义 (动态切换) ---
         - name: quantanexus-misc
+{{- if .Values.quantanexus.storage.hostPathEnabled }}
           hostPath:
             path: {{ .Values.quantanexus.storage.quantanexusMisc }}
             type: DirectoryOrCreate
+{{- else }}
+          persistentVolumeClaim:
+            claimName: {{ include "abc-platform.fullname" . }}-quantanexus-misc-pvc
+{{- end }}
+
 ---
 apiVersion: v1
 kind: Service
