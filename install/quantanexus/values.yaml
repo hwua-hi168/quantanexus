@@ -74,7 +74,14 @@ ingress:
 
 redis:
   auth:
-    password: hi168pass
+    # 密码设置 - 如果为空则自动生成
+    password: ""  # 改为空，自动生成
+    _password: "" # 内部缓存字段，不要手动设置
+    # 新增：使用现有 Secret
+    existingSecret: ""
+    # 新增：Secret 中的键名映射
+    secretKeys:
+      passwordKey: "redis-password"
   path: /var/lib/quantanexus/redis-single
   repository: "redis"
   tag: "7.2.4"
