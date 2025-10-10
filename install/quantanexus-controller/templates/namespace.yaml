@@ -1,0 +1,12 @@
+{{- if .Values.global.createNamespace }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.global.namespace | default "abc-platform" }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-10"
+    # "helm.sh/resource-policy": keep
+  labels:
+    app: abc-platform
+{{- end }}

@@ -1,0 +1,46 @@
+{{- if .Values.hwuaNodeService.enabled  }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: hwua-node-service-daemonset
+  namespace: {{ .Values.global.namespace | default "abc-platform" }}
+spec:
+  selector:
+    matchLabels:
+      app: hwua-node-service
+  template:
+    metadata:
+      labels:
+        app: hwua-node-service
+    spec:
+      {{- if .Values.hwuaNodeService.hostAliases }}
+      hostAliases:
+        {{- toYaml .Values.hwuaNodeService.hostAliases | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: hwua-node-service-container
+        image: "{{ .Values.global.registry }}/{{ .Values.hwuaNodeService.image.repository }}:{{ .Values.hwuaNodeService.image.tag }}"
+        imagePullPolicy: {{ .Values.hwuaNodeService.image.pullPolicy }}
+        command: [ "/entrypoint.sh" ]
+        volumeMounts:
+        - mountPath: /etc/hwua-node-service/conf.toml
+          subPath: conf.toml
+          name: config-volume
+        - mountPath: /run/containerd/containerd.sock
+          name: containerd-sock
+      {{- if .Values.hwuaNodeService.imagePullSecrets }}
+      imagePullSecrets:
+      - name: {{ .Values.hwuaNodeService.imagePullSecrets }}
+      {{- end }}
+      volumes:
+      - name: config-volume
+        configMap:
+          name: hwua-node-service-config
+          items:
+          - key: conf.toml
+            path: conf.toml
+      - name: containerd-sock
+        hostPath:
+          path: /run/containerd/containerd.sock
+          type: Socket
+{{- end }}

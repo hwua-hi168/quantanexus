@@ -1,0 +1,18 @@
+{{- if .Values.abcWebShell.enabled  }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: abc-webshell
+  namespace: {{ .Values.global.namespace | default "abc-platform" }}
+  labels:
+    name: abc-webshell
+spec:
+  type: {{ .Values.abcWebShell.service.type }}
+  ports:
+    - port: {{ .Values.abcWebShell.service.port }}
+      targetPort: {{ .Values.abcWebShell.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    app: abc-webshell
+{{- end }}

@@ -1,0 +1,142 @@
+{{- if .Values.quantanexus.enabled  }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-reverse-proxy-config
+  namespace: {{ .Values.global.namespace }}
+data:
+  default.conf: |
+    proxy_cache_path /tmp/nginx_cache levels=1:2 keys_zone=imgcache:400m max_size=10g inactive=60m use_temp_path=off;
+
+    # 启用 Gzip 压缩, 这里是中间层， 不要启用
+    # gzip on;
+    # gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+    server {
+      listen {{ .Values.quantanexus.nginx.port }};
+
+      # 设置客户端请求的最大体大小
+      client_max_body_size 200M;
+
+      # 设置代理缓冲区大小
+      proxy_buffer_size 32k;
+      proxy_buffers 8 64k;
+
+      # 设置代理连接超时时间和代理读取超时时间
+      proxy_connect_timeout 6000s;
+      proxy_read_timeout 6000s;
+
+      index index.html index.htm;
+      charset utf-8;
+
+      root /wwwroot/;  # 统一设置 root 指令
+      # 我要把/web-static/请求路径下的所有请求映射到文件系统/wwwroot/web-static/目录下, nginx要怎么配置呢?
+      location ^~ /web-static/ {
+        try_files $uri $uri/ =404;  # 确保文件存在，否则返回 404
+      }
+      location ^~ /help/ {
+        try_files $uri $uri/ =404;  # 确保文件存在，否则返回 404
+      }
+      location ^~ /theme/ {
+        try_files $uri $uri/ =404;  # 确保文件存在，否则返回 404
+      }
+      location ^~ /wall/ {
+        try_files $uri $uri/ =404;  # 确保文件存在，否则返回 404
+      }
+      # 我要把/favicon.ico请求路径下的所有请求映射到文件系统/wwwroot/favicon.ico目录下, nginx要怎么配置呢?
+      location ^~ /favicon.ico {
+        try_files $uri $uri/ =404;  # 确保文件存在，否则返回 404
+      }
+      location ^~ /hwualogo.jpg {
+        try_files $uri $uri/ =404;  # 确保文件存在，否则返回 404
+      }
+      location ^~ /index.html {
+        try_files $uri $uri/ =404;  # 确保文件存在，否则返回 404
+      }
+
+      # 内部重写 /web/image?... 到 /web/image/?...
+      location /web/image {
+        if ($request_uri ~* ^/web/image\?(.*)) {
+          rewrite ^ /web/image/?$1 break;
+        }
+
+        # 缓存 /web/image/ 路径下的所有内容
+        log_not_found off;
+        access_log off;
+        proxy_pass http://{{ include "abc-platform.fullname" . }}:8069;
+
+        proxy_buffering on;
+        proxy_ignore_headers X-Accel-Expires Expires Cache-Control Set-Cookie;
+        proxy_cache imgcache;
+        proxy_cache_key "$scheme$proxy_host$request_uri";
+        proxy_cache_valid 200 60m;
+        add_header X-Cache-Status $upstream_cache_status;
+        # 移除 Set-Cookie 响应头
+        proxy_hide_header Set-Cookie;
+      }
+
+      location /hwua/ {
+          rewrite ^/hwua/(.*)$ /odoo/$1 break;
+          proxy_pass http://{{ include "abc-platform.fullname" . }}:8069;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+      # 缓存静态资源
+      location ~* ^.+\.(js|css|ico|gif|jpg|jpeg|png|ttf|woff2)$ {
+        log_not_found off;
+        access_log off;
+        expires 7d;
+        proxy_pass http://{{ include "abc-platform.fullname" . }}:8069;
+
+        proxy_buffering on;
+        proxy_ignore_headers X-Accel-Expires Expires Cache-Control Set-Cookie;
+        proxy_cache imgcache;
+        proxy_cache_key "$scheme$proxy_host$request_uri";
+        proxy_cache_valid 200 302 60m;
+        proxy_cache_valid 404 1m;
+        add_header X-Cache-Status $upstream_cache_status;
+        # 移除 Set-Cookie 响应头
+        proxy_hide_header Set-Cookie;
+      }
+
+      # 缓存 /hw_system/static/ 路径下的所有内容
+      location /hw_system/static/ {
+        log_not_found off;
+        access_log off;
+        # expires 7d;
+        proxy_pass http://{{ include "abc-platform.fullname" . }}:8069;
+
+        proxy_buffering on;
+        proxy_ignore_headers X-Accel-Expires Expires Cache-Control Set-Cookie;
+        proxy_cache imgcache;
+        proxy_cache_key "$scheme$proxy_host$request_uri";
+        proxy_cache_valid 200 302 60m;
+        proxy_cache_valid 404 1m;
+        add_header X-Cache-Status $upstream_cache_status;
+        # 移除 Set-Cookie 响应头
+        proxy_hide_header Set-Cookie;
+      }
+
+      location / {
+        try_files $uri $uri/ @proxy;
+
+        # 禁用缓存
+        proxy_no_cache 1;
+        proxy_cache_bypass 1;
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+        add_header Pragma "no-cache";
+        add_header Expires 0;
+      }
+
+      location @proxy {
+        proxy_pass http://{{ include "abc-platform.fullname" . }}:8069;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+    }
+{{- end }}
