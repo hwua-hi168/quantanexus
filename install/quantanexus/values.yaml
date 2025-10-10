@@ -42,8 +42,8 @@ postgresql:
       storageClass: ""
       size: 40Gi
     # 让 Pod 也落在同一块节点
-    nodeSelector:
-      kubernetes.io/hostname: com-calino-master-1
+    # nodeSelector:
+    #   kubernetes.io/hostname: com-calino-master-1
     podSecurityContext:
       enabled: true
       fsGroup: 0 
@@ -53,10 +53,10 @@ postgresql:
     hostNetwork: true
   hostPath:
     # true=生成 hostPath PV；false=走集群默认动态供给
-    enabled: true
-    node: com-calino-master-1   # 目标节点
-    path: /var/lib/quantanexus/postgresql
-    storage: 40Gi
+    enabled: false
+    # node: com-calino-master-1   # 目标节点
+    # path: /var/lib/quantanexus/postgresql
+    # storage: 40Gi
   # Prometheus Exporter 镜像配置 (如果启用了 metrics)
   metrics:
     enabled: true
