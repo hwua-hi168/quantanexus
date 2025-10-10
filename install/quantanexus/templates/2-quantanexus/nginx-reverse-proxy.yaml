@@ -1,5 +1,4 @@
-{{- if .Values.quantanexus.enabled }}
-{{- if .Values.quantanexus.nginx.enabled }}
+{{- if .Values.components.quantanexus  }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -56,5 +55,4 @@ spec:
           name: nginx-reverse-proxy-config
       - name: app-code
         emptyDir: {}
-{{- end }}
 {{- end }}

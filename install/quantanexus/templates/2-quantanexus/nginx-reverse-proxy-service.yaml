@@ -1,5 +1,4 @@
-{{- if .Values.quantanexus.enabled }}
-{{- if .Values.quantanexus.nginx.enabled }}
+{{- if .Values.components.quantanexus  }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -13,5 +12,4 @@ spec:
     port: {{ .Values.quantanexus.nginx.port }}
     targetPort: {{ .Values.quantanexus.nginx.port }}
   type: ClusterIP
-{{- end }}
 {{- end }}

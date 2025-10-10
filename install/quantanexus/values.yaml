@@ -129,7 +129,6 @@ redis:
   imagePullPolicy: "IfNotPresent"
 
 quantanexus:
-  enabled: true
   replicaCount: 1
 
   # 新增：Odoo 核心运行参数
@@ -144,7 +143,7 @@ quantanexus:
 
   # Image pull secrets configuration
   imagePullSecrets:
-    enabled: true
+    enabled: false
     secrets:
       - name: hi168-harbor-secret
 
@@ -155,7 +154,6 @@ quantanexus:
 
   # Nginx reverse proxy
   nginx:
-    enabled: true
     repository: "nginx"
     tag: "reverse"
     port: 8443
