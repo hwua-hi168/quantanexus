@@ -1,4 +1,4 @@
-{{- if .Values.quantanexus.enabled }}
+{{- if .Values.components.quantanexus  }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -21,7 +21,7 @@ data:
     xmlrpc_port = 8069
     abc_domain_name = {{ .Values.global.domainName }}
     ; redis
-    hwua_redis_enable={{ .Values.redis.enabled }}
+    hwua_redis_enable=true
     hwua_redis_url={{ include "abc-platform.fullname" . }}-redis
     hwua_redis_port=6379
     hwua_redis_timeout=604800
@@ -52,7 +52,7 @@ data:
     data_dir= /opt/data/quantanexus
     xmlrpc_port = 8069
     ; redis
-    hwua_redis_enable={{ .Values.redis.enabled }}
+    hwua_redis_enable=true
     hwua_redis_url={{ include "abc-platform.fullname" . }}-redis
     hwua_redis_port=6379
     hwua_redis_timeout=604800
