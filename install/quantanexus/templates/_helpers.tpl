@@ -64,3 +64,47 @@ Create the name of the service account to use
 {{- define "abc-platform.domainName" -}}
 {{- .Values.global.domainName | default "example.com" -}}
 {{- end -}}
+
+
+{{/*
+获取 Redis Secret 名称
+*/}}
+{{- define "redis.secretName" -}}
+{{- if .Values.redis.auth.existingSecret }}
+    {{- .Values.redis.auth.existingSecret }}
+{{- else }}
+    {{- printf "%s-redis" (include "abc-platform.fullname" .) }}
+{{- end }}
+{{- end }}
+
+{{/*
+获取 Redis 密码（单例模式，确保一致性）
+*/}}
+{{- define "redis.password" -}}
+{{- if .Values.redis.auth._password -}}
+{{- .Values.redis.auth._password -}}
+{{- else -}}
+{{- $password := "" -}}
+{{- if .Values.redis.auth.password -}}
+{{- $password = .Values.redis.auth.password -}}
+{{- else if .Values.redis.auth.existingSecret -}}
+{{- $secret := (lookup "v1" "Secret" .Release.Namespace .Values.redis.auth.existingSecret) -}}
+{{- if $secret -}}
+{{- $password = (index $secret.data .Values.redis.auth.secretKeys.passwordKey | b64dec) -}}
+{{- else -}}
+{{- $password = (randAlphaNum 16) -}}
+{{- end -}}
+{{- else -}}
+{{- $password = (randAlphaNum 16) -}}
+{{- end -}}
+{{- $_ := set .Values.redis.auth "_password" $password -}}
+{{- $password -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+获取 Redis 密码（base64 编码）
+*/}}
+{{- define "redis.password.b64" -}}
+{{- include "redis.password" . | b64enc | quote -}}
+{{- end -}}
