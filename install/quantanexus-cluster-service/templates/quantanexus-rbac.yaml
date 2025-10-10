@@ -1,0 +1,33 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: quantanexus-cluster-admin
+rules:
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["*"]
+- nonResourceURLs: ["*"]
+  verbs: ["*"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: quantanexus-cluster-admin-binding
+subjects:
+- kind: ServiceAccount
+  name: quantanexus-admin
+  namespace: {{ .Values.global.namespace }}
+
+roleRef:
+  kind: ClusterRole
+  name: quantanexus-cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: quantanexus-admin
+  namespace:  {{ .Values.global.namespace }}

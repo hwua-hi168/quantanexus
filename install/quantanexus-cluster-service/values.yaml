@@ -1,4 +1,14 @@
 
+global:
+  namespace: quantanexus
+  domainName: qntest002.example.com
+  registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+  masterNode: com-calino-master-1
+  masterNodes: "com-calino-master-1,com-calino-master-2"
+  workerNodes: "com-calino-worker-1"
+  createNamespace: true
+  labelController: true
+
 # ABC Experiment Service configuration
 abcExperimentService:
   enabled: true
@@ -48,9 +58,9 @@ abcWebShell:
     pullPolicy: IfNotPresent
 
   # Service account configuration
-  serviceAccount:
+  serviceAccount:  
     create: true
-    name: abc-webshell
+    name: quantanexus-admin
 
   # Node selector for master nodes
   nodeSelector:
@@ -108,7 +118,7 @@ abcUploader:
     pullPolicy: IfNotPresent
 
   # Service account configuration (复用 WebShell 的 service account)
-  serviceAccountName: abc-webshell
+  serviceAccountName: quantanexus-admin
 
   # Node selector for master nodes
   nodeSelector:
@@ -180,12 +190,4 @@ hwuaNodeService:
     server:
       ip: "0.0.0.0"
       port: 168
-
-  # Host aliases
   hostAliases:
-    # - ip: "192.168.103.120"
-    #   hostnames:
-    #     - "harbor.hi168.com"
-
-  # Image pull secrets
-  # imagePullSecrets: "hi168-harbor-secret"

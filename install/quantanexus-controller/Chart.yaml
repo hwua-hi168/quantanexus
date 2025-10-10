@@ -8,11 +8,4 @@ dependencies:
     version: "11.7.0"
     repository: "https://helm.hi168.com/charts/"
     condition: postgresql.enabled
-  # - name: redis
-  #   version: "19.5.0"
-  #   repository: "http://helm-repo-service/charts/"
-  #   condition: redis.enabled
-  - name: ingress-nginx
-    version: "4.0.18"
-    repository: "https://helm.hi168.com/charts/"
-    condition: ingress-nginx.enabled
+

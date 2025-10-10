@@ -1,0 +1,23 @@
+---
+# 1. 控制面证书
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: quantanexus-controller-tls
+  namespace: {{ .Values.global.namespace }}
+spec:
+  # 最终 Secret 名字
+  secretName: quantanexus-controller-tls
+  # 证书有效期 & 续期窗口
+  duration: 8760h        # 1 年
+  renewBefore: 720h      # 提前 1 个月续期
+  # 主体 & SAN
+  commonName: controller.quantanexus.io
+  dnsNames:
+    - controller.quantanexus.io
+    - controller.{{ .Values.global.domainName }}   # 如 qntest002.hi168.com
+    - 192.168.103.161                              # 节点 IP（可选）
+  # 签发者（已提前创建）
+  issuerRef:
+    name: {{ .Values.certManager.issuerName | default "selfsigned-issuer" }}
+    kind: {{ .Values.certManager.issuerKind | default "ClusterIssuer" }}
