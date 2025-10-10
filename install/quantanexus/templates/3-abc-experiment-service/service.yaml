@@ -1,4 +1,4 @@
-{{- if .Values.abcExperimentService.enabled }}
+{{- if .Values.components.abcExperimentService  }}
 apiVersion: v1
 kind: Service
 metadata:
