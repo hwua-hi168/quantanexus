@@ -10,16 +10,8 @@ global:
   masterNode: com-calino-master-1
   masterNodes: "com-calino-master-1,com-calino-master-2"
   workerNodes: "com-calino-worker-1"
-
-# Component toggles
-components:
   createNamespace: true
   labelController: true
-  quantanexus: true
-  abcExperimentService: true
-  abcWebShell: true
-  abcUploader: true
-  hwuaNodeService: true
 
 # PostgreSQL configuration (如果使用子chart)
 postgresql:
@@ -66,6 +58,20 @@ postgresql:
       tag: 0.10.1-debian-11-r24
       pullPolicy: IfNotPresent  
 
+ingress-nginx:
+  enabled: false
+
+ingress:
+  tlsManual: false
+  tlsSecret:
+    name: abc-tls
+    # certificate: certificate-Base64encoded-tLQo=
+    # privateKey: privateKey-Base64encoded-tLQo=
+  tlsCommonSecret:
+    name: abc-tls-hwua-common-4
+    # certificate: certificate-common-Base64encoded-tLQo=
+    # privateKey: privateKey-common-Base64encoded-tLQo=
+
 redis:
   auth:
     password: hi168pass
@@ -75,6 +81,7 @@ redis:
   imagePullPolicy: "IfNotPresent"
 
 quantanexus:
+  enabled: true
   replicaCount: 1
 
   # 新增：Odoo 核心运行参数
@@ -153,6 +160,7 @@ quantanexus:
 
 # ABC Experiment Service configuration
 abcExperimentService:
+  enabled: true
   replicaCount: 1
 
   # Application settings
@@ -196,6 +204,7 @@ abcExperimentService:
 
 # ABC WebShell configuration
 abcWebShell:
+  enabled: true
   replicaCount: 1
 
   # Image configuration
@@ -255,6 +264,7 @@ abcWebShell:
       secretName: abc-tls
 # ABC Uploader configuration
 abcUploader:
+  enabled: true
   replicaCount: 1
 
   # Image configuration
@@ -318,7 +328,7 @@ abcUploader:
 
 # HWUA Node Service configuration
 hwuaNodeService:
-
+  enabled: true
   # Image configuration
   image:
     repository: hwua-node-service
@@ -344,4 +354,4 @@ hwuaNodeService:
     #     - "harbor.hi168.com"
 
   # Image pull secrets
-  imagePullSecrets: "hi168-harbor-secret"
+  # imagePullSecrets: "hi168-harbor-secret"
