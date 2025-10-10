@@ -14,7 +14,7 @@ global:
 # Component toggles
 components:
   createNamespace: true
-  ingressController: true
+  labelController: true
   quantanexus: true
   abcExperimentService: true
   abcWebShell: true

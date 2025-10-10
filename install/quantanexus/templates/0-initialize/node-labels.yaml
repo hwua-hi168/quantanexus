@@ -1,4 +1,4 @@
-{{- if .Values.components.ingressController }}
+{{- if .Values.components.labelController }}
 apiVersion: batch/v1
 kind: Job
 metadata:
