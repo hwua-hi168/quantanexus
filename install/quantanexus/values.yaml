@@ -68,6 +68,7 @@ postgresql:
 
 # Ingress Nginx configuration
 ingress-nginx:
+  enabled: false
   className: "nginx"
   defaultBackend:
     enabled: true
@@ -182,7 +183,7 @@ quantanexus:
     quantanexusData: "/var/lib/quantanexus/quantanexus"
     quantanexusMisc: "/var/lib/quantanexus/quantanexus-misc"
     runtime: "/mnt/quantanexus/runtime"
-    
+
     # PVC 大小配置 (hostPathEnabled: false 时使用)
     # 请根据您的实际需求调整这些存储大小
     pvcSizes:
