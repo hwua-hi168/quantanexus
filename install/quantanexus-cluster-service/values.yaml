@@ -1,0 +1,191 @@
+
+# ABC Experiment Service configuration
+abcExperimentService:
+  enabled: true
+  replicaCount: 1
+
+  # Application settings
+  app:
+    repository: "abc-experiment-service"
+    tag: "v1.3.2"
+    imagePullPolicy: "IfNotPresent"
+
+  # Service configuration
+  service:
+    port: 8075
+    host: "0.0.0.0"
+
+  # Kubernetes configuration zhu
+  kubernetes:
+    configFile: "/etc/kubernetes/admin.conf"
+    host: "https://10.96.0.1:443"
+    sslCaCert: "/etc/kubernetes/pki/ca.crt"
+    verifySsl: "False"
+    token: ""
+    assertHostname: "portal"
+    server: "https://10.96.0.1:443"
+    caData: ""
+    clientCertData: ""
+    clientKeyData: ""
+  # Virtual VNC configuration
+  virtVnc:
+    node: "virtvnc.kubevirt.svc.cluster.local"
+    port: 8001
+
+  # Authentication
+  enableAuth: false
+  authUrlBase: ""
+
+# ABC WebShell configuration
+abcWebShell:
+  enabled: true
+  replicaCount: 1
+
+  # Image configuration
+  image:
+    repository: abc-webshell
+    tag: v2.2.4.8
+    pullPolicy: IfNotPresent
+
+  # Service account configuration
+  serviceAccount:
+    create: true
+    name: abc-webshell
+
+  # Node selector for master nodes
+  nodeSelector:
+    ha_node_type: master
+
+  # App configuration
+  config:
+    appname: abc-webshell
+    httpport: 8080
+    runmode: "prod"
+    kubeconfig: ""
+    beego_pprof: true
+    https: true
+    url_prefix: ""
+    enable_demo: true
+    debug: true
+
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+
+  # Ingress configuration
+  ingress:
+    enabled: true
+    className: nginx
+    paths:
+      - /t(/|$)(.*)
+      - /demo
+      - /static/css/xterm.css
+      - /static/css/bootstrap.min.css
+      - /static/js/index.js
+      - /static/xml/app.xml
+      - /static/imgs/favicon.ico
+    annotations:
+      ingress.kubernetes.io/ingress.class: "nginx"
+      nginx.org/client-max-body-size: 100M
+      nginx.ingress.kubernetes.io/cors-allow-headers: >-
+        DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization
+      nginx.ingress.kubernetes.io/affinity: "cookie"
+      nginx.ingress.kubernetes.io/session-cookie-name: "session_id"
+    tls:
+      enabled: true
+      secretName: abc-tls
+# ABC Uploader configuration
+abcUploader:
+  enabled: true
+  replicaCount: 1
+
+  # Image configuration
+  image:
+    repository: abc-uploader
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+
+  # Service account configuration (复用 WebShell 的 service account)
+  serviceAccountName: abc-webshell
+
+  # Node selector for master nodes
+  nodeSelector:
+    ha_node_type: master
+
+  # App configuration
+  config:
+    appname: abc-uploader
+    httpport: 8080
+    runmode: "prod"
+    kubeconfig: ""
+    beego_pprof: true
+    enable_allow_origin: false
+    https: false
+    url_prefix: ""
+    enable_demo: true
+    debug: true
+    uploader_home: "/var/abc-uploader/upload"
+    orm_debug: false
+    clean_chunk_duration: 8
+    sqlite_db_path: "/var/abc-uploader/datas/abc_uploader.db"
+
+  # Host path volumes
+  hostPaths:
+    upload: "/usr/local/abc-uploader/upload"
+    datas: "/usr/local/abc-uploader/datas"
+    upload_david: "/usr/local/abc-uploader/upload-david"
+
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+
+  # Ingress configuration
+  ingress:
+    enabled: true
+    className: nginx
+    paths:
+      - /file/upload
+    annotations:
+      ingress.kubernetes.io/ingress.class: "nginx"
+      nginx.org/client-max-body-size: 100M
+      nginx.ingress.kubernetes.io/cors-allow-headers: >-
+        DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization
+      nginx.ingress.kubernetes.io/affinity: "cookie"
+      nginx.ingress.kubernetes.io/session-cookie-name: "session_id"
+    tls:
+      enabled: true
+      secretName: abc-tls
+
+# HWUA Node Service configuration
+hwuaNodeService:
+  enabled: true
+  # Image configuration
+  image:
+    repository: hwua-node-service
+    tag: 0.0.4
+    pullPolicy: IfNotPresent
+
+  # Configuration
+  config:
+    appname: "HWNodeService"
+    logfile: "/var/log/hwua-node-service/service.log"
+    cri:
+      type: "containerd"
+      socket_addr: "/run/containerd/containerd.sock"
+      namespace: "k8s.io"
+    server:
+      ip: "0.0.0.0"
+      port: 168
+
+  # Host aliases
+  hostAliases:
+    # - ip: "192.168.103.120"
+    #   hostnames:
+    #     - "harbor.hi168.com"
+
+  # Image pull secrets
+  # imagePullSecrets: "hi168-harbor-secret"

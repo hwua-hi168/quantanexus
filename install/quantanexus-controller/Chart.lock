@@ -1,0 +1,9 @@
+dependencies:
+- name: postgresql
+  repository: https://helm.hi168.com/charts/
+  version: 11.7.0
+- name: ingress-nginx
+  repository: https://helm.hi168.com/charts/
+  version: 4.0.18
+digest: sha256:1ca3c05aa9a77be88f19d48933c450cb8df180203a6e36c7296e4fc215726fb7
+generated: "2025-09-30T11:11:18.712675906+08:00"
