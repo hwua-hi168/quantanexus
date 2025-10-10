@@ -207,7 +207,6 @@ quantanexus:
 
 # ABC Experiment Service configuration
 abcExperimentService:
-  enabled: true
   replicaCount: 1
 
   # Application settings
