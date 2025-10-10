@@ -1,4 +1,4 @@
-{{- if .Values.components.labelController }}
+{{- if .Values.global.labelController }}
 apiVersion: batch/v1
 kind: Job
 metadata:
