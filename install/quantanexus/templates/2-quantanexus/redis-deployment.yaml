@@ -1,3 +1,4 @@
+{{- if .Values.components.quantanexus  }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -60,3 +61,5 @@ spec:
   selector:
     {{- include "abc-platform.selectorLabels" . | nindent 4 }}
     app.kubernetes.io/component: redis
+
+{{- end }}

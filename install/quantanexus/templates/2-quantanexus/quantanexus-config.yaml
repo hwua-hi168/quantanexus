@@ -1,4 +1,4 @@
-{{- if .Values.quantanexus.enabled }}
+{{- if .Values.components.quantanexus  }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
