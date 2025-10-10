@@ -1,4 +1,4 @@
-{{- if .Values.quantanexus.enabled }}
+{{- if .Values.components.quantanexus  }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
