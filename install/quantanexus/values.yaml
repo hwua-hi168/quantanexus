@@ -309,7 +309,6 @@ abcWebShell:
       secretName: abc-tls
 # ABC Uploader configuration
 abcUploader:
-  enabled: true
   replicaCount: 1
 
   # Image configuration

@@ -1,4 +1,4 @@
-{{- if and .Values.abcUploader.enabled .Values.abcUploader.ingress.enabled }}
+{{- if and .Values.components.abcUploader .Values.abcUploader.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
