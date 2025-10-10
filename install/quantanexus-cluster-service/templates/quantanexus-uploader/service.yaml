@@ -1,0 +1,18 @@
+{{- if .Values.abcUploader.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: abc-uploader
+  namespace: {{ .Values.global.namespace | default "quantanexus" }}
+  labels:
+    name: abc-uploader
+spec:
+  type: {{ .Values.abcUploader.service.type }}
+  ports:
+    - port: {{ .Values.abcUploader.service.port }}
+      targetPort: {{ .Values.abcUploader.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    app: abc-uploader
+{{- end }}

@@ -1,0 +1,147 @@
+{{- if .Values.quantanexus.enabled  }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "quantanexus.fullname" . }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: quantanexus
+    {{- include "quantanexus.labels" . | nindent 4 }}
+spec:
+  serviceAccountName: quantanexus-admin
+  replicas: {{ .Values.quantanexus.replicaCount }}
+  selector:
+    matchLabels:
+      app: quantanexus
+  template:
+    metadata:
+      labels:
+        app: quantanexus
+    spec:
+      hostAliases:
+        {{- toYaml .Values.quantanexus.hostAliases | nindent 8 }}
+      nodeSelector:
+        kubernetes.io/hostname: {{ .Values.global.masterNode }}
+      initContainers:
+        - name: data-init-container
+          image: {{ .Values.global.registry }}/{{ .Values.quantanexus.manager.repository }}:{{ .Values.quantanexus.manager.tag }}
+          command: [ "/entrypoint.sh" ]
+          volumeMounts:
+            - name: quantanexus-addons
+              mountPath: /data/quantanexus/hwua
+      containers:
+        - name: quantanexus
+          image: {{ .Values.global.registry }}/{{ .Values.quantanexus.app.repository }}:{{ .Values.quantanexus.app.tag }}
+
+          imagePullPolicy: {{ .Values.quantanexus.app.imagePullPolicy }}
+          command: [ "/entrypoint.sh" ]
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.quantanexus.livenessProbe.path }}
+              port: {{ .Values.quantanexus.livenessProbe.port }}
+              scheme: HTTP
+            initialDelaySeconds: {{ .Values.quantanexus.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.quantanexus.livenessProbe.periodSeconds }}
+            successThreshold: 1
+            timeoutSeconds: {{ .Values.quantanexus.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.quantanexus.livenessProbe.failureThreshold }}
+          securityContext:
+            privileged: true
+          env:
+            - name: QUANTANEXUS_HOME
+              value: {{ .Values.quantanexus.env.home | quote }}
+            - name: QuantaNexusConfigFilePath
+              value: {{ .Values.quantanexus.env.configPath | quote }}
+            - name: QuantaNexusUpdateOption
+              value: {{ .Values.quantanexus.env.updateOption | quote }}
+            - name: QuantaNexusPreStartShell
+              value: {{ .Values.quantanexus.env.preStartShell | quote }}
+          volumeMounts:
+            - name: dmidecode
+              mountPath: /sbin/dmidecode
+            - name: mem
+              mountPath: /dev/mem
+            - name: quantanexus-addons
+              mountPath: /var/lib/quantanexus/quantanexus-addons
+            - name: quantanexus-runtime
+              mountPath: /opt/runtime/quantanexus
+            - name: quantanexus-config
+              mountPath: /opt/etc/quantanexus
+            - name: quantanexus-data
+              mountPath: /opt/data/quantanexus
+            - name: quantanexus-misc
+              mountPath: /opt/misc/quantanexus
+      {{- if .Values.quantanexus.imagePullSecrets.enabled }}
+      imagePullSecrets:
+      {{- range .Values.quantanexus.imagePullSecrets.secrets }}
+        - name: {{ .name }}
+      {{- end }}
+      {{- end }}
+      volumes:
+        - name: dmidecode
+          hostPath:
+            path: /sbin/dmidecode
+        - name: mem
+          hostPath:
+            path: /dev/mem
+        - name: quantanexus-addons
+          emptyDir: {}
+        
+        # --- quantanexus-runtime 卷定义 (动态切换) ---
+        - name: quantanexus-runtime
+{{- if .Values.quantanexus.storage.hostPathEnabled }}
+          hostPath:
+            path: {{ .Values.quantanexus.storage.runtime }}
+            type: DirectoryOrCreate
+{{- else }}
+          persistentVolumeClaim:
+            claimName: {{ include "quantanexus.fullname" . }}-quantanexus-runtime-pvc 
+{{- end }}
+
+        - name: quantanexus-config
+          configMap:
+            name: {{ include "quantanexus.fullname" . }}-config
+            
+        # --- quantanexus-data 卷定义 (动态切换) ---
+        - name: quantanexus-data
+{{- if .Values.quantanexus.storage.hostPathEnabled }}
+          hostPath:
+            path: {{ .Values.quantanexus.storage.quantanexusData }}
+            type: DirectoryOrCreate
+{{- else }}
+          persistentVolumeClaim:
+            claimName: {{ include "quantanexus.fullname" . }}-quantanexus-data-pvc
+{{- end }}
+
+        # --- quantanexus-misc 卷定义 (动态切换) ---
+        - name: quantanexus-misc
+{{- if .Values.quantanexus.storage.hostPathEnabled }}
+          hostPath:
+            path: {{ .Values.quantanexus.storage.quantanexusMisc }}
+            type: DirectoryOrCreate
+{{- else }}
+          persistentVolumeClaim:
+            claimName: {{ include "quantanexus.fullname" . }}-quantanexus-misc-pvc
+{{- end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "quantanexus.fullname" . }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: quantanexus
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8069
+      targetPort: 8069
+      protocol: TCP
+    - name: longpolling
+      port: 8072
+      targetPort: 8072
+  selector:
+    app: quantanexus
+{{- end }}

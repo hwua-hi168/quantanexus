@@ -1,0 +1,46 @@
+{{- if .Values.abcWebShell.enabled  }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: abc-webshell
+  namespace: {{ .Values.global.namespace | default "quantanexus" }}
+  labels:
+    app: abc-webshell
+spec:
+  serviceAccountName: quantanexus-admin
+  replicas: {{ .Values.abcWebShell.replicaCount }}
+  selector:
+    matchLabels:
+      app: abc-webshell
+  template:
+    metadata:
+      labels:
+        app: abc-webshell
+    spec:
+      nodeSelector:
+        {{- toYaml .Values.abcWebShell.nodeSelector | nindent 8 }}
+      containers:
+        - name: abc-webshell
+          # 统一使用 global.registry/repository:tag 格式
+          image: "{{ .Values.global.registry }}/{{ .Values.abcWebShell.image.repository }}:{{ .Values.abcWebShell.image.tag }}"
+          imagePullPolicy: {{ .Values.abcWebShell.image.pullPolicy }}
+          volumeMounts:
+            - name: kube-webshell-conf
+              mountPath: "/opt/kube/conf"
+              readOnly: true
+      volumes:
+        - name: kube-webshell-conf
+          secret:
+            secretName: kube-webshell-conf
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - abc-webshell
+              topologyKey: kubernetes.io/hostname
+      serviceAccountName: {{ .Values.abcWebShell.serviceAccount.name }}
+{{- end }}

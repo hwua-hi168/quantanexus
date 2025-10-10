@@ -1,0 +1,60 @@
+{{- if .Values.abcUploader.enabled  }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: abc-uploader
+  namespace: {{ .Values.global.namespace | default "quantanexus" }}
+  labels:
+    app: abc-uploader
+spec:
+  serviceAccountName: quantanexus-admin
+  replicas: {{ .Values.abcUploader.replicaCount }}
+  selector:
+    matchLabels:
+      app: abc-uploader
+  template:
+    metadata:
+      labels:
+        app: abc-uploader
+    spec:
+      nodeSelector:
+        {{- toYaml .Values.abcUploader.nodeSelector | nindent 8 }}
+      containers:
+        - name: abc-uploader
+          image: "{{ .Values.global.registry }}/{{ .Values.abcUploader.image.repository }}:{{ .Values.abcUploader.image.tag }}"
+          imagePullPolicy: {{ .Values.abcUploader.image.pullPolicy }}
+          volumeMounts:
+            - name: kube-uploader-conf
+              mountPath: "/opt/kube/conf"
+              readOnly: true
+            - name: abc-upload
+              mountPath: "/var/abc-uploader/upload"
+            - name: abc-datas
+              mountPath: "/var/abc-uploader/datas"
+            - name: abc-upload-david
+              mountPath: "/opt/kube/upload"
+      volumes:
+        - name: kube-uploader-conf
+          secret:
+            secretName: kube-uploader-conf
+        - name: abc-upload
+          hostPath:
+            path: {{ .Values.abcUploader.hostPaths.upload }}
+        - name: abc-datas
+          hostPath:
+            path: {{ .Values.abcUploader.hostPaths.datas }}
+        - name: abc-upload-david
+          hostPath:
+            path: {{ .Values.abcUploader.hostPaths.upload_david }}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - abc-uploader
+              topologyKey: kubernetes.io/hostname
+      serviceAccountName: {{ .Values.abcUploader.serviceAccountName }}
+{{- end }}

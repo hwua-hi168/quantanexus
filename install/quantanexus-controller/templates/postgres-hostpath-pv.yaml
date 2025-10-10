@@ -1,0 +1,27 @@
+{{- if and .Values.postgresql.enabled .Values.postgresql.hostPath.enabled }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ include "quantanexus.fullname" . }}-pg-hostpath-pv
+  labels:
+    {{- include "quantanexus.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+spec:
+  capacity:
+    storage: {{ .Values.postgresql.hostPath.storage }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""          # 必须空，匹配子 chart 的 ""
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - {{ .Values.postgresql.hostPath.node }}
+  hostPath:
+    path: {{ .Values.postgresql.hostPath.path }}
+    type: DirectoryOrCreate
+{{- end }}
