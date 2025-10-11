@@ -5,9 +5,14 @@ metadata:
   name: abc-webshell-ingress
   namespace: {{ .Values.global.namespace | default "quantanexus" }}
   annotations:
+    kubernetes.io/ingress.class: nginx
     {{- range $key, $value := .Values.abcWebShell.ingress.annotations }}
     {{ $key }}: {{ $value | quote }}
     {{- end }}
+    {{- if and .Values.certManager.enabled (not .Values.ingress.tlsManual) }}
+    cert-manager.io/cluster-issuer: {{ .Values.certManager.issuerName }}
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    {{- end }}    
 spec:
   ingressClassName: {{ .Values.abcWebShell.ingress.className }}
   rules:
