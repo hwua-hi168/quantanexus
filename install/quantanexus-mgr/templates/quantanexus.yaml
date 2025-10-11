@@ -26,6 +26,7 @@ spec:
       initContainers:
         - name: data-init-container
           image: {{ .Values.global.registry }}/{{ .Values.quantanexus.manager.repository }}:{{ .Values.quantanexus.manager.tag }}
+          imagePullPolicy: {{ .Values.quantanexus.app.imagePullPolicy }}
           command: [ "/entrypoint.sh" ]
           volumeMounts:
             - name: quantanexus-addons
