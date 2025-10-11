@@ -12,6 +12,7 @@ global:
   workerNodes: "com-calino-worker-1"
   createNamespace: true
   labelController: true
+  
 
 # PostgreSQL configuration (如果使用子chart)
 postgresql:
