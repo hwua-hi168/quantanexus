@@ -6,7 +6,7 @@ metadata:
   namespace: {{ .Values.global.namespace }}
 data:
   redis.conf: |
-    requirepass {{ .Values.redis.auth.password }}
+    requirepass {{ include "redis.password" . }}
     protected-mode no
     port 6379
     tcp-backlog 511
