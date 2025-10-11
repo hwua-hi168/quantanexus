@@ -19,6 +19,17 @@ certManager:
   issuerName: selfsigned-issuer
   issuerKind: ClusterIssuer 
 
+ingress:
+  tlsManual: false
+  tlsSecret:
+    name: abc-tls
+    certificate: certificate-Base64encoded-tLQo=
+    privateKey: privateKey-Base64encoded-tLQo=
+  tlsCommonSecret:
+    name: abc-tls-hwua-common-4
+    certificate: certificate-common-Base64encoded-tLQo=
+    privateKey: privateKey-common-Base64encoded-tLQo=
+    
 # PostgreSQL configuration (如果使用子chart)
 postgresql:
   enabled: true
@@ -64,17 +75,6 @@ postgresql:
       tag: 0.10.1-debian-11-r24
       pullPolicy: IfNotPresent  
 
-ingress:
-  tlsManual: false
-  tlsSecret:
-    name: abc-tls
-    certificate: certificate-Base64encoded-tLQo=
-    privateKey: privateKey-Base64encoded-tLQo=
-  tlsCommonSecret:
-    name: abc-tls-hwua-common-4
-    certificate: certificate-common-Base64encoded-tLQo=
-    privateKey: privateKey-common-Base64encoded-tLQo=
-
 redis:
   auth:
     # 密码设置 - 如果为空则自动生成
@@ -101,7 +101,7 @@ quantanexus:
     moduleImageCenterEnable: false
     moduleOssManageEnable: false
     moduleCloudLinkEnable: false
-    
+
   # Quantanexus core application
   app:
     repository: "quantanexus-basic"
