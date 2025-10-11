@@ -31,3 +31,74 @@ kind: ServiceAccount
 metadata:
   name: quantanexus-admin
   namespace:  {{ .Values.global.namespace }}
+
+{{- if .Values.abcExperimentService.enabled }}
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: abc-experiment-service
+  namespace: {{ .Values.global.namespace }}
+
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: abc-experiment-service-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: abc-experiment-service
+  namespace: {{ .Values.global.namespace }}
+
+{{- end }}  
+
+---
+apiVersion: v1
+items:
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      name: abc-webshell
+      namespace: qnsystemdefaultnamespace
+    rules:
+      - apiGroups:
+          - ""
+        resources:
+          - pods
+          - pods/log
+        verbs:
+          - get
+          - list
+      - apiGroups:
+          - ""
+        resources:
+          - pods/exec
+        verbs:
+          - create
+kind: List
+
+---
+apiVersion: v1
+items:
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      name: abc-webshell-rb
+      namespace: qnsystemdefaultnamespace
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: Role
+      name: abc-webshell
+    subjects:
+      - kind: ServiceAccount
+        name: abc-webshell
+        namespace: {{ .Values.global.namespace | default "abc-platform" }}
+kind: List
+
+---
+

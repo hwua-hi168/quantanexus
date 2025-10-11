@@ -39,6 +39,7 @@ data:
     virt_vnc_port={{ .Values.abcExperimentService.virtVnc.port }}
     enable_auth={{ .Values.abcExperimentService.enableAuth }}
     auth_url_base={{ .Values.abcExperimentService.authUrlBase }}
+    use_service_account = {{ .Values.abcExperimentService.kubernetes.useServiceAccount }}
   admin.conf: |
     apiVersion: v1
     clusters:
