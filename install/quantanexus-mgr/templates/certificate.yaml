@@ -6,6 +6,8 @@ kind: Certificate
 metadata:
   name: quantanexus-controller-tls
   namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "quantanexus.labels" . | nindent 4 }}
 spec:
   # 最终 Secret 名字
   secretName: quantanexus-controller-tls

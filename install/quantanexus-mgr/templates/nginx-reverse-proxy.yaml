@@ -6,6 +6,7 @@ metadata:
   namespace: {{ .Values.global.namespace }}
   labels:
     app: nginx-reverse-proxy
+    {{- include "quantanexus.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:

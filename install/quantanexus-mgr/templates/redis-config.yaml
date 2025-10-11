@@ -4,6 +4,8 @@ kind: ConfigMap
 metadata:
   name: {{ include "quantanexus.fullname" . }}-redis-config
   namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "quantanexus.labels" . | nindent 4 }}
 data:
   redis.conf: |
     requirepass {{ include "redis.password" . }}

@@ -4,6 +4,8 @@ kind: ConfigMap
 metadata:
   name: nginx-reverse-proxy-config
   namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "quantanexus.labels" . | nindent 4 }}
 data:
   default.conf: |
     proxy_cache_path /tmp/nginx_cache levels=1:2 keys_zone=imgcache:400m max_size=10g inactive=60m use_temp_path=off;

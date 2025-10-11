@@ -4,6 +4,8 @@ kind: Service
 metadata:
   name: nginx-reverse-proxy
   namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "quantanexus.labels" . | nindent 4 }}
 spec:
   selector:
     app: nginx-reverse-proxy
