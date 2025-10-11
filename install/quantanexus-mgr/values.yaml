@@ -13,6 +13,10 @@ global:
   createNamespace: true
   labelController: true
   
+# Cert Manager 配置块
+certManager:
+  issuerName: selfsigned-issuer
+  issuerKind: ClusterIssuer 
 
 # PostgreSQL configuration (如果使用子chart)
 postgresql:
