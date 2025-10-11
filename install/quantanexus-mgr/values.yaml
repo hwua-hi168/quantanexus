@@ -98,6 +98,10 @@ quantanexus:
   config:
     maxCronThreads: 8
     workers: 16
+    moduleImageCenterEnable: false
+    moduleOssManageEnable: false
+    moduleCloudLinkEnable: false
+    
   # Quantanexus core application
   app:
     repository: "quantanexus-basic"

@@ -36,6 +36,11 @@ data:
     limit_memory_soft = 8000000000
     max_cron_threads = {{ .Values.quantanexus.config.maxCronThreads }}
     workers          = {{ .Values.quantanexus.config.workers }}    
+    system_install_namespace = {{ .Values.global.namespace }}
+    module_image_center_enable = {{ .Values.quantanexus.config.moduleImageCenterEnable }}
+    module_oss_manage_enable = {{ .Values.quantanexus.config.moduleOssManageEnable }}
+    module_cloud_link_enable = {{ .Values.quantanexus.config.moduleCloudLinkEnable }}
+
   test.conf: |
     [options]
     ; disable listdb menu item
@@ -64,6 +69,11 @@ data:
     limit_memory_soft = 8000000000
     max_cron_threads = {{ .Values.quantanexus.config.maxCronThreads }}
     workers          = {{ .Values.quantanexus.config.workers }}    
+    system_install_namespace = {{ .Values.global.namespace }}
+    module_image_center_enable = {{ .Values.quantanexus.config.moduleImageCenterEnable }}
+    module_oss_manage_enable = {{ .Values.quantanexus.config.moduleOssManageEnable }}
+    module_cloud_link_enable = {{ .Values.quantanexus.config.moduleCloudLinkEnable }}
+
   pre-start.sh: |
     echo "quantanexus pre-start.sh called"
 {{- end }}
