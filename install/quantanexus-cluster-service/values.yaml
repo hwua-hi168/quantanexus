@@ -14,7 +14,7 @@ abcExperimentService:
   # Application settings
   app:
     repository: "abc-experiment-service"
-    tag: "v1.3.2"
+    tag: "v1.3.6"
     imagePullPolicy: "IfNotPresent"
 
   # Service configuration
@@ -24,6 +24,7 @@ abcExperimentService:
 
   # Kubernetes configuration zhu
   kubernetes:
+    useServiceAccount: true
     configFile: "/etc/kubernetes/admin.conf"
     host: "https://10.96.0.1:443"
     sslCaCert: "/etc/kubernetes/pki/ca.crt"

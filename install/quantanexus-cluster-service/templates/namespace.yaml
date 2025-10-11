@@ -6,3 +6,15 @@ metadata:
   labels:
     app: quantanexus
 {{- end }}
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    hw.ns.usage: user
+    kubernetes.io/metadata.name: qnsystemdefaultnamespace
+  name: qnsystemdefaultnamespace
+spec:
+  finalizers:
+    - kubernetes
