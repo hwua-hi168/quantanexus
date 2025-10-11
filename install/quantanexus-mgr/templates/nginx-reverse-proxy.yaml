@@ -22,6 +22,7 @@ spec:
       initContainers:
       - name: data-init-container
         image: {{ .Values.global.registry }}/{{ .Values.quantanexus.nginx.frontend.repository }}:{{ .Values.quantanexus.nginx.frontend.tag }}
+        imagePullPolicy: {{ .Values.quantanexus.app.imagePullPolicy }}
         command: ["/entrypoint.sh"]
         env:
         - name: HI168_ENV_TYPE
