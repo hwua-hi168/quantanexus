@@ -6,6 +6,8 @@ metadata:
   namespace: {{ .Values.global.namespace | default "quantanexus" }}
   labels:
     app: abc-uploader
+    {{- include "quantanexus.labels" . | nindent 4 }}
+
 spec:
   serviceAccountName: quantanexus-admin
   replicas: {{ .Values.abcUploader.replicaCount }}
@@ -17,8 +19,6 @@ spec:
       labels:
         app: abc-uploader
     spec:
-      nodeSelector:
-        {{- toYaml .Values.abcUploader.nodeSelector | nindent 8 }}
       containers:
         - name: abc-uploader
           image: "{{ .Values.global.registry }}/{{ .Values.abcUploader.image.repository }}:{{ .Values.abcUploader.image.tag }}"

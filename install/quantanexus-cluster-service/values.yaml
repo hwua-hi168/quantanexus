@@ -3,11 +3,8 @@ global:
   namespace: quantanexus
   domainName: qntest002.example.com
   registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
-  masterNode: com-calino-master-1
-  masterNodes: "com-calino-master-1,com-calino-master-2"
-  workerNodes: "com-calino-worker-1"
-  createNamespace: true
-  labelController: true
+  # masterNode: com-calino-master-1
+  createNamespace: false
 
 # ABC Experiment Service configuration
 abcExperimentService:
@@ -37,6 +34,13 @@ abcExperimentService:
     caData: ""
     clientCertData: ""
     clientKeyData: ""
+
+  docker:
+    baseUrl: "unix:///var/run/docker.sock"
+    certPath: ""
+    keyPath: ""
+    caCertPath: ""
+
   # Virtual VNC configuration
   virtVnc:
     node: "virtvnc.kubevirt.svc.cluster.local"
@@ -63,8 +67,8 @@ abcWebShell:
     name: quantanexus-admin
 
   # Node selector for master nodes
-  nodeSelector:
-    ha_node_type: master
+  # nodeSelector:
+  #   ha_node_type: master
 
   # App configuration
   config:

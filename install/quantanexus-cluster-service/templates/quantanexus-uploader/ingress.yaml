@@ -8,6 +8,8 @@ metadata:
     {{- range $key, $value := .Values.abcUploader.ingress.annotations }}
     {{ $key }}: {{ $value | quote }}
     {{- end }}
+    {{- include "quantanexus.labels" . | nindent 4 }}
+
 spec:
   ingressClassName: {{ .Values.abcUploader.ingress.className }}
   rules:

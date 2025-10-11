@@ -5,6 +5,8 @@ kind: ConfigMap
 metadata:
   name: hwua-node-service-config
   namespace: {{ .Values.global.namespace | default "quantanexus" }}
+  labels:
+    {{- include "quantanexus.labels" . | nindent 4 }}
 data:
   conf.toml: |-
     # 这里应包含你的conf/conf.toml配置文件的实际内容
