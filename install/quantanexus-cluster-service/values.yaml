@@ -1,10 +1,27 @@
 
 global:
-  namespace: quantanexus
+  namespace: quantanexus-service
   domainName: qntest002.example.com
   registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
   # masterNode: com-calino-master-1
-  createNamespace: false
+  createNamespace: true
+
+# Cert Manager 配置块
+certManager:
+  enabled: true
+  issuerName: selfsigned-issuer
+  issuerKind: ClusterIssuer 
+
+ingress:
+  tlsManual: false
+  tlsSecret:
+    name: abc-tls
+    certificate: certificate-Base64encoded-tLQo=
+    privateKey: privateKey-Base64encoded-tLQo=
+  tlsCommonSecret:
+    name: abc-tls-hwua-common-4
+    certificate: certificate-common-Base64encoded-tLQo=
+    privateKey: privateKey-common-Base64encoded-tLQo=
 
 # ABC Experiment Service configuration
 abcExperimentService:
