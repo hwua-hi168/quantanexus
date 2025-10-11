@@ -6,6 +6,8 @@ metadata:
   namespace: {{ .Values.global.namespace | default "quantanexus" }}
   labels:
     app: abc-webshell
+    {{- include "quantanexus.labels" . | nindent 4 }}
+
 spec:
   serviceAccountName: quantanexus-admin
   replicas: {{ .Values.abcWebShell.replicaCount }}
@@ -17,8 +19,6 @@ spec:
       labels:
         app: abc-webshell
     spec:
-      nodeSelector:
-        {{- toYaml .Values.abcWebShell.nodeSelector | nindent 8 }}
       containers:
         - name: abc-webshell
           # 统一使用 global.registry/repository:tag 格式

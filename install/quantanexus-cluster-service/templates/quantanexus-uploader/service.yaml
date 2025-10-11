@@ -6,6 +6,8 @@ metadata:
   namespace: {{ .Values.global.namespace | default "quantanexus" }}
   labels:
     name: abc-uploader
+    {{- include "quantanexus.labels" . | nindent 4 }}
+
 spec:
   type: {{ .Values.abcUploader.service.type }}
   ports:

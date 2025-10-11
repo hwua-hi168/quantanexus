@@ -4,6 +4,8 @@ kind: DaemonSet
 metadata:
   name: hwua-node-service-daemonset
   namespace: {{ .Values.global.namespace | default "quantanexus" }}
+  labels:
+    {{- include "quantanexus.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
