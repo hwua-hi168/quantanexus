@@ -1,3 +1,4 @@
+{{- if .Values.certManager.enabled }}
 ---
 # 1. 控制面证书
 apiVersion: cert-manager.io/v1
@@ -21,3 +22,4 @@ spec:
   issuerRef:
     name: {{ .Values.certManager.issuerName | default "selfsigned-issuer" }}
     kind: {{ .Values.certManager.issuerKind | default "ClusterIssuer" }}
+{{- end }}
