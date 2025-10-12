@@ -9,7 +9,7 @@ global:
 # Cert Manager 配置块
 certManager:
   enabled: true
-  issuerName: selfsigned-issuer
+  issuerName: quantanexus-ca-issuer
   issuerKind: ClusterIssuer 
 
 ingress:
