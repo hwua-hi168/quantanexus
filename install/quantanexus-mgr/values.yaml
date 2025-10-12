@@ -1,6 +1,7 @@
 # Global configuration
 global:
   namespace: quantanexus
+  service_namespace: quantanexus
   domainName: qntest002.hi168.com
   # registry: harbor.hi168.com/quantanexus
   # In China, please use aliyuncs
@@ -29,7 +30,7 @@ ingress:
     name: abc-tls-hwua-common-4
     certificate: certificate-common-Base64encoded-tLQo=
     privateKey: privateKey-common-Base64encoded-tLQo=
-    
+
 # PostgreSQL configuration (如果使用子chart)
 postgresql:
   enabled: true
