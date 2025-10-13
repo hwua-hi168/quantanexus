@@ -1,0 +1,93 @@
+{{- if and .Values.certManager.enabled (not .Values.ingress.tlsManual) }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quantanexus-ca-download
+  namespace: {{ .Values.global.namespace | default "quantanexus" }}
+  labels:
+    app: quantanexus-ca-download
+    {{- include "quantanexus.labels" . | nindent 4 }}  
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-ca
+  template:
+    metadata:
+      labels:
+        app: nginx-ca
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: ca-volume
+          mountPath: /usr/share/nginx/html/ca.crt
+          subPath: ca.crt
+          readOnly: true
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+      volumes:
+      - name: ca-volume
+        secret:
+          secretName: root-ca-secret
+          items:
+          - key: ca.crt
+            path: ca.crt
+      - name: nginx-config
+        configMap:
+          name: nginx-ca-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-ca-config
+  namespace: quantanexus-service
+data:
+  default.conf: |
+    server {
+        listen 80;
+        server_name _;
+        root /usr/share/nginx/html;
+        
+        # 设置默认文件，避免 index.html 查找
+        index ca.crt;
+        
+        location / {
+            # 强制下载根证书
+            add_header Content-Type application/x-x509-ca-cert;
+            add_header Content-Disposition "attachment; filename=root-ca.crt";
+            # 直接返回 ca.crt 文件内容
+            try_files /ca.crt =404;
+        }
+        
+        location /ca.crt {
+            add_header Content-Type application/x-x509-ca-cert;
+            add_header Content-Disposition "attachment; filename=root-ca.crt";
+        }
+        
+        # 健康检查端点
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+            add_header Content-Type text/plain;
+        }
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quantanexus-ca-download
+  namespace: quantanexus-service
+spec:
+  selector:
+    app: nginx-ca
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+  type: ClusterIP
+{{- end }}
