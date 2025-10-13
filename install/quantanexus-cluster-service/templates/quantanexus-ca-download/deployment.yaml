@@ -45,7 +45,11 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nginx-ca-config
-  namespace: quantanexus-service
+  namespace: {{ .Values.global.namespace | default "quantanexus" }}
+  labels:
+    app: quantanexus-ca-download
+    {{- include "quantanexus.labels" . | nindent 4 }}  
+
 data:
   default.conf: |
     server {
@@ -81,7 +85,11 @@ apiVersion: v1
 kind: Service
 metadata:
   name: quantanexus-ca-download
-  namespace: quantanexus-service
+  namespace: {{ .Values.global.namespace | default "quantanexus" }}
+  labels:
+    app: quantanexus-ca-download
+    {{- include "quantanexus.labels" . | nindent 4 }}  
+  
 spec:
   selector:
     app: nginx-ca
