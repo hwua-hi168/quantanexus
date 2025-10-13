@@ -16,12 +16,12 @@ ingress:
   tlsManual: false
   tlsSecret:
     name: abc-tls
-    certificate: certificate-Base64encoded-tLQo=
-    privateKey: privateKey-Base64encoded-tLQo=
+    certificate: ""
+    privateKey: ""
   tlsCommonSecret:
     name: abc-tls-hwua-common-4
-    certificate: certificate-common-Base64encoded-tLQo=
-    privateKey: privateKey-common-Base64encoded-tLQo=
+    certificate: ""
+    privateKey: ""
 
 # ABC Experiment Service configuration
 abcExperimentService:
