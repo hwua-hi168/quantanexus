@@ -5,7 +5,9 @@ metadata:
   name: abc-webshell
   namespace: {{ .Values.global.namespace | default "quantanexus" }}
   labels:
-    name: abc-webshell
+    app: abc-webshell
+    {{- include "quantanexus.labels" . | nindent 4 }}
+
 spec:
   type: {{ .Values.abcWebShell.service.type }}
   ports:

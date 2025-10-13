@@ -4,6 +4,9 @@ kind: Ingress
 metadata:
   name: abc-uploader-ingress
   namespace: {{ .Values.global.namespace | default "quantanexus" }}
+  labels:
+    app: abc-uploader
+    {{- include "quantanexus.labels" . | nindent 4 }}  
   annotations:
     {{- range $key, $value := .Values.abcUploader.ingress.annotations }}
     {{ $key }}: {{ $value | quote }}
