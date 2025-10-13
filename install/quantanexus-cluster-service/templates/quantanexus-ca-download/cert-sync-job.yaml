@@ -2,17 +2,18 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: quantanexus-ca-sync
-  namespace: {{ .Values.global.namespace | default "quantanexus" }}
+  name: quantanexus-ca-sync-{{ .Release.Revision }}
+  namespace: {{ .Values.global.namespace }}
   labels:
     app: quantanexus-ca-sync
     {{- include "quantanexus.labels" . | nindent 4 }}
   annotations:
-    # 使用 Helm hook 在安装前执行，但权重比 RBAC 大，确保 RBAC 先创建
     "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-weight": "-5"
-    "helm.sh/hook-delete-policy": before-creation-hook
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": hook-succeeded
 spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 300
   template:
     metadata:
       labels:
@@ -22,45 +23,85 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: ca-sync
-        image: {{ .Values.global.registry }}/kubectl:latest
+        image:  {{ .Values.global.registry }}/kubectl:latest
         command:
         - /bin/sh
         - -c
         - |
           set -e
-          echo "正在从 {{ .Values.certManager.rootCA.sourceNamespace }} 命名空间同步根证书..."
+          echo "=== 开始证书同步 ==="
+          echo "目标命名空间: {{ .Values.global.namespace }}"
+          echo "源 Secret: {{ .Values.certManager.rootCA.sourceSecretName }}"
+          echo "目标 Secret: {{ .Values.certManager.rootCA.targetSecretName }}"
           
-          # 等待 ServiceAccount 和权限就绪（短暂延迟）
-          sleep 5
+          # 调试：显示当前 ServiceAccount 信息
+          echo "=== 调试信息 ==="
+          echo "当前 Pod 的 ServiceAccount:"
+          cat /var/run/secrets/kubernetes.io/serviceaccount/namespace
+          echo ""
+          echo "当前 Token:"
+          cat /var/run/secrets/kubernetes.io/serviceaccount/token | cut -c1-50
+          echo "..."
           
-          # 检查目标命名空间是否存在，如果不存在则创建
-          if ! kubectl get namespace {{ .Values.global.namespace }} &>/dev/null; then
-            echo "命名空间 {{ .Values.global.namespace }} 不存在，正在创建..."
-            kubectl create namespace {{ .Values.global.namespace }}
+          # 等待确保权限生效
+          echo "等待权限生效..."
+          sleep 15
+          
+          # 验证 ServiceAccount 和权限
+          echo "=== 权限验证 ==="
+          if kubectl auth can-i get secrets --as=system:serviceaccount:{{ .Values.global.namespace }}:quantanexus-cert-sync; then
+            echo "✅ 有 secrets get 权限"
+          else
+            echo "❌ 无 secrets get 权限"
+          fi
+          
+          if kubectl auth can-i create secrets --as=system:serviceaccount:{{ .Values.global.namespace }}:quantanexus-cert-sync; then
+            echo "✅ 有 secrets create 权限"
+          else
+            echo "❌ 无 secrets create 权限"
+          fi
+          
+          if kubectl auth can-i get secrets -n {{ .Values.certManager.rootCA.sourceNamespace }} --as=system:serviceaccount:{{ .Values.global.namespace }}:quantanexus-cert-sync; then
+            echo "✅ 有跨命名空间 secrets get 权限"
+          else
+            echo "❌ 无跨命名空间 secrets get 权限"
+          fi
+          
+          # 检查目标命名空间是否存在
+          echo "=== 命名空间检查 ==="
+          if kubectl get namespace {{ .Values.global.namespace }} &>/dev/null; then
+            echo "✅ 命名空间 {{ .Values.global.namespace }} 存在"
+          else
+            echo "❌ 命名空间 {{ .Values.global.namespace }} 不存在"
+            exit 1
           fi
           
           # 检查源 Secret 是否存在
+          echo "=== 源 Secret 检查 ==="
           if kubectl get secret {{ .Values.certManager.rootCA.sourceSecretName }} -n {{ .Values.certManager.rootCA.sourceNamespace }} &>/dev/null; then
-            echo "找到 {{ .Values.certManager.rootCA.sourceSecretName }}，开始同步..."
+            echo "✅ 找到源 Secret {{ .Values.certManager.rootCA.sourceSecretName }}"
             
             # 获取证书数据
             CERT_DATA=$(kubectl get secret {{ .Values.certManager.rootCA.sourceSecretName }} -n {{ .Values.certManager.rootCA.sourceNamespace }} -o jsonpath='{.data.tls\.crt}')
             
             if [ -n "$CERT_DATA" ]; then
+              echo "✅ 成功获取证书数据"
+              
               # 解码证书数据
               echo "$CERT_DATA" | base64 -d > /tmp/root-ca.crt
               
               # 验证证书文件
               if [ -s /tmp/root-ca.crt ]; then
-                echo "证书文件有效，正在创建 Secret..."
+                echo "✅ 证书文件有效，大小: $(wc -c < /tmp/root-ca.crt) 字节"
                 
                 # 创建或更新目标 Secret
+                echo "正在创建目标 Secret..."
                 kubectl create secret generic {{ .Values.certManager.rootCA.targetSecretName }} \
                   -n {{ .Values.global.namespace }} \
                   --from-file=ca.crt=/tmp/root-ca.crt \
                   --dry-run=client -o yaml | kubectl apply -f -
                   
-                echo "根证书同步完成"
+                echo "✅ 根证书同步完成"
                 
                 # 验证创建的 Secret
                 if kubectl get secret {{ .Values.certManager.rootCA.targetSecretName }} -n {{ .Values.global.namespace }} &>/dev/null; then
@@ -82,10 +123,12 @@ spec:
             echo "⚠️  将创建空的证书 Secret 作为占位符"
             kubectl create secret generic {{ .Values.certManager.rootCA.targetSecretName }} \
               -n {{ .Values.global.namespace }} \
-              --from-literal=ca.crt="placeholder-certificate" \
+              --from-literal=ca.crt="placeholder-certificate-created-at-$(date +%Y%m%d-%H%M%S)" \
               --dry-run=client -o yaml | kubectl apply -f -
+            echo "✅ 占位符 Secret 创建完成"
           fi
           
           # 清理临时文件
           rm -f /tmp/root-ca.crt
+          echo "=== 证书同步完成 ==="
 {{- end }}
