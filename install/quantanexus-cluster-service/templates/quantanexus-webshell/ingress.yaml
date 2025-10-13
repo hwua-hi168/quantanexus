@@ -4,6 +4,10 @@ kind: Ingress
 metadata:
   name: abc-webshell-ingress
   namespace: {{ .Values.global.namespace | default "quantanexus" }}
+  labels:
+    app: abc-webshell
+    {{- include "quantanexus.labels" . | nindent 4 }}
+  
   annotations:
     kubernetes.io/ingress.class: nginx
     {{- range $key, $value := .Values.abcWebShell.ingress.annotations }}
