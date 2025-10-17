@@ -28,7 +28,7 @@ global:
 # Cert Manager 配置
 # ==============================
 certManager:
-  # 是否启用 Cert Manager
+  # 是否己安装 Cert Manager
   enabled: true
   # 证书颁发者名称
   issuerName: quantanexus-ca-issuer
