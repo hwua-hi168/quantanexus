@@ -13,12 +13,12 @@ controller:
     tag: v1.1.2
     digest: ""
   kind: DaemonSet
-  tolerations:                 # 让 master 也调度
-  - key: "node-role.kubernetes.io/master"
-    operator: "Exists"
-    effect: "NoSchedule"
-  nodeSelector:                # 仅调度到打标签节点
-    ingress: "true"
+  # tolerations:
+  # - key: "node-role.kubernetes.io/master"
+  #   operator: "Exists"
+  #   effect: "NoSchedule"
+  # nodeSelector:
+  #   ingress: "true"
   # nodeSelector:
   #   kubernetes.io/hostname: "com-cilium-master-2"
   # service:
