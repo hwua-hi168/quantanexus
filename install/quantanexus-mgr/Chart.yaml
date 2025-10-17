@@ -1,5 +1,5 @@
 apiVersion: v2
-name: quantanexus
+name: quantanexus-mgr
 description: A Helm chart for deploying quantanexus mgr on Kubernetes
 version: 1.0.0
 appVersion: "1.0.0"
