@@ -14,7 +14,7 @@ spec:
       serviceAccountName: node-labeler
       containers:
       - name: kubectl
-        image: harbor.hi168.com/quantanexus/kubectl:latest
+        image: {{ .Values.global.registry }}/kubectl:latest
         command:
         - /bin/sh
         - -c

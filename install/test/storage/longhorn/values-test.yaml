@@ -19,3 +19,6 @@ persistence:
 defaultSettings:
   defaultDataPath: /var/lib/longhorn
   createDefaultDiskLabeledNodes: true
+  defaultDiskPath: /var/lib/longhorn
+  createDefaultDisk: true
+  defaultDiskAllowScheduling: true

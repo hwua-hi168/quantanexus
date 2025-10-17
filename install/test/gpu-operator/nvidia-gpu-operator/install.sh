@@ -1,0 +1,9 @@
+#!/bin/bash 
+#helm repo add nvidia https://helm.ngc.nvidia.com/nvidia \
+# && helm repo update
+#宿主机无驱动
+#helm install --wait --generate-name -n gpu-operator --create-namespace nvidia/gpu-operator
+
+
+# 宿主机已经有驱动了
+helm upgrade --install --wait --generate-name  gpu-operator --create-namespace nvidia/gpu-operator --set driver.enabled=false
