@@ -9,11 +9,11 @@ helm repo update
 3. 安装Chart(示例):
 ```bash
 helm install quantanexus quantanexus/quantanexus-mgr --version 1.0.0 \
-    --namespace quantanexus --create-namespace \
-    --set domainName=qntest002.hi168.com \
-    --set masterNode=com-calino-master-1 \
-    --set masterNodes="com-calino-master-1,com-calino-master-2" \
-    --set workerNodes="com-calino-worker-1" 
+  --namespace quantanexus --create-namespace \
+  --set global.domainName=qntest002.hi168.com \
+  --set global.masterNode=master1 \
+  --set "global.masterNodes=master1\,master2" \
+  --set global.workerNodes=worker1    
 ```
 
 ### 自定义配置
@@ -36,7 +36,7 @@ helm upgrade quantanexus quantanexus/quantanexus-mgr --version 1.0.0 \
     --namespace quantanexus --create-namespace \
     --set domainName=qntest002.hi168.com \
     --set masterNode=com-calino-master-1 \
-    --set masterNodes="com-calino-master-1,com-calino-master-2" \
+    --set masterNodes="com-calino-master-1\,com-calino-master-2" \
     --set workerNodes="com-calino-worker-1" 
 
 # 卸载
