@@ -40,6 +40,6 @@ helm upgrade quantanexus quantanexus/quantanexus-mgr --version 1.0.0 \
     --set workerNodes="com-calino-worker-1" 
 
 # 卸载
-helm uninstall quantanexus -n abc-platform
+helm uninstall quantanexus -n quantanexus
 ```
 
