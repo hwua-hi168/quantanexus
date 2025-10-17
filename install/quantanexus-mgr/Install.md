@@ -2,36 +2,44 @@
 
 1. 添加必要的仓库:
 ```bash
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo add quantanexus https://helm.hi168.com/charts/
+helm repo update
 ```
 
-2. 安装依赖:
+3. 安装Chart(示例):
 ```bash
-helm dependency update quantanexus/
-```
-
-3. 安装Chart:
-```bash
-# 使用ko默认值
-helm install release1 ./quantanexus -n abc-platform --create-namespace
+helm install quantanexus quantanexus/quantanexus-mgr --version 1.0.0 \
+  --namespace quantanexus --create-namespace \
+  --set global.domainName=qntest002.hi168.com \
+  --set global.masterNode=master1 \
+  --set "global.masterNodes=master1\,master2" \
+  --set global.workerNodes=worker1    
 ```
 
 ### 自定义配置
 
-编辑自定义values文件（如./quantanexus/values.yaml）:
+helm show values quantanexus/quantanexus-mgr > quantanexus-mgr-values.yaml
+
+编辑自定义values文件 quantanexus-mgr-values.yaml
 
 然后 
-helm upgrade release1 ./quantanexus -n abc-platform
 
+helm install quantanexus quantanexus/quantanexus-mgr --version 1.0.0 \
+    --namespace quantanexus --create-namespace
+    -f quantanexus-mgr-values.yaml
 
 ### 升级和卸载
 
 ```bash
 # 升级
-helm upgrade release1 ./abc-platform -n abc-platform
+helm upgrade quantanexus quantanexus/quantanexus-mgr --version 1.0.0 \
+    --namespace quantanexus --create-namespace \
+    --set domainName=qntest002.hi168.com \
+    --set masterNode=com-calino-master-1 \
+    --set masterNodes="com-calino-master-1\,com-calino-master-2" \
+    --set workerNodes="com-calino-worker-1" 
 
 # 卸载
-helm uninstall release1 -n abc-platform
+helm uninstall quantanexus -n quantanexus
 ```
 
