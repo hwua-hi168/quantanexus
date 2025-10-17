@@ -1,25 +1,12 @@
 {{- if and .Values.certManager.enabled (not .Values.ingress.tlsManual) }}
 {{- if .Values.certManager.rootCA.createRBAC }}
+
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: quantanexus-cert-sync
-  namespace: {{ .Values.global.namespace | default "quantanexus" }}
-  labels:
-    app: quantanexus-cert-sync
-    {{- include "quantanexus.labels" . | nindent 4 }}
-  annotations:
-    # 确保在 Job 之前创建，使用更小的权重值
-    "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-weight": "-10"
-    "helm.sh/hook-delete-policy": before-hook-creation
-
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: quantanexus-cert-sync
+  namespace: {{ .Values.global.namespace }}
   labels:
     app: quantanexus-cert-sync
     {{- include "quantanexus.labels" . | nindent 4 }}
@@ -28,26 +15,37 @@ metadata:
     "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "-10"
     "helm.sh/hook-delete-policy": before-hook-creation
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: quantanexus-cert-sync-{{ .Values.global.namespace }}
+  labels:
+    app: quantanexus-cert-sync
+    {{- include "quantanexus.labels" . | nindent 4 }}
+  annotations:
+    # 与 ServiceAccount 相同的权重，确保同时创建
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-10"
+    "helm.sh/hook-delete-policy": before-hook-creation
+    
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
-  verbs: ["get", "list", "watch"]
-  resourceNames:
-  - {{ .Values.certManager.rootCA.sourceSecretName }}
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 - apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["get", "create", "update", "patch"]
-  resourceNames:
-  - {{ .Values.certManager.rootCA.targetSecretName }}
+  resources: ["namespaces"] 
+  verbs: ["get"]
 - apiGroups: [""]
-  resources: ["namespaces"]
+  resources: ["serviceaccounts"]
   verbs: ["get"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: quantanexus-cert-sync
+  name: quantanexus-cert-sync-{{ .Values.global.namespace }}
   labels:
     app: quantanexus-cert-sync
     {{- include "quantanexus.labels" . | nindent 4 }}
@@ -59,10 +57,11 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: quantanexus-cert-sync
+  name: quantanexus-cert-sync-{{ .Values.global.namespace }}
 subjects:
 - kind: ServiceAccount
   name: quantanexus-cert-sync
-  namespace: {{ .Values.global.namespace | default "quantanexus" }}
+  namespace: {{ .Values.global.namespace }}
+
 {{- end }}
 {{- end }}

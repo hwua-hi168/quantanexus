@@ -15,9 +15,9 @@ spec:
   duration: 8760h        # 1 年
   renewBefore: 720h      # 提前 1 个月续期
   # 主体 & SAN
-  commonName: "*.qntest003.hi168.com"
+  commonName: "*.{{ include "quantanexus.domainName" . }}"
   dnsNames:
-    - "*.qntest003.hi168.com"
+    - "*.{{ include "quantanexus.domainName" . }}"
   # 签发者（已提前创建）
   issuerRef:
     name: {{ .Values.certManager.issuerName | default "selfsigned-issuer" }}
