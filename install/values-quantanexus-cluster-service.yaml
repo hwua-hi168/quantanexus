@@ -1,6 +1,0 @@
-
-global:
-  domainName: qntest003.hi168.com
-  registry: harbor.hi168.com/quantanexus
-  # masterNode: com-calino-master-1
-  createNamespace: true
