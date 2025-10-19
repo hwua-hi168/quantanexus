@@ -25,7 +25,9 @@ Issue: 您可以在issue提出问题，我们会尽快回复，并解答。
 
 ## 一、安装选项
 
-QuantaNexus 提供多种安装方式，以满足不同环境和需求：
+QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平面，另外一个是Quantanexus-cluster-service,是k8s集群服务，提供webshell，镜像提交等功能。
+
+提供多种安装方式，以满足不同环境和需求：
 
 ### 1.0 Helm 一键安装 安装（你必须拥有k8s环境）
 

@@ -13,6 +13,13 @@ controller:
     tag: v1.1.2
     digest: ""
   kind: DaemonSet
+  # added by David  , to expose the metrics to prom . 
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: prometheus
   # tolerations:
   # - key: "node-role.kubernetes.io/master"
   #   operator: "Exists"
