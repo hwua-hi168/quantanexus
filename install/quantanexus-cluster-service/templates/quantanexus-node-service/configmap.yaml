@@ -4,7 +4,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: hwua-node-service-config
-  namespace: {{ .Values.global.namespace | default "quantanexus" }}
+  namespace: {{ .Release.Namespace | default "quantanexus" }}
   labels:
     {{- include "quantanexus.labels" . | nindent 4 }}
 data:

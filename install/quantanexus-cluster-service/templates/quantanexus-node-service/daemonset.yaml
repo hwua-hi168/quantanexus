@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: hwua-node-service-daemonset
-  namespace: {{ .Values.global.namespace | default "quantanexus" }}
+  namespace: {{ .Release.Namespace | default "quantanexus" }}
   labels:
     {{- include "quantanexus.labels" . | nindent 4 }}
 spec:

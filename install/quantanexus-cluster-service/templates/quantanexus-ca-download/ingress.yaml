@@ -3,7 +3,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ca-download
-  namespace: {{ .Values.global.namespace | default "quantanexus" }}
+  namespace: {{ .Release.Namespace | default "quantanexus" }}
   labels:
     app: quantanexus-ca-download
     {{- include "quantanexus.labels" . | nindent 4 }}  

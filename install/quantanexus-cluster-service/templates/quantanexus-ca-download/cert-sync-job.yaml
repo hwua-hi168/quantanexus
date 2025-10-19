@@ -3,7 +3,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: quantanexus-ca-sync-{{ .Release.Revision }}
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: quantanexus-ca-sync
     {{- include "quantanexus.labels" . | nindent 4 }}
@@ -30,7 +30,7 @@ spec:
         - |
           set -e
           echo "=== 开始证书同步 ==="
-          echo "目标命名空间: {{ .Values.global.namespace }}"
+          echo "目标命名空间: {{ .Release.Namespace }}"
           echo "源 Secret: {{ .Values.certManager.rootCA.sourceSecretName }}"
           echo "目标 Secret: {{ .Values.certManager.rootCA.targetSecretName }}"
           
@@ -49,19 +49,19 @@ spec:
           
           # 验证 ServiceAccount 和权限
           echo "=== 权限验证 ==="
-          if kubectl auth can-i get secrets --as=system:serviceaccount:{{ .Values.global.namespace }}:quantanexus-cert-sync; then
+          if kubectl auth can-i get secrets --as=system:serviceaccount:{{ .Release.Namespace }}:quantanexus-cert-sync; then
             echo "✅ 有 secrets get 权限"
           else
             echo "❌ 无 secrets get 权限"
           fi
           
-          if kubectl auth can-i create secrets --as=system:serviceaccount:{{ .Values.global.namespace }}:quantanexus-cert-sync; then
+          if kubectl auth can-i create secrets --as=system:serviceaccount:{{ .Release.Namespace }}:quantanexus-cert-sync; then
             echo "✅ 有 secrets create 权限"
           else
             echo "❌ 无 secrets create 权限"
           fi
           
-          if kubectl auth can-i get secrets -n {{ .Values.certManager.rootCA.sourceNamespace }} --as=system:serviceaccount:{{ .Values.global.namespace }}:quantanexus-cert-sync; then
+          if kubectl auth can-i get secrets -n {{ .Values.certManager.rootCA.sourceNamespace }} --as=system:serviceaccount:{{ .Release.Namespace }}:quantanexus-cert-sync; then
             echo "✅ 有跨命名空间 secrets get 权限"
           else
             echo "❌ 无跨命名空间 secrets get 权限"
@@ -69,10 +69,10 @@ spec:
           
           # 检查目标命名空间是否存在
           echo "=== 命名空间检查 ==="
-          if kubectl get namespace {{ .Values.global.namespace }} &>/dev/null; then
-            echo "✅ 命名空间 {{ .Values.global.namespace }} 存在"
+          if kubectl get namespace {{ .Release.Namespace }} &>/dev/null; then
+            echo "✅ 命名空间 {{ .Release.Namespace }} 存在"
           else
-            echo "❌ 命名空间 {{ .Values.global.namespace }} 不存在"
+            echo "❌ 命名空间 {{ .Release.Namespace }} 不存在"
             exit 1
           fi
           
@@ -97,14 +97,14 @@ spec:
                 # 创建或更新目标 Secret
                 echo "正在创建目标 Secret..."
                 kubectl create secret generic {{ .Values.certManager.rootCA.targetSecretName }} \
-                  -n {{ .Values.global.namespace }} \
+                  -n {{ .Release.Namespace }} \
                   --from-file=ca.crt=/tmp/root-ca.crt \
                   --dry-run=client -o yaml | kubectl apply -f -
                   
                 echo "✅ 根证书同步完成"
                 
                 # 验证创建的 Secret
-                if kubectl get secret {{ .Values.certManager.rootCA.targetSecretName }} -n {{ .Values.global.namespace }} &>/dev/null; then
+                if kubectl get secret {{ .Values.certManager.rootCA.targetSecretName }} -n {{ .Release.Namespace }} &>/dev/null; then
                   echo "✅ Secret {{ .Values.certManager.rootCA.targetSecretName }} 创建成功"
                 else
                   echo "❌ Secret 创建失败"
@@ -122,7 +122,7 @@ spec:
             echo "❌ 在 {{ .Values.certManager.rootCA.sourceNamespace }} 命名空间中未找到 {{ .Values.certManager.rootCA.sourceSecretName }}"
             echo "⚠️  将创建空的证书 Secret 作为占位符"
             kubectl create secret generic {{ .Values.certManager.rootCA.targetSecretName }} \
-              -n {{ .Values.global.namespace }} \
+              -n {{ .Release.Namespace }} \
               --from-literal=ca.crt="placeholder-certificate-created-at-$(date +%Y%m%d-%H%M%S)" \
               --dry-run=client -o yaml | kubectl apply -f -
             echo "✅ 占位符 Secret 创建完成"

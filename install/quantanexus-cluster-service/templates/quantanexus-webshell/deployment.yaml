@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: abc-webshell
-  namespace: {{ .Values.global.namespace | default "quantanexus" }}
+  namespace: {{ .Release.Namespace | default "quantanexus" }}
   labels:
     app: abc-webshell
     {{- include "quantanexus.labels" . | nindent 4 }}
