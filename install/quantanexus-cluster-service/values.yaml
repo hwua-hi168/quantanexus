@@ -13,16 +13,12 @@ appVersion: "1.0.0"
 # 全局配置
 # ==============================
 global:
-  # 部署的命名空间
-  namespace: quantanexus-service
   # 域名配置
   domainName: qntest002.example.com
   # 镜像仓库地址
   registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
   # 主节点名称（已注释）
   # masterNode: com-calino-master-1
-  # 是否自动创建命名空间
-  createNamespace: true
 
 # ==============================
 # Cert Manager 配置
