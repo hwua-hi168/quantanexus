@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-reverse-proxy
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: nginx-reverse-proxy
     {{- include "quantanexus.labels" . | nindent 4 }}
