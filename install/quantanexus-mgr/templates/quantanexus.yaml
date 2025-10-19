@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "quantanexus.fullname" . }}
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: quantanexus
     {{- include "quantanexus.labels" . | nindent 4 }}
@@ -131,7 +131,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "quantanexus.fullname" . }}
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: quantanexus
 spec:

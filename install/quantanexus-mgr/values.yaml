@@ -1,6 +1,5 @@
 # Global configuration
 global:
-  namespace: quantanexus
   service_namespace: quantanexus-service
   domainName: qntest002.hi168.com
   # registry: harbor.hi168.com/quantanexus
@@ -11,7 +10,6 @@ global:
   masterNode: com-calino-master-1
   masterNodes: "com-calino-master-1,com-calino-master-2"
   workerNodes: "com-calino-worker-1"
-  createNamespace: true
   labelController: true
   
 # Cert Manager 配置块
