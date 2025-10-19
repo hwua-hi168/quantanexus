@@ -1,0 +1,38 @@
+adminPassword: prom-operator
+
+# 数据源
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      url: http://prometheus-server:80
+      access: proxy
+      isDefault: true
+
+# 仪表盘提供者
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: true
+      options:
+        path: /var/lib/grafana/dashboards/default
+
+# 仪表盘内容（本地 JSON 或 grafana.net ID 均可）
+dashboards:
+  default:
+    node-exporter:
+      gnetId: 1860          # 官方 Node Exporter 大盘
+      revision: 22
+      datasource: Prometheus
+    gpu-cluster:
+      gnetId: 12239         # DCGM GPU 大盘
+      revision: 1
+      datasource: Prometheus

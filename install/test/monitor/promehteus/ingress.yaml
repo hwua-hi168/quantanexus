@@ -1,0 +1,25 @@
+# grafana-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana
+  namespace: prom
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-dns01 # 配置自动生成 https 证书
+    kubernetes.io/ingress.class: nginx
+spec:
+  tls:
+    - hosts:
+        - 'grafana.todoit.tech'
+      secretName: grafana-letsencrypt-tls
+  rules:
+    - host: grafana.todoit.tech
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prometheus-grafana
+                port:
+                  number: 3000

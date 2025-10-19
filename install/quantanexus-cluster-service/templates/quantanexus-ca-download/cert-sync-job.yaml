@@ -23,7 +23,7 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: ca-sync
-        image:  {{ .Values.global.registry }}/kubectl:latest
+        image: {{ .Values.global.registry }}/kubectl:latest
         command:
         - /bin/sh
         - -c
