@@ -1,0 +1,20 @@
+# 命名空间配置
+namespace:
+  name: helloworld-ns
+  create: true
+
+# 应用配置
+replicaCount: 1
+
+image:
+  repository: nginx
+  pullPolicy: IfNotPresent
+  tag: "1.25"
+
+service:
+  type: ClusterIP
+  port: 80
+
+app:
+  message: "Hello, World from Helm in dedicated namespace!"
+  environment: "development"
