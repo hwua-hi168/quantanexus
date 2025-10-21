@@ -1,0 +1,18 @@
+## values.yaml
+prometheus:
+  service:
+    type: NodePort
+    # Prometheus UI
+    nodePort: 30090
+
+grafana:
+  service:
+    type: NodePort
+    # Grafana UI
+    nodePort: 30300
+
+alertmanager:
+  service:
+    type: NodePort
+    # Alertmanager UI
+    nodePort: 30903  

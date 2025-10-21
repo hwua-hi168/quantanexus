@@ -3,3 +3,4 @@
 
 # all crt files .
 *.crt
+install/quantanexus-mgr/values-qn003.yaml

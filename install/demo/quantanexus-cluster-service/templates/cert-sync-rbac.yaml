@@ -1,0 +1,67 @@
+{{- if and .Values.certManager.enabled (not .Values.ingress.tlsManual) }}
+{{- if .Values.certManager.rootCA.createRBAC }}
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: quantanexus-cert-sync
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: quantanexus-cert-sync
+    {{- include "quantanexus.labels" . | nindent 4 }}
+  annotations:
+    # 与 ServiceAccount 相同的权重，确保同时创建
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-10"
+    "helm.sh/hook-delete-policy": before-hook-creation
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: quantanexus-cert-sync-{{ .Release.Namespace }}
+  labels:
+    app: quantanexus-cert-sync
+    {{- include "quantanexus.labels" . | nindent 4 }}
+  annotations:
+    # 与 ServiceAccount 相同的权重，确保同时创建
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-10"
+    "helm.sh/hook-delete-policy": before-hook-creation
+    
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["namespaces"] 
+  verbs: ["get"]
+- apiGroups: [""]
+  resources: ["serviceaccounts"]
+  verbs: ["get"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: quantanexus-cert-sync-{{ .Release.Namespace }}
+  labels:
+    app: quantanexus-cert-sync
+    {{- include "quantanexus.labels" . | nindent 4 }}
+  annotations:
+    # 与 ServiceAccount 相同的权重，确保同时创建
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-10"
+    "helm.sh/hook-delete-policy": before-hook-creation
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: quantanexus-cert-sync-{{ .Release.Namespace }}
+subjects:
+- kind: ServiceAccount
+  name: quantanexus-cert-sync
+  namespace: {{ .Release.Namespace }}
+
+{{- end }}
+{{- end }}

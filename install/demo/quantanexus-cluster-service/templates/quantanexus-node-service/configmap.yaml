@@ -1,0 +1,29 @@
+{{- if .Values.hwuaNodeService.enabled  }}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hwua-node-service-config
+  namespace: {{ .Release.Namespace | default "quantanexus" }}
+  labels:
+    {{- include "quantanexus.labels" . | nindent 4 }}
+data:
+  conf.toml: |-
+    # 这里应包含你的conf/conf.toml配置文件的实际内容
+    # 例如：
+    appname = "{{ .Values.hwuaNodeService.config.appname }}"
+    #如果不设置logfile 则输出到终端，如果设置了logfile则输出到logfile里
+    logfile = "{{ .Values.hwuaNodeService.config.logfile }}"
+    #container runtime 服务 默认是containerd 为docker，podman留了接口，配置docker，podman不起作用
+    [cri]
+    type = "{{ .Values.hwuaNodeService.config.cri.type }}"
+    socket_addr = "{{ .Values.hwuaNodeService.config.cri.socket_addr }}"
+    # containerd情况下测试默认用default，如果k8s生产环境，此处必须配置：namespace="k8s.io"
+    namespace = "{{ .Values.hwuaNodeService.config.cri.namespace }}"
+    [server]
+    ip = "{{ .Values.hwuaNodeService.config.server.ip }}"
+    port = {{ .Values.hwuaNodeService.config.server.port }}
+    #如果不配置证书，自动变成ws:// 普通连接
+    #certfile = "/etc/hwua-node-service/cert.pem"
+    #keyfile = "/etc/hwua-node-service/private.key"
+{{- end }}
