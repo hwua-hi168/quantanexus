@@ -1,4 +1,5 @@
-helm repo add multus-cni https://helm.projects.multus.io
+# helm repo add multus-cni https://helm.projects.multus.io
+helm repo add hi168 https://hi168.com/charts
 helm repo update
 
-helm install multus multus-cni/multus-cni
+helm install multus hi168/multus-cni

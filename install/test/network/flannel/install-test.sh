@@ -1,10 +1,11 @@
 #!/bin/bash
 
-helm repo add flannel https://flannel-io.github.io/flannel/
+#helm repo add flannel https://flannel-io.github.io/flannel/
+helm repo add hi168 https://hi168.com/charts
 helm repo update
 
 helm install flannel \
   --namespace kube-flannel \
   --create-namespace \
   --set podCidr="10.244.0.0/16" \
-  flannel/flannel
+  hi168/flannel
