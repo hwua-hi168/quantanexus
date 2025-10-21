@@ -1,12 +1,14 @@
 #!/bin/bash
-
-helm repo add jetstack https://charts.jetstack.io
+# 原仓库，测试原因加入了hi168仓库
+# helm repo add jetstack https://charts.jetstack.io
+helm repo add hi168 https://hi168.com/charts 
 helm repo update
-helm upgrade --install cert-manager jetstack/cert-manager \
+helm upgrade --install cert-manager hi68/cert-manager \
   -n cert-manager --create-namespace \
   --set installCRDs=true
   
-#创建自签Issuer
+#创建自签Issuer ? 这个应该放在quantanexus里吧？ 
+
 kubectl apply -f - <<EOF
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer

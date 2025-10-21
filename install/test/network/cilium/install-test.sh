@@ -1,12 +1,12 @@
 #!/bin/bash 
 
-helm repo add cilium https://helm.cilium.io/
-
+#helm repo add cilium https://helm.cilium.io/
+helm repo add hi168 https://hi168.com/charts/
 #local install 
 #helm install cilium ./cilium -n kube-system  \
 
 #remote repository install 
-helm install cilium cilium/cilium --version 1.18.2 --namespace kube-system 
+helm install cilium hi168/cilium --version 1.18.2 --namespace kube-system 
     --set k8sServiceHost=192.168.0.102 \
     --set k8sServicePort=6443 \
     --version 1.16.1 \
