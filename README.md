@@ -42,15 +42,15 @@ QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平
 
 | 组件名称 | 类型 | 必需性 | 说明 |
 |---------|------|--------|------|
-| longhorn 或 ceph | 存储 | ✅ 必需 | 提供持久化存储解决方案，longhorn 适用于测试环境，ceph 适用于生产环境 |
+| longhorn 或 ceph | 存储 | ✅ 必需 | longhorn 适用于测试环境，ceph 适用于生产环境 |
 | cert-manager | 基础设施 | ✅ 必需 | 用于证书签发和管理，为集群提供 TLS 证书支持 |
-| ingress-nginx | 基础设施 | ✅ 必需 | 提供 Kubernetes 集群的入口控制器，实现服务暴露和负载均衡 |
+| ingress-nginx | 基础设施 | ✅ 必需 | 提供 Kubernetes 集群的入口控制器，实现服务暴露 |
 | prometheus | 监控 | ✅ 必需 | 集群监控和指标收集系统，用于监控集群和应用性能 |
 | grafana | 监控 | ✅ 必需 | 数据可视化平台，用于展示 prometheus 收集的监控数据 |
 | harbor | 镜像仓库 | ✅ 必需 | 容器镜像仓库，用于存储和分发容器镜像 |
-| minio 或 seaweedfs | 对象存储 | ⚠️ 可选 | 对象存储解决方案，用于存储非结构化数据，如日志、备份等 |
-| gpu-operator | AI/异构计算 | ⚠️ 可选 | 英伟达 GPU 支持必备组件，仅在需要 GPU 调度时安装 |
-| volcano | AI/异构计算 | ⚠️ 可选 | AI 任务调度器，支持队列式 AI 任务调度，仅在需要 AI 任务管理时安装 |
+| minio 或 seaweedfs | 对象存储 | ⚠️ 可选 | 对象存储解决方案 |
+| gpu-operator | AI | ⚠️ 可选 |仅在需要 GPU 调度时安装 |
+| volcano | AI | ⚠️ 可选 | 仅在需要 AI 任务管理时安装 |
 
 **说明：**
 
