@@ -1,0 +1,39 @@
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+WorkingDirectory=/var/lib/kubelet
+ExecStartPre=/bin/mount -o remount,rw '/sys/fs/cgroup'
+{% if KUBE_RESERVED_ENABLED == "yes" or SYS_RESERVED_ENABLED == "yes" %}
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/cpu/podruntime.slice
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/cpuacct/podruntime.slice
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/cpuset/podruntime.slice
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/memory/podruntime.slice
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/pids/podruntime.slice
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/systemd/podruntime.slice
+
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/cpu/system.slice
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/cpuacct/system.slice
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/cpuset/system.slice
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/memory/system.slice
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/pids/system.slice
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/systemd/system.slice
+
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/hugetlb/podruntime.slice
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/hugetlb/system.slice
+
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/podruntime.slice
+{% endif %}
+ExecStart={{ bin_dir }}/kubelet \
+  --config=/var/lib/kubelet/config.yaml \
+  --container-runtime-endpoint=unix:///run/containerd/containerd.sock \
+  --hostname-override={{ K8S_NODENAME }} \
+  --kubeconfig=/etc/kubernetes/kubelet.kubeconfig \
+  --root-dir={{ KUBELET_ROOT_DIR }} \
+  --v=2
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

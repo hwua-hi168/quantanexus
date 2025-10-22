@@ -1,0 +1,23 @@
+{
+  "data-root": "{{ DOCKER_STORAGE_DIR }}",
+  "exec-opts": ["native.cgroupdriver={{ CGROUP_DRIVER }}"],
+{% if ENABLE_MIRROR_REGISTRY %}
+  "registry-mirrors": [
+    "https://docker.nju.edu.cn/",
+    "https://kuamavit.mirror.aliyuncs.com"
+  ], 
+{% endif %}
+{% if DOCKER_ENABLE_REMOTE_API %}
+  "hosts": ["tcp://0.0.0.0:2376", "unix:///var/run/docker.sock"],
+{% endif %}
+  "insecure-registries": [{{ INSECURE_REG_STRING }}],
+  "max-concurrent-downloads": 10,
+  "live-restore": true,
+  "log-driver": "json-file",
+  "log-level": "warn",
+  "log-opts": {
+    "max-size": "50m",
+    "max-file": "1"
+    },
+  "storage-driver": "overlay2"
+}

@@ -1,0 +1,26 @@
+# to clean 'lb' service
+- block:
+  - name: get service info
+    shell: 'systemctl list-units --type=service |grep -E "l4lb|keepalived|ssh"'
+    register: service_info
+
+  - name: remove service l4lb
+    service: name=l4lb state=stopped enabled=no
+    when: '"l4lb" in service_info.stdout'
+    ignore_errors: true
+
+  - name: remove service keepalived
+    service: name=keepalived state=stopped enabled=no
+    when: '"keepalived" in service_info.stdout'
+    ignore_errors: true
+
+  - name: remove files and dirs
+    file: name={{ item }} state=absent
+    with_items:
+    - "/etc/l4lb"
+    - "/etc/keepalived"
+    - "/etc/systemd/system/l4lb.service"
+    - "/etc/systemd/system/keepalived.service"
+    - "/usr/local/sbin/keepalived"
+  ignore_errors: true
+  when: "inventory_hostname in groups['ex_lb']"

@@ -1,0 +1,15 @@
+# 区分多个instance的VRRP组播，同网段不能重复，取值在0-255之间
+# 因项目已设置vrrp报文单播模式，所以这个ROUTER_ID 即便同网段里面有重复也没关系
+ROUTER_ID: 222
+
+# 启用 ingress NodePort服务的负载均衡 (yes/no)
+INGRESS_NODEPORT_LB: "no"
+
+# ingress NodePort 的端口号
+INGRESS_NODEPORT_LB_PORT: 23456
+
+# 启用 ingress tls NodePort服务的负载均衡 (yes/no)
+INGRESS_TLS_NODEPORT_LB: "no"
+
+# ingress tls NodePort 的端口号
+INGRESS_TLS_NODEPORT_LB_PORT: 23457

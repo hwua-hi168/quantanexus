@@ -1,0 +1,52 @@
+[Unit]
+Description=Kubernetes API Server
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+After=network.target
+
+[Service]
+ExecStart={{ bin_dir }}/kube-apiserver \
+{% if ENABLE_CLUSTER_AUDIT|bool %}
+  --audit-policy-file=/etc/kubernetes/audit/audit-policy.yaml \
+  --audit-log-path=/var/log/kubernetes/audit/audit.log \
+  --audit-log-maxage=30 \
+  --audit-log-maxbackup=10 \
+  --audit-log-maxsize=100 \
+{% endif %}
+  --allow-privileged=true \
+  --anonymous-auth=false \
+  --api-audiences=api,istio-ca \
+  --authorization-mode=Node,RBAC \
+  --bind-address={{ inventory_hostname }} \
+  --client-ca-file={{ ca_dir }}/ca.pem \
+  --endpoint-reconciler-type=lease \
+  --etcd-cafile={{ ca_dir }}/ca.pem \
+  --etcd-certfile={{ ca_dir }}/kubernetes.pem \
+  --etcd-keyfile={{ ca_dir }}/kubernetes-key.pem \
+  --etcd-servers={{ ETCD_ENDPOINTS }} \
+  --kubelet-certificate-authority={{ ca_dir }}/ca.pem \
+  --kubelet-client-certificate={{ ca_dir }}/kubernetes.pem \
+  --kubelet-client-key={{ ca_dir }}/kubernetes-key.pem \
+  --secure-port={{ SECURE_PORT }} \
+  --service-account-issuer=https://kubernetes.default.svc \
+  --service-account-signing-key-file={{ ca_dir }}/ca-key.pem \
+  --service-account-key-file={{ ca_dir }}/ca.pem \
+  --service-cluster-ip-range={{ SERVICE_CIDR }} \
+  --service-node-port-range={{ NODE_PORT_RANGE }} \
+  --tls-cert-file={{ ca_dir }}/kubernetes.pem \
+  --tls-private-key-file={{ ca_dir }}/kubernetes-key.pem \
+  --requestheader-client-ca-file={{ ca_dir }}/ca.pem \
+  --requestheader-allowed-names= \
+  --requestheader-extra-headers-prefix=X-Remote-Extra- \
+  --requestheader-group-headers=X-Remote-Group \
+  --requestheader-username-headers=X-Remote-User \
+  --proxy-client-cert-file={{ ca_dir }}/aggregator-proxy.pem \
+  --proxy-client-key-file={{ ca_dir }}/aggregator-proxy-key.pem \
+  --enable-aggregator-routing=true \
+  --v=2
+Restart=always
+RestartSec=5
+Type=notify
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,29 @@
+- block:
+    - name: 准备配置 kube-router DaemonSet
+      template: src=kuberouter.yaml.j2 dest={{ cluster_dir }}/yml/kube-router.yaml
+
+    - name: 删除 kube-router DaemonSet
+      shell: "{{ base_dir }}/bin/kubectl delete -f {{ cluster_dir }}/yml/kube-router.yaml || echo true; sleep 3"
+      when: 'CHANGE_CA|bool'
+
+    # 只需单节点执行一次
+    - name: 运行 kube-router DaemonSet
+      shell: "{{ base_dir }}/bin/kubectl apply -f {{ cluster_dir }}/yml/kube-router.yaml"
+  run_once: true
+  connection: local
+  tags: force_change_certs
+
+# 删除原有cni配置
+- name: 删除默认cni配置 
+  file: path=/etc/cni/net.d/10-default.conf state=absent
+
+# 等待网络插件部署成功，视下载镜像速度而定
+- name: 轮询等待kube-router 运行，视下载镜像速度而定
+  shell: "{{ base_dir }}/bin/kubectl get pod -n kube-system -o wide|grep 'kube-router'|grep ' {{ K8S_NODENAME }} '|awk '{print $3}'"
+  register: pod_status
+  until: pod_status.stdout == "Running"
+  retries: 15
+  delay: 8
+  ignore_errors: true
+  connection: local
+  tags: force_change_certs
