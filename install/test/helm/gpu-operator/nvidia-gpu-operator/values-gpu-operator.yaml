@@ -12,14 +12,14 @@ operator:
     image: nvcr.io-nvidia-cuda # 原始: nvcr.io/nvidia/cuda
     version: 13.0.1-base-ubi9 # 保留原始版本号作为标签的一部分
 
-driver:
-  repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
-  image: driver # 原始: nvcr.io/nvidia/driver
-  version: "580.82.07" # 保留原始版本号作为标签的一部分
-  manager:
-    repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
-    image: nvcr.io-nvidia-cloud-native-k8s-driver-manager # 原始: nvcr.io/nvidia/cloud-native/k8s-driver-manager
-    version: v0.8.1 # 保留原始版本号作为标签的一部分
+# driver:
+#   repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+#   image: driver # 原始: nvcr.io/nvidia/driver
+#   version: "580.82.07" # 保留原始版本号作为标签的一部分
+#   manager:
+#     repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+#     image: nvcr.io-nvidia-cloud-native-k8s-driver-manager # 原始: nvcr.io/nvidia/cloud-native/k8s-driver-manager
+#     version: v0.8.1 # 保留原始版本号作为标签的一部分
 
 toolkit:
   repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
