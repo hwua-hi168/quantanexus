@@ -22,11 +22,13 @@ operator:
 #     version: v0.8.1 # 保留原始版本号作为标签的一部分
 
 toolkit:
+  enabled: true
   repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
   image: nvcr.io-nvidia-k8s-container-toolkit # 原始: nvcr.io/nvidia/k8s/container-toolkit
   version: v1.17.8-ubuntu20.04 # 保留原始版本号作为标签的一部分
 
 devicePlugin:
+  enabled: true
   repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
   image: nvcr.io-nvidia-k8s-device-plugin # 原始: nvcr.io/nvidia/k8s-device-plugin
   version: v0.17.4 # 保留原始版本号作为标签的一部分
@@ -37,6 +39,7 @@ dcgm: # enabled: false
   version: 4.3.1-1-ubuntu22.04 # 保留原始版本号作为标签的一部分
 
 dcgmExporter:
+  enabled: true  
   repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
   image: nvcr.io-nvidia-k8s-dcgm-exporter # 原始: nvcr.io/nvidia/k8s/dcgm-exporter
   version: 4.3.1-4.4.0-ubuntu22.04 # 保留原始版本号作为标签的一部分
