@@ -1,0 +1,7 @@
+tigeraOperator:
+  image: registry.cn-hangzhou.aliyuncs.com/quantanexus/quay.io-tigera-operator
+  version: v1.38.7
+  registry: ""
+calicoctl:
+  image: registry.cn-hangzhou.aliyuncs.com/quantanexus/docker.io-calico-ctl
+  tag: v3.30.4
