@@ -1,0 +1,111 @@
+validator:
+  repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+  image: nvcr.io-nvidia-cloud-native-gpu-operator-validator # 原始: nvcr.io/nvidia/cloud-native/gpu-operator-validator
+  version: v25.3.4 # 保留原始版本号作为标签的一部分
+
+operator:
+  repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+  image: nvcr.io-nvidia-gpu-operator # 原始: nvcr.io/nvidia/gpu-operator
+  version: v25.3.4 # 保留原始版本号作为标签的一部分
+  initContainer:
+    repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+    image: nvcr.io-nvidia-cuda # 原始: nvcr.io/nvidia/cuda
+    version: 13.0.1-base-ubi9 # 保留原始版本号作为标签的一部分
+
+# driver:
+#   repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+#   image: driver # 原始: nvcr.io/nvidia/driver
+#   version: "580.82.07" # 保留原始版本号作为标签的一部分
+#   manager:
+#     repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+#     image: nvcr.io-nvidia-cloud-native-k8s-driver-manager # 原始: nvcr.io/nvidia/cloud-native/k8s-driver-manager
+#     version: v0.8.1 # 保留原始版本号作为标签的一部分
+
+toolkit:
+  enabled: true
+  repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+  image: nvcr.io-nvidia-k8s-container-toolkit # 原始: nvcr.io/nvidia/k8s/container-toolkit
+  version: v1.17.8-ubuntu20.04 # 保留原始版本号作为标签的一部分
+
+devicePlugin:
+  enabled: true
+  repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+  image: nvcr.io-nvidia-k8s-device-plugin # 原始: nvcr.io/nvidia/k8s-device-plugin
+  version: v0.17.4 # 保留原始版本号作为标签的一部分
+
+dcgm: # enabled: false
+  repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+  image: nvcr.io-nvidia-cloud-native-dcgm # 原始: nvcr.io/nvidia/cloud-native/dcgm
+  version: 4.3.1-1-ubuntu22.04 # 保留原始版本号作为标签的一部分
+
+dcgmExporter:
+  enabled: true  
+  repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+  image: nvcr.io-nvidia-k8s-dcgm-exporter # 原始: nvcr.io/nvidia/k8s/dcgm-exporter
+  version: 4.3.1-4.4.0-ubuntu22.04 # 保留原始版本号作为标签的一部分
+
+gfd:
+  repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+  image: nvcr.io-nvidia-k8s-device-plugin # 原始: nvcr.io/nvidia/k8s-device-plugin
+  version: v0.17.4 # 保留原始版本号作为标签的一部分
+
+migManager:
+  repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+  image: nvcr.io-nvidia-cloud-native-k8s-mig-manager # 原始: nvcr.io/nvidia/cloud-native/k8s-mig-manager
+  version: v0.12.3-ubuntu20.04 # 保留原始版本号作为标签的一部分
+
+nodeStatusExporter: # enabled: false
+  repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+  image: nvcr.io-nvidia-cloud-native-gpu-operator-validator # 原始: nvcr.io/nvidia/cloud-native/gpu-operator-validator
+  version: v25.3.4 # 使用 Chart appVersion
+
+# gds: # enabled: false
+#   repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+#   image: nvcr.io-nvidia-cloud-native-nvidia-fs # 原始: nvcr.io/nvidia/cloud-native/nvidia-fs
+#   version: "2.20.5" # 保留原始版本号作为标签的一部分
+
+# gdrcopy: # enabled: false
+#   repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+#   image: nvcr.io-nvidia-cloud-native-gdrdrv # 原始: nvcr.io/nvidia/cloud-native/gdrdrv
+#   version: "v2.5.1" # 保留原始版本号作为标签的一部分
+
+# vgpuManager 镜像未在成功列表，但 driverManager 已成功
+vgpuManager: # enabled: false
+  # image: vgpu-manager # vgpuManager 镜像没有对应私有仓库，不进行修改
+  # version: ""
+  driverManager:
+    repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+    image: nvcr.io-nvidia-cloud-native-k8s-driver-manager # 原始: nvcr.io/nvidia/cloud-native/k8s-driver-manager
+    version: v0.8.1 # 保留原始版本号作为标签的一部分
+
+vgpuDeviceManager:
+  repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+  image: nvcr.io-nvidia-cloud-native-vgpu-device-manager # 原始: nvcr.io/nvidia/cloud-native/vgpu-device-manager
+  version: v0.4.0 # 保留原始版本号作为标签的一部分
+
+vfioManager:
+  repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+  image: nvcr.io-nvidia-cuda # 原始: nvcr.io/nvidia/cuda
+  version: 13.0.1-base-ubi9 # 保留原始版本号作为标签的一部分
+  driverManager:
+    repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+    image: nvcr.io-nvidia-cloud-native-k8s-driver-manager # 原始: nvcr.io/nvidia/cloud-native/k8s-driver-manager
+    version: v0.8.1 # 保留原始版本号作为标签的一部分
+
+kataManager: # enabled: false
+  repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+  image: nvcr.io-nvidia-cloud-native-k8s-kata-manager # 原始: nvcr.io/nvidia/cloud-native/k8s-kata-manager
+  version: v0.2.3 # 保留原始版本号作为标签的一部分
+  # kataManager.config.runtimeClasses.artifacts.url 字段不支持直接在 values.yaml 中替换，
+  # 因为它是一个完整的 URL 字符串。通常需要修改 Helm 模板本身或使用 image.registry/image.repository/image.tag 结构。
+
+sandboxDevicePlugin:
+  repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+  image: nvcr.io-nvidia-kubevirt-gpu-device-plugin # 原始: nvcr.io/nvidia/kubevirt-gpu-device-plugin
+  version: v1.4.0 # 保留原始版本号作为标签的一部分
+
+ccManager: # enabled: false
+  repository: registry.cn-hangzhou.aliyuncs.com/quantanexus
+  image: nvcr.io-nvidia-cloud-native-k8s-cc-manager # 原始: nvcr.io/nvidia/cloud-native/k8s-cc-manager
+  version: v0.1.1 # 保留原始版本号作为标签的一部分
+
