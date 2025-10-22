@@ -1,0 +1,41 @@
+- name: prepare some dirs
+  file: name={{ item }} state=directory
+  with_items:
+  - "/etc/chrony"
+  - "/var/lib/chrony"
+  - "/var/log/chrony"
+
+- name: 卸载 ntp
+  package: name=ntp state=absent
+  ignore_errors: true
+
+- name: 下载二进制文件chronyd
+  copy: src={{ base_dir }}/bin/chronyd dest=/usr/sbin/chronyd mode=0755
+
+- name: 创建chronyd的systemd unit文件
+  template: src=chronyd.service.j2 dest=/etc/systemd/system/chronyd.service
+
+- name: 配置 chrony server
+  template: src=server.conf.j2 dest=/etc/chrony/chrony.conf
+  when: 'inventory_hostname == groups.chrony[0]'
+
+- name: 配置 chrony client
+  template: src=client.conf.j2 dest=/etc/chrony/chrony.conf
+  when: 'inventory_hostname != groups.chrony[0]'
+
+- name: 开机启用chronyd服务
+  shell: systemctl disable chronyd && systemctl enable chronyd
+  ignore_errors: true
+
+- name: 开启chronyd服务
+  shell: systemctl daemon-reload && systemctl restart chronyd
+  ignore_errors: true
+  tags: restart_chronyd
+
+- name: 以轮询的方式等待chronyd服务启动
+  shell: "systemctl is-active chronyd.service"
+  register: svc_status
+  until: '"active" in svc_status.stdout'
+  retries: 3
+  delay: 3
+  tags: restart_chronyd

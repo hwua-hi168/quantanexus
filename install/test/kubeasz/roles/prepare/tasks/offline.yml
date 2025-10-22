@@ -1,0 +1,36 @@
+# 离线安装基础系统包
+# 仅当机器无法从本地yum/apt源安装时使用
+# 执行前需要预先运行类似 ./ezdown -P debian_10 下载离线安装包
+
+- name: 检查是否已下载离线软件包{{ SYS_PKG_NAME }}
+  stat:
+    path: "{{ base_dir }}/down/packages/{{ SYS_PKG_NAME }}"
+  register: pkg
+  connection: local
+  run_once: true
+
+- name: 准备离线安装包目录
+  file: name=/opt/kube/packages/basic state=directory
+
+- block:
+  - name: 分发离线软件包{{ SYS_PKG_NAME }}
+    copy:
+      src: "{{ base_dir }}/down/packages/{{ SYS_PKG_NAME }}"
+      dest: "/opt/kube/packages/basic/{{ SYS_PKG_NAME }}"
+
+  # 离线安装包可能需要安装多次才能成功
+  - name: 安装离线软件包{{ SYS_PKG_NAME }}
+    shell: 'cd /opt/kube/packages/basic && tar zxf {{ SYS_PKG_NAME }} && \
+           dpkg -i *.deb > /tmp/install_basic.log 2>&1'
+    register: install_info
+    until: not install_info.failed
+    retries: 3
+    delay: 1
+    when: 'ansible_distribution_file_variety in ["Debian"]'
+
+  - name: 安装离线软件包{{ SYS_PKG_NAME }}
+    shell: 'cd /opt/kube/packages/basic && tar zxf {{ SYS_PKG_NAME }} && \
+           rpm -Uvh --force --nodeps *.rpm > /tmp/install_basic.log 2>&1'
+    when: 'ansible_distribution_file_variety in ["RedHat", "SUSE"]'
+  when: 'pkg.stat.exists|bool'
+  ignore_errors: true

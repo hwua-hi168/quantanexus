@@ -1,0 +1,27 @@
+apiVersion: apps.kubeblocks.io/v1
+kind: Cluster
+metadata:
+  name: clickhouse-standalone
+spec:
+  clusterDef: clickhouse
+  topology: standalone
+  terminationPolicy: Delete
+  componentSpecs:
+    - name: clickhouse
+      replicas: 1
+      resources:
+        limits:
+          cpu: '1'
+          memory: 2Gi
+        requests:
+          cpu: '1'
+          memory: 2Gi
+      volumeClaimTemplates:
+        - name: data
+          spec:
+            storageClassName: "openebs-hostpath"
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 20Gi

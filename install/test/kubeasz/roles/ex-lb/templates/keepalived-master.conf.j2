@@ -1,0 +1,29 @@
+global_defs {
+}
+
+vrrp_track_process check-l4lb {
+    process l4lb
+    weight -60
+    delay 3
+}
+
+vrrp_instance VI-01 {
+    state MASTER
+    priority 120
+    unicast_src_ip {{ inventory_hostname }}
+    unicast_peer {
+{% for h in groups['ex_lb'] %}{% if h != inventory_hostname %}
+        {{ h }}
+{% endif %}{% endfor %}
+    }
+    dont_track_primary
+    interface {{ LB_IF }}
+    virtual_router_id {{ ROUTER_ID }}
+    advert_int 3
+    track_process {
+        check-l4lb
+    }
+    virtual_ipaddress {
+        {{ EX_APISERVER_VIP }}
+    }
+}

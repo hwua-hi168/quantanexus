@@ -1,0 +1,173 @@
+kubeTargetVersionOverride: "{{ K8S_VER }}"
+
+##
+global:
+  imageRegistry: "easzlab.io.local:5000"
+
+## Configuration for alertmanager
+alertmanager:
+  enabled: true
+  service:
+    nodePort: 30902
+    type: NodePort 
+
+## Using default values from https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
+grafana:
+  enabled: true
+  adminUser: admin
+  adminPassword: Admin1234!
+  image:
+    repository: prometheus/grafana
+  service:
+    nodePort: 30903
+    type: NodePort
+  sidecar:
+    image:
+      repository: prometheus/k8s-sidecar
+    skipTlsVerify: true
+
+## Flag to disable all the kubernetes component scrapers
+kubernetesServiceMonitors:
+  enabled: true
+
+## Component scraping the kube api server
+kubeApiServer:
+  enabled: true
+
+## Component scraping the kubelet and kubelet-hosted cAdvisor
+kubelet:
+  enabled: true
+
+## Component scraping the kube controller manager
+kubeControllerManager:
+  enabled: true
+  endpoints:
+{% for h in groups['kube_master'] %}
+  - {{ h }}
+{% endfor %}
+  serviceMonitor:
+    https: true
+    insecureSkipVerify: true
+    serverName: localhost
+
+## Component scraping coreDns. Use either this or kubeDns
+coreDns:
+  enabled: true
+
+## Component scraping etcd
+kubeEtcd:
+  enabled: true
+  endpoints:
+{% for h in groups['etcd'] %}
+  - {{ h }}
+{% endfor %}
+  service:
+    port: 2379
+    targetPort: 2379
+  serviceMonitor:
+    scheme: https
+    insecureSkipVerify: true
+    serverName: localhost
+    caFile: /etc/prometheus/secrets/etcd-client-cert/etcd-ca
+    certFile: /etc/prometheus/secrets/etcd-client-cert/etcd-client
+    keyFile: /etc/prometheus/secrets/etcd-client-cert/etcd-client-key
+
+## Component scraping kube scheduler
+kubeScheduler:
+  enabled: true
+  endpoints:
+{% for h in groups['kube_master'] %}
+  - {{ h }}
+{% endfor %}
+  serviceMonitor:
+    https: true
+    insecureSkipVerify: true
+
+## Component scraping kube proxy
+kubeProxy:
+  enabled: true
+  endpoints:
+{% for h in groups['kube_master'] %}
+  - {{ h }}
+{% endfor %}
+{% for h in groups['kube_node'] %}
+{% if h not in groups['kube_master'] %}
+  - {{ h }}
+{% endif %}
+{% endfor %}
+
+## Component scraping kube state metrics
+kubeStateMetrics:
+  enabled: true
+
+## Configuration for kube-state-metrics subchart
+kube-state-metrics:
+  image:
+    registry: easzlab.io.local:5000
+    repository: easzlab/kube-state-metrics
+
+## Deploy node exporter as a daemonset to all nodes
+nodeExporter:
+  enabled: true
+  operatingSystems:
+    linux:
+      enabled: true
+    aix:
+      enabled: false
+    darwin:
+      enabled: false
+
+## Configuration for prometheus-node-exporter subchart
+prometheus-node-exporter:
+  image:
+    registry: easzlab.io.local:5000
+    repository: prometheus/node-exporter
+
+## Manages Prometheus and Alertmanager components
+prometheusOperator:
+  enabled: true
+  admissionWebhooks:
+    enabled: true
+    patch:
+      enabled: true
+      image:
+        registry: easzlab.io.local:5000
+        repository: easzlab/kube-webhook-certgen
+  image:
+    registry: easzlab.io.local:5000
+    repository: prometheus/prometheus-operator
+  service:
+    nodePort: 30899
+    nodePortTls: 30900
+    type: NodePort
+  prometheusConfigReloader:
+    image:
+      registry: easzlab.io.local:5000
+      repository: prometheus/prometheus-config-reloader
+
+## Deploy a Prometheus instance
+prometheus:
+  enabled: true
+  service:
+    nodePort: 30901
+    type: NodePort
+
+  prometheusSpec:
+    image:
+      registry: easzlab.io.local:5000
+    replicas: 1
+    retention: 30d
+    secrets:
+    - etcd-client-cert
+{% if prom_storage_class != "" %}
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: {{ prom_storage_class }}
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
+{% else %}
+    storageSpec: {}
+{% endif %}

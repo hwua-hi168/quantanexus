@@ -1,0 +1,25 @@
+# [optional] to set up a HARBOR, and to integrate the HARBOR with k8s cluster
+# read the guide: 'guide/harbor.md'
+
+### --- install harbor ---
+- hosts: harbor
+  roles:
+  - { role: os-harden, when: "NEW_INSTALL|bool and OS_HARDEN|bool" }
+  - { role: chrony, when: "NEW_INSTALL|bool and groups['chrony']|length > 0" }
+  - { role: prepare, when: "NEW_INSTALL|bool" }
+  - { role: docker, when: "NEW_INSTALL|bool" }
+  - { role: harbor, when: "NEW_INSTALL|bool" }
+
+### --- config k8s nodes to work with harbor ---
+- hosts: 
+  - kube_master
+  - kube_node
+  tasks:
+  # [optional] if you have a DNS server, add an 'A record' instead
+  - name: Adding an '/etc/hosts' entry for the HARBOR DOMAIN
+    lineinfile:
+      dest: /etc/hosts
+      state: present
+      regexp: '{{ HARBOR_DOMAIN }}'
+      line: "{{ groups['harbor'][0] }} {{ HARBOR_DOMAIN }}"
+    when: "hostvars[groups.harbor[0]]['HARBOR_DOMAIN'] != ''"

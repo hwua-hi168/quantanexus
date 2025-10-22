@@ -1,0 +1,30 @@
+- name: 配置 flannel DaemonSet yaml文件
+  template: src=kube-flannel.yaml.j2 dest={{ cluster_dir }}/yml/flannel.yaml
+  run_once: true
+  connection: local
+
+- name: 删除 flannel网络
+  shell: "{{ base_dir }}/bin/kubectl delete -f {{ cluster_dir }}/yml/flannel.yaml || echo true; sleep 3"
+  run_once: true
+  connection: local
+  tags: force_change_certs
+  when: 'CHANGE_CA|bool'
+
+- name: 运行 flannel网络
+  shell: "{{ base_dir }}/bin/kubectl apply -f {{ cluster_dir }}/yml/flannel.yaml"
+  run_once: true
+  connection: local
+  tags: force_change_certs
+
+- name: 删除默认cni配置
+  file: path=/etc/cni/net.d/10-default.conf state=absent
+
+- name: 轮询等待flannel 运行，视下载镜像速度而定
+  shell: "{{ base_dir }}/bin/kubectl get pod -n kube-system -o wide|grep 'flannel'|grep ' {{ K8S_NODENAME }} '|awk '{print $3}'"
+  register: pod_status
+  until: pod_status.stdout == "Running"
+  retries: 15
+  delay: 8
+  ignore_errors: true
+  connection: local
+  tags: force_change_certs
