@@ -25,13 +25,57 @@ Issue: 您可以在issue提出问题，我们会尽快回复，并解答。
 
 ## 一、安装选项
 
-QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平面，另外一个是Quantanexus-cluster-service,是k8s集群服务，提供webshell，镜像提交等功能。
+QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平面，另外一个是QuantaNexus集群服务简称Quantanexus-cs，提供webshell，镜像提交，S3存储桶等功能。作为多集群控制平面，Quantanexus-mgr可以控制多个K8S集群服务（集群安装Quantanexus-cs组件即可）。
+
+
+### Quantanexus 依赖组件列表
+
+安装 Quantanexus-mgr 需要预先安装以下核心组件：
+| 组件名称 | 类型 | 必需性 | 说明 |
+|---------|------|--------|------|
+| cert-manager | 基础设施 | ✅ 必需 | 用于证书签发和管理，为集群提供 TLS 证书支持 |
+| ingress-nginx | 基础设施 | ✅ 必需 | 提供 Kubernetes 集群的入口控制器，实现服务暴露和负载均衡 |
+| prometheus | 监控 | ✅ 必需 | 集群监控和指标收集系统，用于监控集群和应用性能 |
+| grafana | 监控 | ✅ 必需 | 数据可视化平台，用于展示 prometheus 收集的监控数据 |
+
+
+安装 Quantanexus-cs 需要预先安装以下核心组件：
+| 组件名称 | 类型 | 必需性 | 说明 |
+|---------|------|--------|------|
+| longhorn 或 ceph | 存储 | ✅ 必需 | 提供持久化存储解决方案，longhorn 适用于测试环境，ceph 适用于生产环境 |
+| cert-manager | 基础设施 | ✅ 必需 | 用于证书签发和管理，为集群提供 TLS 证书支持 |
+| ingress-nginx | 基础设施 | ✅ 必需 | 提供 Kubernetes 集群的入口控制器，实现服务暴露和负载均衡 |
+| prometheus | 监控 | ✅ 必需 | 集群监控和指标收集系统，用于监控集群和应用性能 |
+| grafana | 监控 | ✅ 必需 | 数据可视化平台，用于展示 prometheus 收集的监控数据 |
+| harbor | 镜像仓库 | ✅ 必需 | 容器镜像仓库，用于存储和分发容器镜像 |
+| minio 或 seaweedfs | 对象存储 | ⚠️ 条件必需 | 对象存储解决方案，用于存储非结构化数据，如日志、备份等 |
+| gpu-operator | AI/异构计算 | ⚠️ 条件必需 | 英伟达 GPU 支持必备组件，仅在需要 GPU 调度时安装 |
+| volcano | AI/异构计算 | ⚠️ 条件必需 | AI 任务调度器，支持队列式 AI 任务调度，仅在需要 AI 任务管理时安装 |
+
+**说明：**
+- ✅ 必需：安装 Quantanexus 的基本要求，必须提前部署
+- ⚠️ 条件必需：根据实际使用场景决定是否安装，如不使用 GPU 或 AI 功能可不安装
+- 存储组件在测试环境中推荐使用 longhorn，生产环境建议使用 ceph
+- 对象存储组件(minio或seaweedfs)根据实际需求选择其一即可,最小安装状态下可以不用安装。
 
 提供多种安装方式，以满足不同环境和需求：
+### 1.0 k8s集群已经搭建完毕，并满足上述条件，则推荐使用一键安装方式
 
-### 1.0 Helm 一键安装 安装（你必须拥有k8s环境）
 
 
+
+```bash 
+    helm repo add hi168 https://helm.hi168.com/charts/ 2>/dev/null
+    helm repo update hi168
+
+
+    
+
+    helm install quantanexus-cs hi168/quantanexus-cluster-service --version 1.0.0 \
+    --namespace quantanexus-cs --create-namespace \
+    --set domainName=qntest002.hi168.com 
+
+```
 
 ### 1.1 All-in-One 安装（从0开始）
 
