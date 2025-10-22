@@ -1,0 +1,23 @@
+global:
+  registry:
+    address: registry.cn-hangzhou.aliyuncs.com/quantanexus
+    imagePullSecrets: []
+  images:
+    kubeovn:
+      repository: docker.io-kubeovn-kube-ovn
+      vpcRepository: docker.io-kubeovn-vpc-nat-gateway
+      tag: v1.14.0
+      support_arm: true
+      thirdparty: true
+natGw:
+  bgpSpeaker:
+    image:
+      # -- Image repository.
+      # @section -- NAT gateways configuration
+      repository: registry.cn-hangzhou.aliyuncs.com/quantanexus/docker.io-kubeovn-kube-ovn
+      # -- Image tag.
+      # @section -- NAT gateways configuration
+      tag: v1.14.0
+      # -- Image pull policy.
+      # @section -- NAT gateways configuration
+      pullPolicy: IfNotPresent

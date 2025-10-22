@@ -5,7 +5,7 @@ helm repo add hi168 https://hi168.com/charts
 helm repo update
 helm upgrade --install cert-manager hi68/cert-manager \
   -n cert-manager --create-namespace \
-  --set installCRDs=true -f cert-manager.yaml
+  --set installCRDs=true -f values-cert-manager.yaml
   
 kubectl apply -f - <<EOF
 apiVersion: cert-manager.io/v1
