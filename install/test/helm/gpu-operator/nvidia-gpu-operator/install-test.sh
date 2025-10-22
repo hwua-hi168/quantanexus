@@ -3,7 +3,7 @@ helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
 helm repo update
 helm upgrade --install --wait gpu-operator ./gpu-operator-v25.3.4.tgz \
      -n gpu-operator --create-namespace \
-     -f values-test.yaml \
+     -f values.yaml \
      --wait --timeout=15m
 
 
