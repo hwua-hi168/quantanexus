@@ -1,0 +1,75 @@
+# 'etcd' cluster should have odd member(s) (1,3,5,...)
+[etcd]
+192.168.1.1
+
+# master node(s), set unique 'k8s_nodename' for each node
+# CAUTION: 'k8s_nodename' must consist of lower case alphanumeric characters, '-' or '.',
+# and must start and end with an alphanumeric character
+[kube_master]
+192.168.1.1
+
+# work node(s), set unique 'k8s_nodename' for each node
+# CAUTION: 'k8s_nodename' must consist of lower case alphanumeric characters, '-' or '.',
+# and must start and end with an alphanumeric character
+[kube_node]
+192.168.1.1 k8s_nodename=''
+
+# [optional] harbor server, a private docker registry
+# 'NEW_INSTALL': 'true' to install a harbor server; 'false' to integrate with existed one
+[harbor]
+#192.168.1.8 NEW_INSTALL=false
+
+# [optional] loadbalance for accessing k8s from outside
+[ex_lb]
+#192.168.1.6 LB_ROLE=backup EX_APISERVER_VIP=192.168.1.250 EX_APISERVER_PORT=8443
+#192.168.1.7 LB_ROLE=master EX_APISERVER_VIP=192.168.1.250 EX_APISERVER_PORT=8443
+
+# [optional] ntp server for the cluster
+[chrony]
+#192.168.1.1
+
+[all:vars]
+# --------- Main Variables ---------------
+# Secure port for apiservers
+SECURE_PORT="6443"
+
+# Cluster container-runtime supported: docker, containerd
+# if k8s version >= 1.24, docker is not supported
+CONTAINER_RUNTIME="containerd"
+
+# Network plugins supported: calico, flannel, kube-router, cilium, kube-ovn
+CLUSTER_NETWORK="calico"
+
+# Service proxy mode of kube-proxy: 'iptables' or 'ipvs'
+PROXY_MODE="ipvs"
+
+# K8S Service CIDR, not overlap with node(host) networking
+SERVICE_CIDR="10.68.0.0/16"
+
+# Cluster CIDR (Pod CIDR), not overlap with node(host) networking
+CLUSTER_CIDR="172.20.0.0/16"
+
+# NodePort Range
+NODE_PORT_RANGE="30000-32767"
+
+# Cluster DNS Domain
+CLUSTER_DNS_DOMAIN="cluster.local"
+
+# -------- Additional Variables (don't change the default value right now)---
+# Binaries Directory
+bin_dir="/opt/kube/bin"
+
+# Deploy Directory (kubeasz workspace)
+base_dir="/etc/kubeasz"
+
+# Directory for a specific cluster
+cluster_dir="{{ base_dir }}/clusters/_cluster_name_"
+
+# CA and other components cert/key Directory
+ca_dir="/etc/kubernetes/ssl"
+
+# Default 'k8s_nodename' is empty
+k8s_nodename=''
+
+# Default python interpreter
+ansible_python_interpreter=/usr/bin/python3

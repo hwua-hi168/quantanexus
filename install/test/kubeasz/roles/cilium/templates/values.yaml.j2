@@ -1,0 +1,89 @@
+image:
+  repository: "easzlab.io.local:5000/cilium/cilium"
+  tag: "v{{ cilium_ver }}"
+  useDigest: false
+
+# -- Additional agent container arguments.
+{% if ENABLE_LOCAL_DNS_CACHE %}
+extraArgs:
+  - --exclude-local-address="{{ LOCAL_DNS_CACHE }}/32"
+{% endif %}
+
+resources:
+  limits:
+    cpu: 4000m
+    memory: 4Gi
+  requests:
+    cpu: 100m
+    memory: 512Mi
+
+{% if cilium_hubble_enabled %}
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+    image:
+      repository: "easzlab.io.local:5000/cilium/hubble-relay"
+      tag: "v{{ cilium_ver }}"
+      useDigest: false
+  ui:
+{% if cilium_hubble_ui_enabled %}
+    enabled: true
+{% else %}
+    enabled: false
+{% endif %}
+    backend:
+      image:
+        repository: "easzlab.io.local:5000/cilium/hubble-ui-backend"
+        tag: "v0.13.2"
+        useDigest: false
+    frontend:
+      image:
+        repository: "easzlab.io.local:5000/cilium/hubble-ui"
+        tag: "v0.13.2"
+        useDigest: false
+{% endif %}
+
+identityAllocationMode: "crd"
+
+ipam:
+  # ref: https://docs.cilium.io/en/stable/concepts/networking/ipam/
+  mode: "cluster-pool"
+  operator:
+    clusterPoolIPv4PodCIDRList: ["{{ CLUSTER_CIDR }}"]
+    clusterPoolIPv4MaskSize: 24
+
+# -- Enable Layer 7 network policy.
+l7Proxy: true
+
+# -- Configure TLS configuration in the agent.
+tls:
+  enabled: true
+  secretsBackend: local
+
+etcd:
+  enabled: false
+
+operator:
+  enabled: true
+  image:
+    repository: "easzlab.io.local:5000/cilium/operator"
+    tag: "v{{ cilium_ver }}"
+    useDigest: false
+  replicas: 1
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+preflight:
+  enabled: false
+
+clustermesh:
+  useAPIServer: false
+
+envoy:
+  enabled: false

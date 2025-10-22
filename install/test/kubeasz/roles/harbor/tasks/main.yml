@@ -1,0 +1,108 @@
+- name: 创建 {{ HARBOR_PATH }} 目录
+  file:
+    path: "{{ HARBOR_PATH }}"
+    state: directory
+    mode: 0755
+
+# 注册变量 result，如果 {{ HARBOR_PATH }} 目录下存在 registry 目录说明已经安装过 harbor，则不进行安装
+- name: 注册变量 result
+  command: ls {{ HARBOR_PATH }}
+  register: result
+
+- name: 已安装提示
+  debug:
+    msg: "发现harbor安装已存在，为避免冲突，不进行重新安装，仅尝试启动harbor"
+  when: '"registry" in result.stdout'
+
+- block:
+  - name: 生成 harbor 随机密码
+    shell: < /dev/urandom tr -dc 0-9A-Za-z-_ | head -c 16
+    register: harbor_password_gen
+  
+  - debug: var="harbor_password_gen.stdout"
+  
+  - name: 生成 DB 随机密码
+    shell: < /dev/urandom tr -dc 0-9A-Za-z-_ | head -c 16
+    register: db_password_gen
+  
+  - debug: var="db_password_gen.stdout"
+  
+  - name: 下发 docker compose 二进制文件
+    copy: src={{ base_dir }}/bin/docker-compose dest={{ bin_dir }}/docker-compose mode=0755
+
+  - name: 下发 harbor 离线安装包
+    copy:
+      src: "{{ base_dir }}/down/harbor-offline-installer-{{ HARBOR_VER }}.tgz"
+      dest: "{{ HARBOR_PATH }}/harbor-offline-installer-{{ HARBOR_VER }}.tgz"
+
+  - name: 解压 harbor 离线安装包
+    shell: "cd {{ HARBOR_PATH }} && tar zxf harbor-offline-installer-{{ HARBOR_VER }}.tgz"
+
+  - name: 导入 harbor 所需 docker images
+    shell: "{{ bin_dir }}/docker load -i {{ HARBOR_PATH }}/harbor/harbor.{{ HARBOR_VER }}.tar.gz"
+  
+  - block:
+    - name: 创建 harbor 证书请求
+      template: src=harbor-csr.json.j2 dest={{ cluster_dir }}/ssl/harbor-csr.json
+      connection: local
+    
+    - name: 创建 harbor 证书和私钥
+      shell: "cd {{ cluster_dir }}/ssl && {{ base_dir }}/bin/cfssl gencert \
+            -ca=ca.pem \
+            -ca-key=ca-key.pem \
+            -config=ca-config.json \
+            -profile=kubernetes harbor-csr.json|{{ base_dir }}/bin/cfssljson -bare harbor"
+      connection: local
+    
+    - name: 分发自签名证书
+      copy: src={{ cluster_dir }}/ssl/{{ item }} dest={{ ca_dir }}/{{ item }}
+      with_items:
+      - ca.pem
+      - harbor.pem
+      - harbor-key.pem
+    when: 'HARBOR_SELF_SIGNED_CERT|bool'
+
+  - name: 推送非自签名证书（需提前在{{ base_dir }}/down/ 下载好证书）
+    copy: src={{ base_dir }}/down/{{ item }} dest={{ ca_dir }}/{{ item }}
+    with_items: 
+    - harbor.pem
+    - harbor-key.pem  
+    when: 'not HARBOR_SELF_SIGNED_CERT|bool'
+  
+  - name: 准备 harbor 配置文件
+    template: src=harbor-{{ HARBOR_VER_MAIN }}.yml.j2 dest={{ HARBOR_PATH }}/harbor/harbor.yml
+
+  - set_fact: HARBOR_INST_OPS="{{ HARBOR_INST_OPS }} --with-trivy"
+    when: "HARBOR_WITH_TRIVY|bool"
+
+  - debug: var="HARBOR_INST_OPS"
+
+  - name: 安装 harbor
+    shell: "cd {{ HARBOR_PATH }}/harbor && \
+            export PATH={{ bin_dir }}:$PATH && \
+            ./install.sh {{ HARBOR_INST_OPS }} >> /tmp/harbor-`date +'%Y%m%d%H%M%S'`.log 2>&1"
+  when: '"registry" not in result.stdout'
+  
+- name: 创建 harbor 的 systemd unit 文件
+  template: src=harbor.service.j2 dest=/etc/systemd/system/harbor.service
+
+- name: 开机启用 harbor 服务
+  shell: systemctl enable harbor
+  ignore_errors: true
+
+- name: 开启 harbor 服务
+  shell: systemctl daemon-reload && systemctl restart harbor
+
+- name: 轮询等待 harbor 服务启动
+  shell: systemctl is-active harbor.service
+  register: harbor_status
+  until: '"active" in harbor_status.stdout'
+  retries: 10
+  delay: 3
+
+- name: 检测 harbor 端口是否正常
+  wait_for:
+    host: "{{ inventory_hostname }}"
+    port: "{{ HARBOR_TLS_PORT }}"
+    timeout: 60
+  run_once: true
