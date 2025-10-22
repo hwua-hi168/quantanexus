@@ -21,7 +21,7 @@ helm install cilium hi168/cilium --version 1.18.2 --namespace kube-system
     --set nodePort.enabled=true \
     --set bpf.masquerade=true \
     --set bandwidthManager.enabled=true \
-   --set bandwidthManager.bbr=true 
+   --set bandwidthManager.bbr=true -f values-cilium
     
 
 
