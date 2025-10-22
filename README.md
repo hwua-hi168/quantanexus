@@ -25,7 +25,7 @@ Issue: 您可以在issue提出问题，我们会尽快回复，并解答。
 
 ## 一、安装选项
 
-QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平面，另外一个是QuantaNexus集群服务简称Quantanexus-cs，提供webshell，镜像提交，S3存储桶等功能。作为多集群控制平面，Quantanexus-mgr可以控制多个K8S集群服务（集群安装Quantanexus-cs组件即可）。
+QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平面，另外一个是QuantaNexus集群服务简称Quantanexus-cs，提供webshell，镜像提交，S3存储桶等功能。作为多集群控制平面，Quantanexus-mgr可以控制多个K8S集群服务（集群安装Quantanexus-cs组件即可）。当然，你也可以将两个组件安装在一个K8S集群中，尽可能将两套组件分开在不同的namespace中，但是公共组件例如:cert-manager,ingress-nginx,prometheus,grafana这些都是可以重用的。
 
 ### Quantanexus 依赖组件列表
 
@@ -37,6 +37,8 @@ QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平
 | ingress-nginx | 基础设施 | ✅ 必需 | 提供 Kubernetes 集群的入口控制器，实现服务暴露和负载均衡 |
 | prometheus | 监控 | ✅ 必需 | 集群监控和指标收集系统，用于监控集群和应用性能 |
 | grafana | 监控 | ✅ 必需 | 数据可视化平台，用于展示 prometheus 收集的监控数据 |
+| longhorn 或 ceph | 存储 | ✅ 必需 | longhorn 适用于测试环境，ceph 适用于生产环境 |
+
 
 安装 Quantanexus-cs 需要预先安装以下核心组件：
 
@@ -67,9 +69,15 @@ QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平
     helm repo add hi168 https://helm.hi168.com/charts/ 2>/dev/null
     helm repo update hi168
 
-
+    # 安装 QuantaNexus-mgr 控制平面
+    helm install quantanexus hi168/quantanexus-mgr --version 1.0.0 \
+    --namespace quantanexus --create-namespace \
+    --set global.domainName=qntest002.hi168.com \
+    --set global.masterNode=master1 \
+    --set "global.masterNodes=master1\,master2" \
+    --set global.workerNodes=worker1    
     
-
+    # 安装 QuantaNexus-cs 集群服务
     helm install quantanexus-cs hi168/quantanexus-cluster-service --version 1.0.0 \
     --namespace quantanexus-cs --create-namespace \
     --set domainName=qntest002.hi168.com 
@@ -80,12 +88,14 @@ QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平
 
 适用于全新环境，一键安装完整的 Kubernetes 集群和 QuantaNexus 平台：
 
-- 自动部署 Kubernetes 1.28+ 集群
-- 预配置网络插件（可选 flannel、calico、cilium、kube-ovn）
-- 内置安装 kube-virt 虚拟化组件
-- 集成 Ceph 存储系统（支持 Ceph 17+ 版本）
+- 自动部署 Kubernetes 1.28+ 集群，可以使用./install/test/kubeeasz开源项目用来部署。
+- 预配置网络插件可选 flannel、calico、cilium、kube-ovn，建议使用calico。
+- 安装 kube-virt 虚拟化组件
+- 集成 Ceph 存储系统（支持 Ceph 17+ 版本）或者Longhorn 存储系统（支持 Longhorn 1.5.x ）
 - 预装 Prometheus 监控系统
-- 自动配置 QuantaNexus 核心服务
+- 自动配置 QuantaNexus-mgr 和 QuantaNexus-cs 核心服务
+
+可以参考install/test/README.md(./install/test/README.md) 进行安装。
 
 ### 1.2 现有 Kubernetes 集群安装
 
@@ -135,7 +145,7 @@ QuantaNexus 从 **Kubernetes 1.28 版本**开始提供完整适配支持，包�
 
 ### 3.3  Ceph 存储支持
 
-QuantaNexus 针对 Ceph 存储系统提供全面集成，支持 Ceph 作为 K8s 集群及 kube-virt 虚拟机的后端存储。Ceph 版本支持情况如下：
+QuantaNexus 针对 Ceph 存储系统提供全面集成，全面支持Ceph并建议生产环境用Ceph 作为 K8s 集群及 kube-virt 虚拟机的后端存储。Ceph 版本支持情况如下：
 
 **Ceph 版本支持矩阵**：
 
