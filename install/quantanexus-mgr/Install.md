@@ -1,12 +1,14 @@
-### 安装Chart
+# 安装Chart
 
 1. 添加必要的仓库:
+
 ```bash
 helm repo add hi168 https://helm.hi168.com/charts/
 helm repo update
 ```
 
-3. 安装Chart(示例):
+2.  安装Chart(示例):
+
 ```bash
 helm install quantanexus hi168/quantanexus-mgr --version 1.0.0 \
   --namespace quantanexus --create-namespace \
@@ -21,7 +23,6 @@ helm install quantanexus hi168/quantanexus-mgr --version 1.0.0 \
 helm show values quantanexus/quantanexus-mgr > values.yaml
 
 编辑自定义values文件 values.yaml
-
 
 helm install quantanexus hi68/quantanexus-mgr --version 1.0.0 \
     --namespace quantanexus-mgr --create-namespace
@@ -41,4 +42,3 @@ helm upgrade quantanexus hi168/quantanexus-mgr --version 1.0.0 \
 # 卸载
 helm uninstall quantanexus -n quantanexus
 ```
-
