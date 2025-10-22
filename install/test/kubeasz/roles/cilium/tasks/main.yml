@@ -1,0 +1,55 @@
+# https://docs.cilium.io/en/stable/installation/k8s-install-helm/#k8s-install-helm
+- name: 转换内核版本为浮点数
+  set_fact:
+     KERNEL_VER: "{{ ansible_kernel.split('-')[0].split('.')[0]|int + ansible_kernel.split('-')[0].split('.')[1]|int/100 }}"
+
+- name: 检查内核版本>4.9
+  fail: msg="kernel {{ ansible_kernel }} is too old for cilium installing"
+  when: "KERNEL_VER|float <= 4.09"
+
+- block:
+    - name: 创建 cilium chart 个性化设置
+      template: src=values.yaml.j2 dest={{ cluster_dir }}/yml/cilium-values.yaml
+
+    - name: helm 删除 cilium {{ cilium_ver }}
+      shell: "{{ base_dir }}/bin/helm delete cilium -n kube-system || echo true; sleep 3"
+      tags: force_change_certs
+      when: 'CHANGE_CA|bool'
+
+    - name: helm 创建 cilium {{ cilium_ver }}
+      shell: "{{ base_dir }}/bin/helm upgrade cilium --install \
+              -n kube-system -f {{ cluster_dir }}/yml/cilium-values.yaml \
+              {{ base_dir }}/roles/cilium/files/cilium-{{ cilium_ver }}.tgz"
+      tags: force_change_certs
+  run_once: true
+  connection: local  
+
+- name: 下载client工具
+  copy: src={{ base_dir }}/bin/{{ item }} dest={{ bin_dir }}/{{ item }} mode=0755
+  with_items:
+  - cilium
+  - hubble
+
+# 删除原有cni配置
+- name: 删除默认cni配置
+  file: path=/etc/cni/net.d/10-default.conf state=absent
+
+# 等待网络插件部署成功，视下载镜像速度而定
+- name: 轮询等待cilium-node 运行
+  shell: "{{ base_dir }}/bin/kubectl get pod -n kube-system -owide -lk8s-app=cilium|grep ' {{ K8S_NODENAME }} '|awk '{print $3}'"
+  register: pod_status
+  until: pod_status.stdout == "Running"
+  retries: 15
+  delay: 8
+  ignore_errors: true
+  connection: local
+  tags: force_change_certs
+
+# hubble-relay 可能需要重启一下
+- name: 重启hubble-relay pod
+  shell: "{{ base_dir }}/bin/kubectl -n kube-system scale deploy hubble-relay --replicas=0 && sleep 5 && \
+            {{ base_dir }}/bin/kubectl -n kube-system scale deploy hubble-relay --replicas=1"
+  run_once: true
+  connection: local
+  when: "cilium_hubble_enabled|bool"
+  tags: force_change_certs

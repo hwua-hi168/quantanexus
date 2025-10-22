@@ -1,0 +1,21 @@
+{
+  "CN": "system:node:{{ K8S_NODENAME }}",
+  "hosts": [
+    "127.0.0.1",
+    "{{ inventory_hostname }}",
+    "{{ K8S_NODENAME }}"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "CN",
+      "ST": "HangZhou",
+      "L": "XS",
+      "O": "system:nodes",
+      "OU": "System"
+    }
+  ]
+}

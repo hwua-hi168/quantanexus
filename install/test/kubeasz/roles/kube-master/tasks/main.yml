@@ -1,0 +1,151 @@
+- name: 下载 kube_master 二进制
+  copy: src={{ base_dir }}/bin/{{ item }} dest={{ bin_dir }}/{{ item }} mode=0755
+  with_items:
+  - kube-apiserver
+  - kube-controller-manager
+  - kube-scheduler
+  - kubectl
+  tags: upgrade_k8s
+
+- name: 分发controller/scheduler kubeconfig配置文件
+  copy: src={{ cluster_dir }}/{{ item }} dest=/etc/kubernetes/{{ item }}
+  with_items:
+  - kube-controller-manager.kubeconfig
+  - kube-scheduler.kubeconfig
+  tags: force_change_certs 
+
+- name: 创建cluster audit相关目录
+  file: name={{ item }} state=directory
+  with_items:
+  - "/etc/kubernetes/audit"
+  - "/var/log/kubernetes/audit"
+  when: "ENABLE_CLUSTER_AUDIT|bool"
+
+- name: 分发cluster audit配置文件
+  template: src=audit-policy.yaml.j2 dest=/etc/kubernetes/audit/audit-policy.yaml
+  when: "ENABLE_CLUSTER_AUDIT|bool"
+
+- name: 创建 kubernetes 证书签名请求
+  template: src=kubernetes-csr.json.j2 dest={{ cluster_dir }}/ssl/kubernetes-csr.json
+  tags: change_cert, force_change_certs
+  connection: local
+
+- name: 创建 kubernetes 证书和私钥
+  shell: "cd {{ cluster_dir }}/ssl && {{ base_dir }}/bin/cfssl gencert \
+        -ca=ca.pem \
+        -ca-key=ca-key.pem \
+        -config=ca-config.json \
+        -profile=kubernetes kubernetes-csr.json | {{ base_dir }}/bin/cfssljson -bare kubernetes"
+  tags: change_cert, force_change_certs
+  connection: local
+
+# 创建aggregator proxy相关证书
+- name: 创建 aggregator proxy证书签名请求
+  template: src=aggregator-proxy-csr.json.j2 dest={{ cluster_dir }}/ssl/aggregator-proxy-csr.json
+  connection: local
+  tags: force_change_certs 
+
+- name: 创建 aggregator-proxy证书和私钥
+  shell: "cd {{ cluster_dir }}/ssl && {{ base_dir }}/bin/cfssl gencert \
+        -ca=ca.pem \
+        -ca-key=ca-key.pem \
+        -config=ca-config.json \
+        -profile=kubernetes aggregator-proxy-csr.json | {{ base_dir }}/bin/cfssljson -bare aggregator-proxy"
+  connection: local
+  tags: force_change_certs 
+
+- name: 分发 kubernetes证书
+  copy: src={{ cluster_dir }}/ssl/{{ item }} dest={{ ca_dir }}/{{ item }}
+  with_items:
+  - ca.pem
+  - ca-key.pem
+  - kubernetes.pem
+  - kubernetes-key.pem
+  - aggregator-proxy.pem
+  - aggregator-proxy-key.pem
+  tags: change_cert, force_change_certs
+
+- name: 替换 kubeconfig 的 apiserver 地址
+  lineinfile:
+    dest: "{{ item }}"
+    regexp: "^    server"
+    line: "    server: https://127.0.0.1:{{ SECURE_PORT }}"
+  with_items:
+  - "/etc/kubernetes/kube-controller-manager.kubeconfig"
+  - "/etc/kubernetes/kube-scheduler.kubeconfig"
+  tags: force_change_certs 
+
+- name: 创建 master 服务的 systemd unit 文件
+  template: src={{ item }}.j2 dest=/etc/systemd/system/{{ item }}
+  with_items:
+  - kube-apiserver.service
+  - kube-controller-manager.service
+  - kube-scheduler.service
+  tags: restart_master, upgrade_k8s
+
+- name: enable master 服务
+  shell: systemctl enable kube-apiserver kube-controller-manager kube-scheduler
+  ignore_errors: true
+
+- name: 启动 master 服务
+  shell: "systemctl daemon-reload && systemctl restart kube-apiserver && \
+	systemctl restart kube-controller-manager && systemctl restart kube-scheduler"
+  tags: upgrade_k8s, restart_master, force_change_certs
+
+# 轮询等待kube-apiserver启动完成
+- name: 轮询等待kube-apiserver启动
+  shell: "systemctl is-active kube-apiserver.service"
+  register: api_status
+  until: '"active" in api_status.stdout'
+  retries: 10
+  delay: 3
+  tags: upgrade_k8s, restart_master, force_change_certs
+
+# 轮询等待kube-controller-manager启动完成
+- name: 轮询等待kube-controller-manager启动
+  shell: "systemctl is-active kube-controller-manager.service"
+  register: cm_status
+  until: '"active" in cm_status.stdout'
+  retries: 8
+  delay: 3
+  tags: upgrade_k8s, restart_master, force_change_certs
+
+# 轮询等待kube-scheduler启动完成
+- name: 轮询等待kube-scheduler启动
+  shell: "systemctl is-active kube-scheduler.service"
+  register: sch_status
+  until: '"active" in sch_status.stdout'
+  retries: 8
+  delay: 3
+  tags: upgrade_k8s, restart_master, force_change_certs
+
+- block:
+    - name: 复制kubectl.kubeconfig
+      shell: 'cd {{ cluster_dir }} && cp -f kubectl.kubeconfig {{ K8S_NODENAME }}-kubectl.kubeconfig'
+      tags: upgrade_k8s, restart_master, force_change_certs
+
+    - name: 替换 kubeconfig 的 apiserver 地址
+      lineinfile:
+        dest: "{{ cluster_dir }}/{{ K8S_NODENAME }}-kubectl.kubeconfig"
+        regexp: "^    server"
+        line: "    server: https://{{ inventory_hostname }}:{{ SECURE_PORT }}"
+      tags: upgrade_k8s, restart_master, force_change_certs
+
+    - name: 轮询等待master服务启动完成
+      command: "{{ base_dir }}/bin/kubectl --kubeconfig={{ cluster_dir }}/{{ K8S_NODENAME }}-kubectl.kubeconfig get node"
+      register: result
+      until:    result.rc == 0
+      retries:  5
+      delay: 6
+      tags: upgrade_k8s, restart_master, force_change_certs
+
+    - name: 获取user:kubernetes是否已经绑定对应角色
+      shell: "{{ base_dir }}/bin/kubectl get clusterrolebindings|grep kubernetes-crb || echo 'notfound'"
+      register: crb_info
+      run_once: true
+
+    - name: 创建user:kubernetes角色绑定
+      command: "{{ base_dir }}/bin/kubectl create clusterrolebinding kubernetes-crb --clusterrole=system:kubelet-api-admin --user=kubernetes"
+      run_once: true
+      when: "'notfound' in crb_info.stdout"
+  connection: local

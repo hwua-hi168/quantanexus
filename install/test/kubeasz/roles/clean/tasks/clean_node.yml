@@ -1,0 +1,121 @@
+# to clean 'kube_node' nodes
+- block:
+  - name: stop and disable kube_node service
+    service: name={{ item }} state=stopped enabled=no
+    with_items:
+    - kube-lb
+    - kubelet
+    - kube-proxy
+    ignore_errors: true
+
+  - name: umount kubelet filesystems
+    shell: "mount | grep '/var/lib/kubelet'| awk '{print $3}'|xargs umount || exit 0"
+    ignore_errors: true
+
+  - name: remove files and dirs of 'kube_node' nodes
+    file: name={{ item }} state=absent
+    with_items:
+    - "/var/lib/kubelet/"
+    - "/var/lib/kube-proxy/"
+    - "/etc/systemd/system/kube-lb.service"
+    - "/etc/systemd/system/kubelet.service"
+    - "/etc/systemd/system/kube-proxy.service"
+    - "/etc/kube-lb/"
+    - "/etc/kubernetes/"
+    ignore_errors: true
+
+# to clean container runtime and networking
+  - block:
+      - name: to check if container 'kubeasz' is running
+        shell: 'docker ps|grep kubeasz || echo "NOT FOUND"'
+        register: install_info
+
+      - block:
+        - name: stop and disable docker service
+          service:
+            name: docker
+            state: stopped
+            enabled: no
+          ignore_errors: true
+  
+        # as k8s-network-plugins use host-network, '/var/run/docker/netns/default' must be umounted
+        - name: umount docker filesystem-1
+          mount: path=/var/run/docker/netns/default state=unmounted
+  
+        - name: umount docker filesystem-2
+          mount: path=/var/lib/docker/overlay state=unmounted
+  
+        - name: umount docker filesystem-3
+          shell: "echo /var/lib/docker/overlay2/*/merged|xargs umount || exit 0"
+          ignore_errors: true
+
+        - name: umount docker filesystem-4
+          shell: "echo /var/lib/docker/containers/*/mounts/shm|xargs umount || exit 0"
+          ignore_errors: true
+
+        - name: umount docker filesystem-5
+          shell: "echo /var/run/docker/netns/*|xargs umount || exit 0"
+          ignore_errors: true
+
+        - name: remove files and dirs
+          file: name={{ item }} state=absent
+          with_items:
+          - "/var/lib/docker/"
+          - "/var/lib/dockershim/"
+          - "/var/run/docker/"
+          - "/etc/docker/"
+          - "/etc/systemd/system/docker.service"
+          - "/etc/systemd/system/docker.service.requires/"
+          - "/etc/systemd/system/docker.service.d/"
+          - "/etc/bash_completion.d/docker"
+          - "/usr/bin/docker"
+        when: "'kubeasz' not in install_info.stdout"
+    ignore_errors: true
+    when: CONTAINER_RUNTIME == 'docker'
+
+  - block:
+      - name: stop and disable containerd service
+        service:
+          name: containerd
+          state: stopped
+          enabled: no
+        ignore_errors: true
+
+      - name: umount containerd filesystems
+        shell: "mount | grep 'containerd/io.containerd'| awk '{print $3}'|xargs umount || exit 0"
+        ignore_errors: true
+
+      - name: remove files and dirs
+        file: name={{ item }} state=absent
+        with_items:
+        - "/etc/containerd/"
+        - "/etc/crictl.yaml"
+        - "/etc/systemd/system/containerd.service"
+        - "/opt/containerd/"
+        - "/var/lib/containerd/"
+        - "/var/run/containerd/"
+    ignore_errors: true
+    when: CONTAINER_RUNTIME == 'containerd'
+
+  - name: remove files and dirs2
+    file: name={{ item }} state=absent
+    with_items:
+    - "/etc/cni/"
+    - "/run/flannel/"
+    - "/etc/calico/"
+    - "/var/lib/calico/"
+    - "/var/log/calico/"
+    - "/etc/cilium/"
+    - "/sys/fs/bpf/tc/"
+    - "/var/lib/cni/"
+    - "/var/lib/kube-router/"
+    - "/var/run/openvswitch/"
+    - "/var/run/ovn/"
+    - "/etc/origin/openvswitch/"
+    - "/etc/origin/ovn/"
+    - "/var/log/openvswitch/"
+    - "/var/log/ovn/"
+    - "/var/log/kube-ovn/"
+    ignore_errors: true
+
+  when: "inventory_hostname in groups['kube_master'] or inventory_hostname in groups['kube_node']"

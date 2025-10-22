@@ -1,0 +1,15 @@
+- block:
+    - name: stop and disable chronyd
+      service: name=chronyd state=stopped enabled=no
+      ignore_errors: true
+
+    - name: remove files and dirs
+      file: name={{ item }} state=absent
+      with_items:
+      - "/etc/chrony"
+      - "/var/lib/chrony"
+      - "/var/log/chrony"
+      - "/var/run/chrony"
+      - "/etc/systemd/system/chronyd.service"
+  ignore_errors: true
+  when: "groups['chrony']|length > 0"

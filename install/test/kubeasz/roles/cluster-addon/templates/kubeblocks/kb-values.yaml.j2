@@ -1,0 +1,47 @@
+## KubeBlocks container image settings
+image:
+  registry: easzlab.io.local:5000
+
+## Resource settings
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# dynamically replace instance's registry. ref: https://github.com/apecloud/kubeblocks/pull/8018
+registryConfig:
+  defaultRegistry: easzlab.io.local:5000
+  defaultNamespace: apecloud
+
+## Data protection settings
+dataProtection:
+  enabled: true
+
+## @param autoInstalledAddons - the list of auto-installed addons when install and upgrade.
+autoInstalledAddons:
+  - "mongodb"
+  - "mysql"
+  - "postgresql"
+  - "redis"
+
+controllers:
+  apps:
+    enabled: true
+  workloads:
+    enabled: true
+  operations:
+    enabled: true
+  experimental:
+    enabled: false
+  trace:
+    enabled: false
+
+featureGates:
+  ignoreConfigTemplateDefaultMode:
+    enabled: false
+  ignorePodVerticalScaling:
+    enabled: false
+  componentReplicasAnnotation:
+    enabled: true
+  inPlacePodVerticalScaling:
+    enabled: false
