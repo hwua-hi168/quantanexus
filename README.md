@@ -6,11 +6,11 @@ QuantaNexus 是海文公司基于 Kubernetes（K8S）平台开发的云算力管
 
 请帮忙点亮小星星和克隆.
 
-gitee 镜像： https://gitee.com/hwua/quantanexus.git
+gitee 镜像： <https://gitee.com/hwua/quantanexus.git>
 
-WEB Demo:  https://www.hi168.com   (公有云版)
+WEB Demo:  <https://www.hi168.com>   (公有云版)
 
-加入我们的[Slack](https://join.slack.com/t/hwua/shared_invite/zt-3e8immsaf-DQlHsdEfWsBpIe2UtttieQ) 
+加入我们的[Slack](https://join.slack.com/t/hwua/shared_invite/zt-3e8immsaf-DQlHsdEfWsBpIe2UtttieQ)
 
 QQ支持群： 574087153
 
@@ -27,10 +27,10 @@ Issue: 您可以在issue提出问题，我们会尽快回复，并解答。
 
 QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平面，另外一个是QuantaNexus集群服务简称Quantanexus-cs，提供webshell，镜像提交，S3存储桶等功能。作为多集群控制平面，Quantanexus-mgr可以控制多个K8S集群服务（集群安装Quantanexus-cs组件即可）。
 
-
 ### Quantanexus 依赖组件列表
 
 安装 Quantanexus-mgr 需要预先安装以下核心组件：
+
 | 组件名称 | 类型 | 必需性 | 说明 |
 |---------|------|--------|------|
 | cert-manager | 基础设施 | ✅ 必需 | 用于证书签发和管理，为集群提供 TLS 证书支持 |
@@ -38,8 +38,8 @@ QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平
 | prometheus | 监控 | ✅ 必需 | 集群监控和指标收集系统，用于监控集群和应用性能 |
 | grafana | 监控 | ✅ 必需 | 数据可视化平台，用于展示 prometheus 收集的监控数据 |
 
-
 安装 Quantanexus-cs 需要预先安装以下核心组件：
+
 | 组件名称 | 类型 | 必需性 | 说明 |
 |---------|------|--------|------|
 | longhorn 或 ceph | 存储 | ✅ 必需 | 提供持久化存储解决方案，longhorn 适用于测试环境，ceph 适用于生产环境 |
@@ -53,18 +53,17 @@ QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平
 | volcano | AI/异构计算 | ⚠️ 条件必需 | AI 任务调度器，支持队列式 AI 任务调度，仅在需要 AI 任务管理时安装 |
 
 **说明：**
+
 - ✅ 必需：安装 Quantanexus 的基本要求，必须提前部署
 - ⚠️ 条件必需：根据实际使用场景决定是否安装，如不使用 GPU 或 AI 功能可不安装
 - 存储组件在测试环境中推荐使用 longhorn，生产环境建议使用 ceph
 - 对象存储组件(minio或seaweedfs)根据实际需求选择其一即可,最小安装状态下可以不用安装。
 
 提供多种安装方式，以满足不同环境和需求：
+
 ### 1.0 k8s集群已经搭建完毕，并满足上述条件，则推荐使用一键安装方式
 
-
-
-
-```bash 
+```bash
     helm repo add hi168 https://helm.hi168.com/charts/ 2>/dev/null
     helm repo update hi168
 
@@ -81,25 +80,25 @@ QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平
 
 适用于全新环境，一键安装完整的 Kubernetes 集群和 QuantaNexus 平台：
 
-*   自动部署 Kubernetes 1.28+ 集群
-*   预配置网络插件（可选 flannel、calico、cilium、kube-ovn）
-*   内置安装 kube-virt 虚拟化组件
-*   集成 Ceph 存储系统（支持 Ceph 17+ 版本）
-*   预装 Prometheus 监控系统
-*   自动配置 QuantaNexus 核心服务
+- 自动部署 Kubernetes 1.28+ 集群
+- 预配置网络插件（可选 flannel、calico、cilium、kube-ovn）
+- 内置安装 kube-virt 虚拟化组件
+- 集成 Ceph 存储系统（支持 Ceph 17+ 版本）
+- 预装 Prometheus 监控系统
+- 自动配置 QuantaNexus 核心服务
 
 ### 1.2 现有 Kubernetes 集群安装
 
 适用于已有 Kubernetes 环境的用户，需确保集群版本在兼容列表内：
 
-*   **Kubernetes 兼容版本**：1.28.x、1.29.x、1.30.x
-*   **依赖组件检查**：
-    *   CNI 插件（查阅兼容列表）
-    *   kube-virt（建议版本 >= 0.57.0）
-    *   Ceph CSI 驱动（支持 Ceph 17+）
-    *   Prometheus 监控系统（建议版本 >= 2.40.0）
-*   QuantaNexus 控制平面部署
-*   组件集成与配置优化
+- **Kubernetes 兼容版本**：1.28.x、1.29.x、1.30.x
+- **依赖组件检查**：
+  - CNI 插件（查阅兼容列表）
+  - kube-virt（建议版本 >= 0.57.0）
+  - Ceph CSI 驱动（支持 Ceph 17+）
+  - Prometheus 监控系统（建议版本 >= 2.40.0）
+- QuantaNexus 控制平面部署
+- 组件集成与配置优化
 
 ## 二、QuantaNexus 对主流 CNI 插件的功能支持
 
@@ -121,18 +120,18 @@ QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平
 
 QuantaNexus 从 **Kubernetes 1.28 版本**开始提供完整适配支持，包括但不限于：
 
-*   集群生命周期管理（部署、升级、运维监控）；
-*   核心资源（Pod、Deployment、Service、ConfigMap 等）的可视化管理与调度优化；
-*   与 K8s 原生 API 完全兼容，支持自定义资源（CRD）扩展。
+- 集群生命周期管理（部署、升级、运维监控）；
+- 核心资源（Pod、Deployment、Service、ConfigMap 等）的可视化管理与调度优化；
+- 与 K8s 原生 API 完全兼容，支持自定义资源（CRD）扩展。
 
 ### 3.2  kube-virt 虚拟化支持
 
 基于 K8s 1.28+ 版本基础，QuantaNexus 已实现对 kube-virt 的深度适配，支持能力包括：
 
-*   虚拟机（VM）与容器的统一调度与管理，可通过 QuantaNexus 界面创建、启动、停止、删除 VM 实例；
-*   VM 资源（CPU、内存、存储、网络）的动态配置与监控；
-*   虚拟机镜像管理（支持从镜像仓库拉取、本地导入镜像）；
-*   容器与 VM 之间的网络互通（依赖已适配的 CNI 插件实现）。
+- 虚拟机（VM）与容器的统一调度与管理，可通过 QuantaNexus 界面创建、启动、停止、删除 VM 实例；
+- VM 资源（CPU、内存、存储、网络）的动态配置与监控；
+- 虚拟机镜像管理（支持从镜像仓库拉取、本地导入镜像）；
+- 容器与 VM 之间的网络互通（依赖已适配的 CNI 插件实现）。
 
 ### 3.3  Ceph 存储支持
 
@@ -174,11 +173,10 @@ QuantaNexus 支持主流 AI 运算芯片的虚拟化与调度能力，可满足�
 
 ## 五、核心优势补充
 
-1.  **基础适配全覆盖**：QuantaNexus 已实现对 K8s 1.28+、主流 CNI 插件、AI 芯片的基础适配，确保集群网络、计算、存储、异构资源层的稳定运行；
+1. **基础适配全覆盖**：QuantaNexus 已实现对 K8s 1.28+、主流 CNI 插件、AI 芯片的基础适配，确保集群网络、计算、存储、异构资源层的稳定运行；
 
-2.  **"计算 - 存储 - 虚拟化 - AI" 一体化**：深度集成 kube-virt、Ceph 与异构计算芯片，实现容器、虚拟机、存储、AI 资源的统一管理，降低多场景运维复杂度；
+2. **"计算 - 存储 - 虚拟化 - AI" 一体化**：深度集成 kube-virt、Ceph 与异构计算芯片，实现容器、虚拟机、存储、AI 资源的统一管理，降低多场景运维复杂度；
 
-3.  **多生态兼容**：同时兼容英伟达 CUDA、华为 MindSpore 等主流 AI 生态，支持 VGPU 与显卡直通，满足不同 AI 业务的资源调度需求；
+3. **多生态兼容**：同时兼容英伟达 CUDA、华为 MindSpore 等主流 AI 生态，支持 VGPU 与显卡直通，满足不同 AI 业务的资源调度需求；
 
-4.  **持续迭代规划**：后续将逐步扩展 K8s 更高版本（如 1.29、1.30）的适配，优化 AI 芯片性能监控、Ceph 存储灾备、kube-virt 高可用等功能，进一步完善生态支持。
-
+4. **持续迭代规划**：后续将逐步扩展 K8s 更高版本（如 1.29、1.30）的适配，优化 AI 芯片性能监控、Ceph 存储灾备、kube-virt 高可用等功能，进一步完善生态支持。

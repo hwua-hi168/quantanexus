@@ -47,6 +47,7 @@ Quantanexus 完全支持国内主流的 Linux 发行版，下表列出了经过�
 #### 1.4 软件依赖
 
 所有节点必须预装以下软件：
+
 - curl, wget, tar, jq 等基础工具
 - Python 3.6 或更高版本
 - SSH 服务并允许 root 登录或 sudo 权限
