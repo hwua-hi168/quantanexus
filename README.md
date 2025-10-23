@@ -83,8 +83,9 @@ QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平
     --set domainName=qntest002.hi168.com 
 
 ```
-QutantaNexus-Mgr helm参数列表README.md(./install/test/helm/quantanexus-mgr/README.md)
-QutantaNexus-CS  helm参数列表README.md(./install/test/helm/quantanexus-cs/README.md)
+[QuantaNexus-Mgr helm参数列表](./install/test/helm/quantanexus-mgr/README.md)
+[QutantaNexus-CS  helm参数列表](./install/test/helm/quantanexus-cs/README.md)
+
 
 ### 1.1 All-in-One 安装（从0开始）
 
