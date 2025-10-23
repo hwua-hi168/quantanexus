@@ -1,0 +1,43 @@
+nginx:
+  image:
+    repository: harbor.hi168.com/quantanexus/goharbor-nginx-photon
+    tag: v2.14.0
+portal:
+  image:
+    repository: harbor.hi168.com/quantanexus/goharbor-harbor-portal
+    tag: v2.14.0
+core:
+  image:
+    repository: harbor.hi168.com/quantanexus/goharbor-harbor-core
+    tag: v2.14.0
+jobservice:
+  image:
+    repository: harbor.hi168.com/quantanexus/goharbor-harbor-jobservice
+    tag: v2.14.0
+registry:
+  registry:
+    image:
+      repository: harbor.hi168.com/quantanexus/goharbor-registry-photon
+      tag: v2.14.0
+  controller:
+    image:
+      repository: harbor.hi168.com/quantanexus/goharbor-harbor-registryctl
+      tag: v2.14.0
+trivy:
+  image:
+    repository: harbor.hi168.com/quantanexus/goharbor-trivy-adapter-photon
+    tag: v2.14.0
+database:
+  internal:
+    image:
+      repository: harbor.hi168.com/quantanexus/goharbor-harbor-db
+      tag: v2.14.0
+redis:
+  internal:
+    image:
+      repository: harbor.hi168.com/quantanexus/goharbor-redis-photon
+      tag: v2.14.0
+exporter:
+  image:
+    repository: harbor.hi168.com/quantanexus/goharbor-harbor-exporter
+    tag: v2.14.0

@@ -1,0 +1,38 @@
+# cert-manager-controller 镜像
+image:
+  # registry: harbor.hi168.com/quantanexus
+  repository: harbor.hi168.com/quantanexus/quay.io-jetstack-cert-manager-controller
+  tag: v1.19.1
+  pullPolicy: IfNotPresent
+
+# cert-manager-webhook 镜像
+webhook:
+  image:
+    # registry: harbor.hi168.com/quantanexus
+    repository: harbor.hi168.com/quantanexus/quay.io-jetstack-cert-manager-webhook
+    tag: v1.19.1
+    pullPolicy: IfNotPresent
+
+# cert-manager-cainjector 镜像
+cainjector:
+  image:
+    # registry: harbor.hi168.com/quantanexus
+    repository: harbor.hi168.com/quantanexus/quay.io-jetstack-cert-manager-cainjector
+    tag: v1.19.1
+    pullPolicy: IfNotPresent
+
+# cert-manager-acmesolver 镜像
+acmesolver:
+  image:
+    # registry: harbor.hi168.com/quantanexus
+    repository: harbor.hi168.com/quantanexus/quay.io-jetstack-cert-manager-acmesolver
+    tag: v1.19.1
+    pullPolicy: IfNotPresent
+
+# cert-manager-startupapicheck 镜像（补充）
+startupapicheck:
+  image:
+    # registry: harbor.hi168.com/quantanexus
+    repository: harbor.hi168.com/quantanexus/quay.io-jetstack-cert-manager-startupapicheck
+    tag: v1.19.1
+    pullPolicy: IfNotPresent

@@ -1,0 +1,6 @@
+basic:
+  controller_image_name: "harbor.hi168.com/quantanexus/docker.io-volcanosh-vc-controller-manager"
+  scheduler_image_name: "harbor.hi168.com/quantanexus/docker.io-volcanosh-vc-scheduler"
+  admission_image_name: "harbor.hi168.com/quantanexus/docker.io-volcanosh-vc-webhook-manager"
+  agent_image_name: "harbor.hi168.com/quantanexus/docker.io-volcanosh-vc-agent"
+  image_registry: ""

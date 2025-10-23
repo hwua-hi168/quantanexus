@@ -1,0 +1,7 @@
+tigeraOperator:
+  image: harbor.hi168.com/quantanexus/quay.io-tigera-operator
+  version: v1.38.7
+  registry: ""
+calicoctl:
+  image: harbor.hi168.com/quantanexus/docker.io-calico-ctl
+  tag: v3.30.4
