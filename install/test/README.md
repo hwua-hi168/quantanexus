@@ -71,7 +71,7 @@ snap install wget
 由于镜像不容易拉取，我们已经制作了 Hi168 的 Helm 仓库，方便进行拉取和更新。测试文件夹下的所有组件都可以通过 Helm mirror 拉取特定版本的 Helm Chart：
 
 ```bash
-helm repo add hi168 https://hi168.com/charts   
+helm repo add hi168 https://helm.hi168.com/charts   
 helm repo update hi168
 ```
 
