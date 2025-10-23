@@ -256,6 +256,10 @@ helm install quantanexus-cs quantanexus/quantanexus-cluster-service --version 1.
   --namespace quantanexus-service --create-namespace \
   --set domainName=qntest002.hi168.com
 ```
+QutantaNexus-Mgr helm参数列表README.md(./install/test/helm/quantanexus-mgr/README.md)
+QutantaNexus-CS  helm参数列表README.md(./install/test/helm/quantanexus-cs/README.md)
+
+
 
 ### 5. 验证与健康检查阶段
 

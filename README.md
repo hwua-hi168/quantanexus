@@ -69,7 +69,7 @@ QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平
     helm repo add hi168 https://helm.hi168.com/charts/ 2>/dev/null
     helm repo update hi168
 
-    # 安装 QuantaNexus-mgr 控制平面,具体参数请查阅helm参数列表README.md(./install/test/helm/quantanexus-mgr/README.md)
+    # 安装 QuantaNexus-mgr 控制平面
     helm install quantanexus hi168/quantanexus-mgr --version 1.0.0 \
     --namespace quantanexus --create-namespace \
     --set global.domainName=qntest002.hi168.com \
@@ -77,12 +77,14 @@ QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平
     --set "global.masterNodes=master1\,master2" \
     --set global.workerNodes=worker1    
     
-    # 安装 QuantaNexus-cs 集群服务,具体参数请查阅helm参数列表README.md(./install/test/helm/quantanexus-cs/README.md)
+    # 安装 QuantaNexus-cs 集群服务·
     helm install quantanexus-cs hi168/quantanexus-cluster-service --version 1.0.0 \
     --namespace quantanexus-cs --create-namespace \
     --set domainName=qntest002.hi168.com 
 
 ```
+QutantaNexus-Mgr helm参数列表README.md(./install/test/helm/quantanexus-mgr/README.md)
+QutantaNexus-CS  helm参数列表README.md(./install/test/helm/quantanexus-cs/README.md)
 
 ### 1.1 All-in-One 安装（从0开始）
 
