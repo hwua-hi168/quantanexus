@@ -3,4 +3,4 @@ basic:
   scheduler_image_name: "quantanexus/docker.io-volcanosh-vc-scheduler"
   admission_image_name: "quantanexus/docker.io-volcanosh-vc-webhook-manager"
   agent_image_name: "quantanexus/docker.io-volcanosh-vc-agent"
-  image_registry: "registry.cn-hangzhou.aliyuncs.com"
+  image_registry: "harbor.hi168.com"

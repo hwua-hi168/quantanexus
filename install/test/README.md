@@ -71,7 +71,7 @@ snap install wget
 由于镜像不容易拉取，我们已经制作了 Hi168 的 Helm 仓库，方便进行拉取和更新。测试文件夹下的所有组件都可以通过 Helm mirror 拉取特定版本的 Helm Chart：
 
 ```bash
-helm repo add hi168 https://hi168.com/charts   
+helm repo add hi168 https://helm.hi168.com/charts   
 helm repo update hi168
 ```
 
@@ -80,8 +80,6 @@ helm repo update hi168
 ```bash
 # 安装证书管理器
 # helm repo add jetstack https://charts.jetstack.io  # 正式环境建议使用官方仓库，测试环境使用 hi168 仓库
-helm repo add hi168 https://hi168.com/charts 2>/dev/null
-helm repo update hi168
 
 helm upgrade --install cert-manager hi168/cert-manager \
   -n cert-manager --create-namespace \
@@ -129,13 +127,19 @@ spec:
 EOF
 ```
 
-#### 3.2 安装 Ingress Controller
+#### 3.2 安装资源指标收集器 Prometheus
+
+```bash
+
+helm upgrade --install prometheus hi168/kube-prometheus-stack \
+  --namespace prom --create-namespace \
+  -f ./helm/monitor/kube-prometheus-stack/values.yaml
+```
+
+#### 3.3 安装 Ingress Controller
 
 ```bash
 # helm repo add ingress-nginx https://helm.hi168.com/charts/
-# Hi168 Helm repository
-helm repo add hi168 https://hi168.com/charts 2>/dev/null
-helm repo update hi168
 
 helm upgrade --install ingress-nginx hi168/ingress-nginx --version 4.0.18 \
   -n ingress-nginx --create-namespace \
@@ -145,17 +149,6 @@ helm upgrade --install ingress-nginx hi168/ingress-nginx --version 4.0.18 \
 kubectl get pods -n ingress-nginx
 ```
 
-#### 3.3 安装资源指标收集器 Prometheus
-
-```bash
-helm repo add hi168 https://hi168.com/charts 2>/dev/null
-helm repo update hi168
-
-helm upgrade --install prometheus hi168/kube-prometheus-stack \
-  --namespace prom --create-namespace \
-  -f ./helm/monitor/kube-prometheus-stack/values.yaml
-```
-
 #### 3.4 存储相关组件
 
 安装存储，为了方便测试，默认安装 Longhorn，生产环境强烈建议使用 Ceph：
@@ -163,9 +156,6 @@ helm upgrade --install prometheus hi168/kube-prometheus-stack \
 ```bash
 # 生产环境请用官方仓库
 # helm repo add longhorn https://charts.longhorn.io 
-
-helm repo add hi168 https://hi168.com/charts 2>/dev/null
-helm repo update hi168
 
 echo "Installing Longhorn..."
 
@@ -182,14 +172,15 @@ kubectl get pods -n longhorn-system
 ```bash
 # 正式环境请使用正式仓库
 # helm repo add harbor https://helm.goharbor.io
-helm repo add hi168 https://hi168.com/charts 2>/dev/null
-helm repo update hi168
 
 # 安装 Harbor，同时应用自定义 Job 和配置
 helm upgrade --install harbor hi168/harbor \
   --namespace harbor \
   --create-namespace \
   -f ./helm/harbor/values.yaml
+
+# 安装完毕后检查所有 Pod 是否正常
+kubectl get pods -n harbor
 ```
 
 #### 3.6 GPU Operator 和 Volcano
@@ -197,22 +188,25 @@ helm upgrade --install harbor hi168/harbor \
 ```bash
 # 测试环境请使用 Hi168 的仓库，此处测试英伟达 GPU
 # helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
-helm repo add hi168 https://hi168.com/charts 
-helm repo update hi168
 
 # 宿主机已经有驱动了
-helm upgrade --install --wait gpu-operator --create-namespace hi168/gpu-operator \
+helm upgrade --install --wait gpu-operator -n gpu-operator --create-namespace hi168/gpu-operator \
   --set driver.enabled=false -f ./helm/gpu-operator/nvidia-gpu-operator/values.yaml
 
 # 宿主机无驱动
 # helm upgrade --install --wait gpu-operator -n gpu-operator --create-namespace nvidia/gpu-operator \
 #   -f ./helm/gpu-operator/nvidia-gpu-operator/values.yaml
 
-# 安装 Volcano
+# 安装完毕后检查所有 Pod 是否正常
+kubectl get pods -n gpu-operator
+
+```
+
+#### 3.7 安装 Volcano
+
+```
 # 生产环境请使用官方仓库，此处使用 Hi168 Helm mirror
 # helm repo add volcano-sh https://volcano-sh.github.io/helm-charts
-helm repo add hi168 https://hi168.com/charts 2>/dev/null
-helm repo update hi168
 
 helm upgrade --install volcano hi168/volcano \
   -n volcano-system --create-namespace \
@@ -225,9 +219,6 @@ helm upgrade --install volcano hi168/volcano \
 
 ```bash
 # 执行主控服务安装脚本
-helm repo add hi168 https://helm.hi168.com/charts/ 2>/dev/null 
-helm repo update hi168
-
 helm install quantanexus hi168/quantanexus-mgr --version 1.0.0 \
   --namespace quantanexus-mgr --create-namespace \
   --set global.domainName=qntest002.hi168.com \
@@ -240,12 +231,9 @@ helm install quantanexus hi168/quantanexus-mgr --version 1.0.0 \
 
 ```bash
 # 执行集群服务安装脚本
-helm repo add hi168 https://helm.hi168.com/charts/
-helm repo update
 
-# 安装 Chart（示例）
-helm install quantanexus-cs quantanexus/quantanexus-cluster-service --version 1.0.0 \
-  --namespace quantanexus-service --create-namespace \
+helm install quantanexus-cs quantanexus/quantanexus-cs --version 1.0.0 \
+  --namespace quantanexus-cs --create-namespace \
   --set domainName=qntest002.hi168.com
 ```
 

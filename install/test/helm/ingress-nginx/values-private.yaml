@@ -1,0 +1,37 @@
+className: "nginx"
+defaultBackend:
+  enabled: true
+  image:
+    registry: harbor.hi168.com/quantanexus
+    image: k8s.gcr.io-defaultbackend-amd64
+    tag: "1.5"
+
+controller:
+  image:
+    registry: harbor.hi168.com/quantanexus
+    image: k8s.gcr.io-ingress-nginx-controller
+    tag: "v1.1.2"
+    digest: ""
+  kind: DaemonSet
+  # added by David  , to expose the metrics to prom . 
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: prometheus
+  hostNetwork: true
+  # 启用 Webhooks (推荐)
+  admissionWebhooks:
+    enabled: true
+    patch:
+      enabled: true
+      image:
+        registry: harbor.hi168.com/quantanexus
+        image: k8s.gcr.io-ingress-nginx-kube-webhook-certgen
+        tag: v1.1.1
+        digest: ""
+  # 额外的 args, 如果需要
+  extraArgs:
+    enable-ssl-passthrough: true
+    default-ssl-certificate: "ingress-nginx/default-tls"

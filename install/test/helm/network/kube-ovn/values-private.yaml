@@ -1,0 +1,23 @@
+global:
+  registry:
+    address: harbor.hi168.com
+    imagePullSecrets: []
+  images:
+    kubeovn:
+      repository: docker.io-kubeovn-kube-ovn
+      vpcRepository: docker.io-kubeovn-vpc-nat-gateway
+      tag: v1.14.0
+      support_arm: true
+      thirdparty: true
+natGw:
+  bgpSpeaker:
+    image:
+      # -- Image repository.
+      # @section -- NAT gateways configuration
+      repository: harbor.hi168.com/docker.io-kubeovn-kube-ovn
+      # -- Image tag.
+      # @section -- NAT gateways configuration
+      tag: v1.14.0
+      # -- Image pull policy.
+      # @section -- NAT gateways configuration
+      pullPolicy: IfNotPresent

@@ -28,49 +28,49 @@ image:
   # 核心组件
   longhorn:
     engine:
-      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+      registry: harbor.hi168.com/quantanexus
       repository: longhornio-longhorn-engine
     manager:
-      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+      registry: harbor.hi168.com/quantanexus
       repository: longhornio-longhorn-manager
     ui:
-      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+      registry: harbor.hi168.com/quantanexus
       repository: longhornio-longhorn-ui
     instanceManager:
-      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+      registry: harbor.hi168.com/quantanexus
       repository: longhornio-longhorn-instance-manager
     shareManager:
-      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+      registry: harbor.hi168.com/quantanexus
       repository: longhornio-longhorn-share-manager
     backingImageManager:
-      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+      registry: harbor.hi168.com/quantanexus
       repository: longhornio-backing-image-manager
     supportBundleKit:
-      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+      registry: harbor.hi168.com/quantanexus
       repository: longhornio-support-bundle-kit
   # CSI 组件
   csi:
     attacher:
-      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+      registry: harbor.hi168.com/quantanexus
       repository: longhornio-csi-attacher
       # tag: v4.9.0-20250826 # 保持原样，无需修改
     provisioner:
-      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+      registry: harbor.hi168.com/quantanexus
       repository: longhornio-csi-provisioner
       # tag: v5.3.0-20250826 # 保持原样，无需修改
     nodeDriverRegistrar:
-      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+      registry: harbor.hi168.com/quantanexus
       repository: longhornio-csi-node-driver-registrar
       # tag: v2.14.0-20250826 # 保持原样，无需修改
     resizer:
-      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+      registry: harbor.hi168.com/quantanexus
       repository: longhornio-csi-resizer
       # tag: v1.14.0-20250826 # 保持原样，无需修改
     snapshotter:
-      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+      registry: harbor.hi168.com/quantanexus
       repository: longhornio-csi-snapshotter
       # tag: v8.3.0-20250826 # 保持原样，无需修改
     livenessProbe:
-      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+      registry: harbor.hi168.com/quantanexus
       repository: longhornio-livenessprobe
       # tag: v2.16.0-20250826 # 保持原样，无需修改
