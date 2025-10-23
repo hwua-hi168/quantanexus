@@ -1,5 +1,3 @@
-基于您提供的 values.yaml 文件，我为您生成 Quantanexus-mgr 的 Helm References 文档：
-
 # Quantanexus Cluster Service Helm Chart 配置参考
 
 ## 全局配置 (Global)
