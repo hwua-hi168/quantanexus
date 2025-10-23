@@ -267,10 +267,10 @@ kubectl get pods -n quantanexus-mgr
 kubectl get svc -n quantanexus-cs
 
 # 查看主控服务日志
-kubectl logs -f deployment/quantanexus-mgr -n quantanexus-mgr
+kubectl logs -f deployment/quantanexus-quantanexus-mgr -n quantanexus-mgr
 
 # 查看集群服务日志
-kubectl logs -f deployment/quantanexus-cluster-service -n quantanexus-cs
+kubectl logs -f deployment/abc-webshell -n quantanexus-cs
 ```
 
 确认所有服务处于 Running 状态，验证服务间通信正常，检查主控服务能否正确管理集群服务。
