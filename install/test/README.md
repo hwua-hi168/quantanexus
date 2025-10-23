@@ -80,7 +80,7 @@ helm repo update hi168
 ```bash
 # 安装证书管理器
 # helm repo add jetstack https://charts.jetstack.io  # 正式环境建议使用官方仓库，测试环境使用 hi168 仓库
-helm repo add hi168 https://hi168.com/charts 2>/dev/null
+helm repo add hi168 https://helm.hi168.com/charts 2>/dev/null
 helm repo update hi168
 
 helm upgrade --install cert-manager hi168/cert-manager \
