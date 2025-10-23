@@ -1,5 +1,3 @@
-您说得对，我需要补充完整的 type 和 default 字段。以下是完整的表格：
-
 # QuantaNexus Cluster Service Helm Chart 配置参数
 
 | Key | Description | Type | Default |
