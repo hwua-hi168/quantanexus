@@ -39,7 +39,6 @@ QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平
 | grafana | 监控 | ✅ 必需 | 数据可视化平台，用于展示 prometheus 收集的监控数据 |
 | longhorn 或 ceph | 存储 | ✅ 必需 | longhorn 适用于测试环境，ceph 适用于生产环境 |
 
-
 安装 Quantanexus-cs 需要预先安装以下核心组件：
 
 | 组件名称 | 类型 | 必需性 | 说明 |
@@ -83,9 +82,11 @@ QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平
     --set domainName=qntest002.hi168.com 
 
 ```
-[QuantaNexus-Mgr helm参数列表](./install/test/helm/quantanexus-mgr/README.md)
-[QutantaNexus-CS  helm参数列表](./install/test/helm/quantanexus-cs/README.md)
 
+| 组件 | Helm参数文档 |
+|------|----------|
+| QuantaNexus-Mgr | [Helm参数](./install/test/helm/quantanexus-mgr/README.md) |
+| QuantaNexus-CS  | [Helm参数](./install/test/helm/quantanexus-cs/README.md) |
 
 ### 1.1 All-in-One 安装（从0开始）
 
