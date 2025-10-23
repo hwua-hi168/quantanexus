@@ -233,7 +233,7 @@ helm install quantanexus hi168/quantanexus-mgr --version 1.0.0 \
 # 执行集群服务安装脚本
 
 helm install quantanexus-cs quantanexus/quantanexus-cs --version 1.0.0 \
-  --namespace quantanexus-service --create-namespace \
+  --namespace quantanexus-cs --create-namespace \
   --set domainName=qntest002.hi168.com
 ```
 
