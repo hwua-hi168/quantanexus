@@ -91,6 +91,11 @@ apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: root-ca-issuer
+  labels:
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    meta.helm.sh/release-name: quantanexus-cs
+    meta.helm.sh/release-namespace: quantanexus-cs
 spec:
   selfSigned: {}
 ---
@@ -99,6 +104,11 @@ kind: Certificate
 metadata:
   name: root-ca
   namespace: cert-manager
+  labels:
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    meta.helm.sh/release-name: quantanexus-cs
+    meta.helm.sh/release-namespace: quantanexus-cs
 spec:
   secretName: root-ca-secret
   commonName: "QuantaNexus Root CA"
@@ -121,6 +131,11 @@ apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: quantanexus-ca-issuer
+  labels:
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    meta.helm.sh/release-name: quantanexus-cs
+    meta.helm.sh/release-namespace: quantanexus-cs
 spec:
   ca:
     secretName: root-ca-secret
@@ -234,7 +249,7 @@ helm install quantanexus hi168/quantanexus-mgr --version 1.0.0 \
 
 helm install quantanexus-cs quantanexus/quantanexus-cs --version 1.0.0 \
   --namespace quantanexus-cs --create-namespace \
-  --set domainName=qntest002.hi168.com
+  --set global.domainName=qntest002.hi168.com
 ```
 
 | 组件 | Helm参数文档 |
