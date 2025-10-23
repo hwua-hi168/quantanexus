@@ -243,6 +243,14 @@ helm install quantanexus hi168/quantanexus-mgr --version 1.0.0 \
 helm repo add hi168 https://helm.hi168.com/charts/
 helm repo update
 
+helm install quantanexus hi168/quantanexus-mgr --version 1.0.0 \
+  --namespace quantanexus --create-namespace \
+  --set global.domainName=qntest002.hi168.com \
+  --set global.masterNode=master1 \
+  --set "global.masterNodes=master1\,master2" \
+  --set global.workerNodes=worker1  
+  
+
 # 安装 Chart（示例）
 helm install quantanexus-cs quantanexus/quantanexus-cluster-service --version 1.0.0 \
   --namespace quantanexus-service --create-namespace \
