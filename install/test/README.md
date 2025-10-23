@@ -203,10 +203,10 @@ kubectl get pods -n gpu-operator
 ```
 
 #### 3.7 安装 Volcano
+
+```
 # 生产环境请使用官方仓库，此处使用 Hi168 Helm mirror
 # helm repo add volcano-sh https://volcano-sh.github.io/helm-charts
-helm repo add hi168 https://hi168.com/charts 2>/dev/null
-helm repo update hi168
 
 helm upgrade --install volcano hi168/volcano \
   -n volcano-system --create-namespace \
