@@ -1,14 +1,3 @@
-
-apiVersion: v2
-# 应用名称
-name: quantanexus-cluster-service
-# 应用描述：用于在 Kubernetes 上部署 QuantaNexus 集群服务的 Helm Chart
-description: A Helm chart for deploying quantanexus cluster service on Kubernetes
-# 图表版本
-version: 1.0.0
-# 应用版本
-appVersion: "1.0.0"
-
 # ==============================
 # 全局配置
 # ==============================

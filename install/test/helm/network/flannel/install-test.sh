@@ -8,4 +8,4 @@ helm install flannel \
   --namespace kube-flannel \
   --create-namespace \
   --set podCidr="10.244.0.0/16" \
-  hi168/flannel
+  hi168/flannel -f values.yaml
