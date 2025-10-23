@@ -1,0 +1,11 @@
+global:
+  imageName: registry.cn-hangzhou.aliyuncs.com/quantanexus/chrislusf-seaweedfs:3.98
+
+volume:
+  resizeHook:
+    image: registry.cn-hangzhou.aliyuncs.com/quantanexus/alpine-k8s:1.28.4
+
+cosi:
+  image: registry.cn-hangzhou.aliyuncs.com/quantanexus/ghcr.io-seaweedfs-seaweedfs-cosi-driver:v0.1.2
+  sidecar:
+    image: registry.cn-hangzhou.aliyuncs.com/quantanexus/gcr.io-k8s-staging-sig-storage-objectstorage-sidecar:v20250711-controllerv0.2.0-rc1-80-gc2f6e65
