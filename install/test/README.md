@@ -80,8 +80,6 @@ helm repo update hi168
 ```bash
 # 安装证书管理器
 # helm repo add jetstack https://charts.jetstack.io  # 正式环境建议使用官方仓库，测试环境使用 hi168 仓库
-helm repo add hi168 https://helm.hi168.com/charts 2>/dev/null
-helm repo update hi168
 
 helm upgrade --install cert-manager hi168/cert-manager \
   -n cert-manager --create-namespace \
@@ -129,13 +127,19 @@ spec:
 EOF
 ```
 
-#### 3.2 安装 Ingress Controller
+#### 3.2 安装资源指标收集器 Prometheus
+
+```bash
+
+helm upgrade --install prometheus hi168/kube-prometheus-stack \
+  --namespace prom --create-namespace \
+  -f ./helm/monitor/kube-prometheus-stack/values.yaml
+```
+
+#### 3.3 安装 Ingress Controller
 
 ```bash
 # helm repo add ingress-nginx https://helm.hi168.com/charts/
-# Hi168 Helm repository
-helm repo add hi168 https://hi168.com/charts 2>/dev/null
-helm repo update hi168
 
 helm upgrade --install ingress-nginx hi168/ingress-nginx --version 4.0.18 \
   -n ingress-nginx --create-namespace \
@@ -145,16 +149,7 @@ helm upgrade --install ingress-nginx hi168/ingress-nginx --version 4.0.18 \
 kubectl get pods -n ingress-nginx
 ```
 
-#### 3.3 安装资源指标收集器 Prometheus
 
-```bash
-helm repo add hi168 https://hi168.com/charts 2>/dev/null
-helm repo update hi168
-
-helm upgrade --install prometheus hi168/kube-prometheus-stack \
-  --namespace prom --create-namespace \
-  -f ./helm/monitor/kube-prometheus-stack/values.yaml
-```
 
 #### 3.4 存储相关组件
 
