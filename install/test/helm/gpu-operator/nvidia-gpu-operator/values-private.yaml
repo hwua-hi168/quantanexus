@@ -109,3 +109,6 @@ ccManager: # enabled: false
   image: nvcr.io-nvidia-cloud-native-k8s-cc-manager # 原始: nvcr.io/nvidia/cloud-native/k8s-cc-manager
   version: v0.1.1 # 保留原始版本号作为标签的一部分
 
+node-feature-discovery:
+  image:
+    repository: harbor.hi168.com/quantanexus/registry.k8s.io-nfd-node-feature-discovery
