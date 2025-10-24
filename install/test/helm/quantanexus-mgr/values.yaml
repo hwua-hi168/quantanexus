@@ -120,7 +120,7 @@ quantanexus:
   # Quantanexus manager (init container)
   manager:
     repository: "quantanexus-mgr"
-    tag: "v8.3.7.12"
+    tag: "v8.3.7.13"
 
   # Nginx reverse proxy
   nginx:
