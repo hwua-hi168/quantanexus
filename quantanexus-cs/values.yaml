@@ -35,7 +35,10 @@ certManager:
     hooks:
       rbacWeight: "-10"
       jobWeight: "-5"
-
+prometheus:
+  namespace: prom
+  volcanoNamespace: volcano-system
+  volcanoServiceName: volcano-scheduler
 # ==============================
 # Ingress 配置
 # ==============================

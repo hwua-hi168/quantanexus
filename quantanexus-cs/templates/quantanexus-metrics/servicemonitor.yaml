@@ -4,18 +4,17 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: volcano-scheduler
-  namespace: prom
+  namespace: {{ .Values.prom.namespace | default "prom" }}
   labels:
     release: prometheus
 spec:
   selector:
     matchLabels:
-      app: volcano-scheduler
+      app: {{ .Values.prom.volcanoServiceName | default "volcano-scheduler"}}
   endpoints:
   - port: metrics
     interval: 30s
     path: /metrics
   namespaceSelector:
     matchNames:
-    - volcano-system
-~
+    - {{ .Values.prom.volcanoNamespace | default "volcano-system"}}
