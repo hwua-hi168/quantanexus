@@ -3,20 +3,20 @@ name: Sync to Gitee
 on:
   push:
     branches: [ main, master ]
-  schedule:
-    - cron: '0 2 * * *'
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Mirror to Gitee
-        uses: Yikun/hub-mirror-action@6ef4a80c6c5b8e9b27a4e85c52d2e371ece833b7
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          src: github/${{ github.repository }}
-          dst: gitee/hwua/quantanexus
-          static-list: "${{ github.repository }}"
-          force-update: true
-          debug: true
+          fetch-depth: 0
+
+      - name: Mirror to Gitee
+        uses: wearerequired/git-mirror-action@v1
         env:
-          GITEE_PRIVATE_KEY: ${{ secrets.GITEE_TOKEN }}
+          SSH_PRIVATE_KEY: ${{ secrets.GITEE_SSH_KEY }}
+        with:
+          source-repo: ${{ github.repository }}
+          destination-repo: git@gitee.com:hwua/quantanexus.git
