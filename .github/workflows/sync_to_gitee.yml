@@ -24,7 +24,7 @@ jobs:
           # 添加 Gitee 到 known_hosts
           ssh-keyscan gitee.com >> ~/.ssh/known_hosts
           
-          # 调试信息
+          # 调试信息 test 
           echo "=== SSH Key Info ==="
           ls -la ~/.ssh/
           echo "=== Key Content ==="
