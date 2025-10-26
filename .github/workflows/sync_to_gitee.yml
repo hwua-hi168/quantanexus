@@ -16,13 +16,19 @@ jobs:
 
       # 解决“dubious ownership”
       - name: Mark workspace safe
-        run: 	git config --global --add safe.directory /github/workspace
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@users.noreply.github.com"
+          git config --global --add safe.directory /github/workspace
 
       - name: Mirror to Gitee
         uses: wearerequired/git-mirror-action@v1
         env:
           SSH_PRIVATE_KEY: ${{ secrets.GITEE_SSH_PRIVATE_KEY }}
-        with:
-          source-repo: 'hwua-hi168/quantanexus'      # ← 必须和 GitHub 上大小写一致
-          destination-repo: 'git@gitee.com:hwua/quantanexus.git'
-          dry-run: false
+        run: |
+          # 移除可能已存在的远程仓库
+          git remote remove gitee || true
+          # 添加 Gitee 远程仓库（使用 HTTPS 和 Token）
+          git remote add gitee https://${{ secrets.GITEE_TOKEN }}@gitee.com/hwua/quantanexus.git
+          # 推送到 Gitee
+          git push gitee HEAD:main --force
