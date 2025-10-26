@@ -1,0 +1,25 @@
+basic:
+  controller_image_name: "quantanexus/docker.io-volcanosh-vc-controller-manager"
+  scheduler_image_name: "quantanexus/docker.io-volcanosh-vc-scheduler"
+  admission_image_name: "quantanexus/docker.io-volcanosh-vc-webhook-manager"
+  agent_image_name: "quantanexus/docker.io-volcanosh-vc-agent"
+  image_registry: "registry.cn-hangzhou.aliyuncs.com"
+
+scheduler:
+  replicaCount: 1
+  service:
+    type: ClusterIP
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8080"
+      prometheus.io/path: "/metrics"
+      # 可选：自定义抓取间隔
+      prometheus.io/interval: "30s"
+
+controller-manager:
+  replicaCount: 1
+  service:
+    annotations:
+      prometheus.io/scrape: "true" 
+      prometheus.io/port: "8081"
+      prometheus.io/path: "/metrics"

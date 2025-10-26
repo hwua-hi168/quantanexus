@@ -8,7 +8,7 @@ helm install seaweedfs hi168/seaweedfs \
   --namespace seaweedfs --create-namespace \
   --set global.replicaCount=3 \
   --set filer.s3.enabled=true \
-  --set filer.s3.port=8333
+  --set filer.s3.port=8333 -f values.yaml
 
 # 3. 查看 svc
 kubectl -n seaweedfs get svc seaweedfs-filer-s3

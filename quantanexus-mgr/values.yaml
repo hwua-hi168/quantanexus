@@ -1,6 +1,6 @@
 # Global configuration
 global:
-  service_namespace: quantanexus-service
+  service_namespace: quantanexus-cs
   domainName: qntest002.hi168.com
   # registry: harbor.hi168.com/quantanexus
   # In China, please use aliyuncs
@@ -15,9 +15,13 @@ global:
 # Cert Manager 配置块
 certManager:
   enabled: true
-  issuerName: quantanexus-ca-issuer
+  certificateName: 
+  issuerName: qn-mgr-selfsigned-ca
   issuerKind: ClusterIssuer 
-
+  issuerSecret:: qn-selfsigned-ca-tls
+  dnsNames:
+    - controller.quantanexus.io
+    - controller.qntest002.hi168.com
 ingress:
   tlsManual: false
   tlsSecret:
