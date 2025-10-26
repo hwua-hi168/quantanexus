@@ -1,4 +1,4 @@
-name: Sync to Gitee
+name: Sync to Gitee via SSH
 
 on:
   push:
@@ -15,17 +15,21 @@ jobs:
 
       - name: Setup Git
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git config --global --add safe.directory /github/workspace
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@users.noreply.github.com"
 
-      - name: Setup Gitee remote
+      - name: Setup SSH
         run: |
-          git remote remove gitee 2>/dev/null || true
-          git remote add gitee https://hwua:${{ secrets.GITEE_SYNC_TOKEN }}@gitee.com/hwua/quantanexus.git
+          mkdir -p ~/.ssh
+          echo "${{ secrets.GITEE_SSH_PRIVATE_KEY }}" > ~/.ssh/gitee_key
+          chmod 600 ~/.ssh/gitee_key
+          ssh-keyscan gitee.com >> ~/.ssh/known_hosts
+
+      - name: Add Gitee remote via SSH
+        run: |
+          git remote remove gitee || true
+          git remote add gitee git@gitee.com:hwua/quantanexus.git
 
       - name: Push to Gitee
         run: |
-          CURRENT_BRANCH=$(git branch --show-current)
-          echo "Pushing from $CURRENT_BRANCH to main"
-          git push gitee $CURRENT_BRANCH:main --force
+          git push gitee HEAD:main --force
