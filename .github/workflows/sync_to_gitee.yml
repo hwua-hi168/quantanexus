@@ -4,7 +4,6 @@ on:
   push:
     branches: [ main, master ]
   schedule:
-    # 每天早上6点自动同步（UTC时间，注意时区转换）
     - cron: '0 */4 * * *'  # 每4小时一次
 
 jobs:
