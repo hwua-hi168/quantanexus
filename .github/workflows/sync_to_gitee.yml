@@ -16,7 +16,7 @@ jobs:
       - name: Mirror to Gitee
         uses: wearerequired/git-mirror-action@v1
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.GITEE_SSH_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.GITEE_SSH_PRIVATE_KEY }}
         with:
           source-repo: ${{ github.repository }}
           destination-repo: git@gitee.com:hwua/quantanexus.git
