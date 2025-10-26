@@ -9,4 +9,4 @@ helm repo update
 helm upgrade --install harbor hi168/harbor \
   --namespace harbor \
   --create-namespace \
-  -f values-test.yaml 
+  -f values.yaml

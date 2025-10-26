@@ -1,0 +1,176 @@
+# Global configuration
+global:
+  service_namespace: quantanexus-service
+  domainName: qntest002.hi168.com
+  # registry: harbor.hi168.com/quantanexus
+  # In China, please use aliyuncs
+  registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+  # outside of China, please use docker.io
+  # registry: docker.io/hwua
+  masterNode: com-calino-master-1
+  masterNodes: "com-calino-master-1,com-calino-master-2"
+  workerNodes: "com-calino-worker-1"
+  labelController: true
+  
+# Cert Manager 配置块
+certManager:
+  enabled: true
+  certificateName: 
+  issuerName: qn-mgr-selfsigned-ca
+  issuerKind: ClusterIssuer 
+  issuerSecret:: qn-selfsigned-ca-tls
+  dnsNames:
+    - controller.quantanexus.io
+    - controller.qntest002.hi168.com
+ingress:
+  tlsManual: false
+  tlsSecret:
+    name: abc-tls
+    certificate: certificate-Base64encoded-tLQo=
+    privateKey: privateKey-Base64encoded-tLQo=
+  tlsCommonSecret:
+    name: abc-tls-hwua-common-4
+    certificate: certificate-common-Base64encoded-tLQo=
+    privateKey: privateKey-common-Base64encoded-tLQo=
+
+# PostgreSQL configuration (如果使用子chart)
+postgresql:
+  enabled: true
+  auth:
+    username: "quantanexus"
+    password: "xYyE3lLtdcvmKkhFEcea"
+    database: quantanexus001
+  # 主数据库镜像配置
+  image:
+    registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+    repository: postgresql
+    tag: 14.4.0-debian-11-r23
+    pullPolicy: IfNotPresent
+    # digest: ""
+  primary:
+    persistence:
+      enabled: true
+      # 必须空，才能匹配 hostPath PV
+      storageClass: ""
+      size: 40Gi
+    # 让 Pod 也落在同一块节点
+    # nodeSelector:
+    #   kubernetes.io/hostname: com-calino-master-1
+    podSecurityContext:
+      enabled: true
+      fsGroup: 0 
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 0
+    hostNetwork: true
+  hostPath:
+    # true=生成 hostPath PV；false=走集群默认动态供给
+    enabled: false
+    # node: com-calino-master-1   # 目标节点
+    # path: /var/lib/quantanexus/postgresql
+    # storage: 40Gi
+  # Prometheus Exporter 镜像配置 (如果启用了 metrics)
+  metrics:
+    enabled: true
+    image:
+      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+      repository: postgres-exporter
+      tag: 0.10.1-debian-11-r24
+      pullPolicy: IfNotPresent  
+
+redis:
+  auth:
+    # 密码设置 - 如果为空则自动生成
+    password: ""  # 改为空，自动生成
+    _password: "" # 
+    # 新增：使用现有 Secret
+    existingSecret: ""
+    # 新增：Secret 中的键名映射
+    secretKeys:
+      passwordKey: "redis-password"
+  path: /var/lib/quantanexus/redis-single
+  repository: "redis"
+  tag: "7.2.4"
+  imagePullPolicy: "IfNotPresent"
+
+quantanexus:
+  enabled: true
+  replicaCount: 1
+
+  # 新增：Odoo 核心运行参数
+  config:
+    maxCronThreads: 8
+    workers: 16
+    moduleImageCenterEnable: false
+    moduleOssManageEnable: false
+    moduleCloudLinkEnable: false
+
+  # Quantanexus core application
+  app:
+    repository: "quantanexus-basic"
+    tag: "1.0.5"
+    imagePullPolicy: "IfNotPresent"
+
+  # Image pull secrets configuration
+  imagePullSecrets:
+    enabled: false
+    secrets:
+      - name: hi168-harbor-secret
+
+  # Quantanexus manager (init container)
+  manager:
+    repository: "quantanexus-mgr"
+    tag: "v8.3.7.13"
+
+  # Nginx reverse proxy
+  nginx:
+    repository: "nginx"
+    tag: "reverse"
+    port: 8443
+
+    # Frontend (Vue) init container
+    frontend:
+      repository: "hi168-vue"
+      tag: "v8.3.7.qn11"
+      env:
+        type: "hi168slot"
+        moduleList: "basic"
+
+  # Host aliases
+  hostAliases:
+    # - ip: "192.168.103.120"
+    #   hostnames:
+    #     - "harbor.hi168.com"
+
+  # Storage paths and PVC configuration
+  storage:
+    # 新增开关: 控制是否使用 hostPath 卷。false 表示使用 PVC (Longhorn 自动分配)
+    hostPathEnabled: false 
+    
+    # 路径配置 (hostPathEnabled: true 时使用)
+    quantanexusData: "/var/lib/quantanexus/quantanexus"
+    quantanexusMisc: "/var/lib/quantanexus/quantanexus-misc"
+    runtime: "/mnt/quantanexus/runtime"
+
+    # PVC 大小配置 (hostPathEnabled: false 时使用)
+    # 请根据您的实际需求调整这些存储大小
+    pvcSizes:
+      runtime: 30Gi  # QuantaNexus 运行时卷大小
+      data: 40Gi     # QuantaNexus 数据卷大小
+      misc: 20Gi     # QuantaNexus 杂项卷大小    
+
+  # Environment variables
+  env:
+    home: "/var/lib/quantanexus"
+    configPath: "/opt/etc/quantanexus/prod.conf"
+    updateOption: "-i muk_web_theme,hw_base,hw_frontend -u all"
+    preStartShell: "/opt/etc/quantanexus/pre-start.sh"
+
+  # Liveness probe
+  livenessProbe:
+    path: "/liveness"
+    port: 8069
+    initialDelaySeconds: 300
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3

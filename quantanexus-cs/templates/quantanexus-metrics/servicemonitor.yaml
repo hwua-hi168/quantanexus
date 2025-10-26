@@ -1,0 +1,20 @@
+# volcano-service-monitor.yaml
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: volcano-scheduler
+  namespace: {{ .Values.prom.namespace | default "prom" }}
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.prom.volcanoServiceName | default "volcano-scheduler"}}
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
+  namespaceSelector:
+    matchNames:
+    - {{ .Values.prom.volcanoNamespace | default "volcano-system"}}

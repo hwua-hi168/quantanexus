@@ -1,0 +1,74 @@
+# alertmanager
+alertmanager:
+  alertmanagerSpec:
+    image:
+      registry: harbor.hi168.com/quantanexus
+      repository: quay.io-prometheus-alertmanager
+      tag: v0.28.1
+
+# prometheus-operator
+prometheusOperator:
+  image:
+    registry: harbor.hi168.com/quantanexus
+    repository: quay.io-prometheus-operator-prometheus-operator
+    tag: v0.86.0
+  prometheusConfigReloader:
+    image:
+      registry: harbor.hi168.com/quantanexus
+      repository: quay.io-prometheus-operator-prometheus-config-reloader
+      tag: v0.86.0
+  thanosImage:
+    registry: harbor.hi168.com/quantanexus
+    repository: quay.io-thanos-thanos
+    tag: v0.39.2
+
+# prometheus
+prometheus:
+  prometheusSpec:
+    image:
+      registry: harbor.hi168.com/quantanexus
+      repository: quay.io-prometheus-prometheus
+      tag: v3.6.0
+
+# crds upgrade job
+crds:
+  upgradeJob:
+    image:
+      busybox:
+        registry: harbor.hi168.com/quantanexus
+        repository: docker.io-busybox
+        tag: latest
+      kubectl:
+        registry: harbor.hi168.com/quantanexus
+        repository: registry.k8s.io-kubectl
+        tag: v1.33.1
+
+# admission webhook patch
+prometheusOperator:
+  admissionWebhooks:
+    patch:
+      image:
+        registry: harbor.hi168.com/quantanexus
+        repository: registry.k8s.io-ingress-nginx-kube-webhook-certgen
+        tag: v1.6.3
+
+# kube-state-metrics
+kube-state-metrics:
+  image:
+    registry: harbor.hi168.com/quantanexus
+    repository: registry.k8s.io-kube-state-metrics-kube-state-metrics
+    tag: v2.17.0
+
+# grafana
+grafana:
+  image:
+    registry: harbor.hi168.com/quantanexus
+    repository: docker.io-grafana-grafana
+    tag: 12.2.0
+
+# node-exporter
+prometheus-node-exporter:
+  image:
+    registry: harbor.hi168.com/quantanexus
+    repository: quay.io-prometheus-node-exporter
+    tag: v1.9.1

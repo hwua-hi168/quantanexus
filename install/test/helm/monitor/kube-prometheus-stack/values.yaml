@@ -1,0 +1,94 @@
+# alertmanager
+alertmanager:
+  alertmanagerSpec:
+    image:
+      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+      repository: quay.io-prometheus-alertmanager
+      tag: v0.28.1
+
+# prometheus-operator
+prometheusOperator:
+  image:
+    registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+    repository: quay.io-prometheus-operator-prometheus-operator
+    tag: v0.86.0
+  prometheusConfigReloader:
+    image:
+      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+      repository: quay.io-prometheus-operator-prometheus-config-reloader
+      tag: v0.86.0
+  thanosImage:
+    registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+    repository: quay.io-thanos-thanos
+    tag: v0.39.2
+
+# prometheus
+prometheus:
+  prometheusSpec:
+    image:
+      registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+      repository: quay.io-prometheus-prometheus
+      tag: v3.6.0
+
+# crds upgrade job
+crds:
+  upgradeJob:
+    image:
+      busybox:
+        registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+        repository: docker.io-busybox
+        tag: latest
+      kubectl:
+        registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+        repository: registry.k8s.io-kubectl
+        tag: v1.33.1
+
+# admission webhook patch
+prometheusOperator:
+  admissionWebhooks:
+    patch:
+      image:
+        registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+        repository: registry.k8s.io-ingress-nginx-kube-webhook-certgen
+        tag: v1.6.3
+
+# kube-state-metrics
+kube-state-metrics:
+  image:
+    registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+    repository: registry.k8s.io-kube-state-metrics-kube-state-metrics
+    tag: v2.17.0
+
+# grafana
+grafana:
+  image:
+    registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+    repository: docker.io-grafana-grafana
+    tag: 12.2.0
+  service:
+    type: NodePort          # 也可改为 LoadBalancer
+    port: 3000
+    nodePort: 30300         # 仅 NodePort 时生效
+
+  # 2) 允许匿名调用 API（只读），或下面单独创建 API Key
+  grafana.ini:
+    auth.anonymous:
+      enabled: true
+      org_name: Main Org.
+      org_role: Viewer      # Viewer/Editor/Admin 按需给
+
+    # 3) 关闭 CSRF，方便脚本裸 curl（可选）
+    security:
+      disable_csrf_protection: true
+
+  # 4) 持久化，避免重启丢 Dashboard
+  persistence:
+    enabled: true
+    size: 10Gi
+
+# node-exporter
+prometheus-node-exporter:
+  image:
+    registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+    repository: quay.io-prometheus-node-exporter
+    tag: v1.9.1

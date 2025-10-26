@@ -1,0 +1,379 @@
+# ==============================
+# 全局配置
+# ==============================
+global:
+  # 域名配置
+  domainName: qntest002.example.com
+  # 镜像仓库地址
+  registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+  # 主节点名称（已注释）
+  # masterNode: com-calino-master-1
+
+# ==============================
+# Cert Manager 配置
+# ==============================
+certManager:
+  # 是否己安装 Cert Manager
+  enabled: true
+  # 证书颁发者名称
+  issuerName: quantanexus-ca-issuer
+  # 证书颁发者类型
+  issuerKind: ClusterIssuer
+  # 根证书同步配置
+  rootCA:
+    # 是否启用根证书同步
+    enabled: true
+    # 源证书所在的命名空间
+    sourceNamespace: cert-manager
+    # 源 Secret 名称
+    sourceSecretName: root-ca-secret
+    # 目标 Secret 名称
+    targetSecretName: root-ca-secret
+    # 是否创建 RBAC 权限
+    createRBAC: true
+    # Helm hook 权重配置
+    hooks:
+      rbacWeight: "-10"
+      jobWeight: "-5"
+prometheus:
+  namespace: prom
+  volcanoNamespace: volcano-system
+  volcanoServiceName: volcano-scheduler
+# ==============================
+# Ingress 配置
+# ==============================
+ingress:
+  # 是否手动配置 TLS
+  tlsManual: false
+  # TLS 密钥配置
+  tlsSecret:
+    # TLS 密钥名称
+    name: abc-tls
+    # 证书内容（Base64编码）
+    certificate: ""
+    # 私钥内容（Base64编码）
+    privateKey: ""
+  # 通用 TLS 密钥配置
+  tlsCommonSecret:
+    # 通用 TLS 密钥名称
+    name: abc-tls-hwua-common-4
+    # 通用证书内容
+    certificate: ""
+    # 通用私钥内容
+    privateKey: ""
+
+# ==============================
+# 实验服务配置
+# ==============================
+abcExperimentService:
+  # 是否启用实验服务
+  enabled: true
+  # 副本数量
+  replicaCount: 1
+
+  # 应用镜像配置
+  app:
+    # 镜像仓库名称
+    repository: "abc-experiment-service"
+    # 镜像标签版本
+    tag: "v1.3.6"
+    # 镜像拉取策略
+    imagePullPolicy: "IfNotPresent"
+
+  # 服务网络配置
+  service:
+    # 服务暴露端口
+    port: 8075
+    # 服务监听地址
+    host: "0.0.0.0"
+
+  # Kubernetes 客户端配置
+  kubernetes:
+    # 是否使用服务账户进行认证
+    useServiceAccount: true
+    # Kubernetes 配置文件路径
+    configFile: "/etc/kubernetes/admin.conf"
+    # Kubernetes API 服务器地址
+    host: "https://10.96.0.1:443"
+    # SSL CA 证书文件路径
+    sslCaCert: "/etc/kubernetes/pki/ca.crt"
+    # 是否验证 SSL 证书
+    verifySsl: "False"
+    # 认证令牌（如使用 Token 认证）
+    token: ""
+    # 断言的主机名
+    assertHostname: "portal"
+    # Kubernetes 服务器地址
+    server: "https://10.96.0.1:443"
+    # Base64 编码的 CA 证书数据
+    caData: ""
+    # Base64 编码的客户端证书数据
+    clientCertData: ""
+    # Base64 编码的客户端密钥数据
+    clientKeyData: ""
+
+  # Docker 守护进程配置
+  docker:
+    # Docker 守护进程连接地址
+    baseUrl: "unix:///var/run/docker.sock"
+    # Docker 客户端证书路径
+    certPath: ""
+    # Docker 客户端密钥路径
+    keyPath: ""
+    # Docker CA 证书路径
+    caCertPath: ""
+
+  # 虚拟 VNC 服务配置
+  virtVnc:
+    # VNC 服务内部域名
+    node: "virtvnc.kubevirt.svc.cluster.local"
+    # VNC 服务端口
+    port: 8001
+
+  # 认证系统配置
+  enableAuth: false
+  # 认证服务基础 URL
+  authUrlBase: ""
+
+# ==============================
+# ABC WebShell 配置
+# ==============================
+abcWebShell:
+  # 是否启用 ABC WebShell 服务
+  enabled: true
+  # 副本数量
+  replicaCount: 1
+
+  # 镜像配置
+  image:
+    # 镜像仓库名称
+    repository: abc-webshell
+    # 镜像标签版本
+    tag: v2.2.4.8
+    # 镜像拉取策略
+    pullPolicy: IfNotPresent
+
+  # 服务账户配置
+  serviceAccount:  
+    # 是否创建服务账户
+    create: true
+    # 服务账户名称
+    name: quantanexus-admin
+
+  # 节点选择器配置（用于调度到主节点）
+  # nodeSelector:
+  #   ha_node_type: master
+
+  # 应用运行配置
+  config:
+    # 应用名称
+    appname: abc-webshell
+    # HTTP 服务端口
+    httpport: 8080
+    # 运行模式（prod-生产环境）
+    runmode: "prod"
+    # Kubernetes 配置文件路径
+    kubeconfig: ""
+    # 是否启用 Beego 性能分析
+    beego_pprof: true
+    # 是否启用 HTTPS
+    https: true
+    # URL 路径前缀
+    url_prefix: ""
+    enable_demo: true
+    # 是否启用调试模式
+    debug: true
+
+  # 服务暴露配置
+  service:
+    # 服务类型（ClusterIP/NodePort/LoadBalancer）
+    type: ClusterIP
+    # 服务端口
+    port: 80
+    # 容器内目标端口
+    targetPort: 8080
+
+  # Ingress 路由配置
+  ingress:
+    # 是否启用 Ingress
+    enabled: true
+    # Ingress 控制器类型
+    className: nginx
+    # 路由路径规则
+    paths:
+      - /t(/|$)(.*)
+      - /demo
+      - /static/css/xterm.css
+      - /static/css/bootstrap.min.css
+      - /static/js/index.js
+      - /static/xml/app.xml
+      - /static/imgs/favicon.ico
+    # Ingress 注解配置
+    annotations:
+      # 指定 Ingress 控制器类型
+      ingress.kubernetes.io/ingress.class: "nginx"
+      # 设置客户端请求体大小限制
+      nginx.org/client-max-body-size: 100M
+      # 配置 CORS 允许的请求头
+      nginx.ingress.kubernetes.io/cors-allow-headers: >-
+        DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization
+      # 启用会话亲和性（基于 Cookie）
+      nginx.ingress.kubernetes.io/affinity: "cookie"
+      # 会话 Cookie 名称
+      nginx.ingress.kubernetes.io/session-cookie-name: "session_id"
+    # TLS 安全传输配置
+    tls:
+      # 是否启用 TLS 加密
+      enabled: true
+      # TLS 密钥名称
+      secretName: abc-tls
+
+# ==============================
+# ABC 上传服务配置
+# ==============================
+abcUploader:
+  # 是否启用 ABC 上传服务
+  enabled: true
+  # 副本数量
+  replicaCount: 1
+
+  # 镜像配置
+  image:
+    # 镜像仓库名称
+    repository: abc-uploader
+    # 镜像标签版本
+    tag: v1.0.0
+    # 镜像拉取策略
+    pullPolicy: IfNotPresent
+
+  # 服务账户配置（复用 WebShell 的服务账户）
+  serviceAccountName: quantanexus-admin
+
+  # 节点选择器配置
+  nodeSelector:
+    # 指定调度到主节点
+    ha_node_type: master
+
+  # 应用配置参数
+  config:
+    # 应用名称
+    appname: abc-uploader
+    # HTTP 服务端口
+    httpport: 8080
+    # 运行模式
+    runmode: "prod"
+    # Kubernetes 配置文件
+    kubeconfig: ""
+    # 是否启用 Beego 性能分析
+    beego_pprof: true
+    # 是否允许跨域请求
+    enable_allow_origin: false
+    # 是否启用 HTTPS
+    https: false
+    # URL 路径前缀
+    url_prefix: ""
+    # 是否启用演示模式
+    enable_demo: true
+    # 是否启用调试模式
+    debug: true
+    # 文件上传存储目录
+    uploader_home: "/var/abc-uploader/upload"
+    # 是否启用 ORM 调试日志
+    orm_debug: false
+    # 清理分块文件的间隔时间（小时）
+    clean_chunk_duration: 8
+    # SQLite 数据库文件路径
+    sqlite_db_path: "/var/abc-uploader/datas/abc_uploader.db"
+
+  # 主机路径卷映射配置
+  hostPaths:
+    # 文件上传目录
+    upload: "/usr/local/abc-uploader/upload"
+    # 数据存储目录
+    datas: "/usr/local/abc-uploader/datas"
+    # David 专用上传目录
+    upload_david: "/usr/local/abc-uploader/upload-david"
+
+  # 服务配置
+  service:
+    # 服务类型
+    type: ClusterIP
+    # 服务端口
+    port: 80
+    # 容器内目标端口
+    targetPort: 8080
+
+  # Ingress 配置
+  ingress:
+    # 是否启用 Ingress
+    enabled: true
+    # Ingress 控制器类型
+    className: nginx
+    # 路由路径规则
+    paths:
+      - /file/upload
+    # Ingress 注解配置
+    annotations:
+      # 指定 Ingress 控制器
+      ingress.kubernetes.io/ingress.class: "nginx"
+      # 设置客户端请求体大小限制
+      nginx.org/client-max-body-size: 100M
+      # 配置 CORS 允许的请求头
+      nginx.ingress.kubernetes.io/cors-allow-headers: >-
+        DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization
+      # 启用会话亲和性
+      nginx.ingress.kubernetes.io/affinity: "cookie"
+      # 会话 Cookie 名称
+      nginx.ingress.kubernetes.io/session-cookie-name: "session_id"
+    # TLS 配置
+    tls:
+      # 是否启用 TLS
+      enabled: true
+      # TLS 密钥名称
+      secretName: abc-tls
+
+# ==============================
+# HWUA 节点服务配置
+# ==============================
+hwuaNodeService:
+  # 是否启用 HWUA 节点服务
+  enabled: true
+  
+  # 镜像配置
+  image:
+    # 镜像仓库名称
+    repository: hwua-node-service
+    # 镜像标签版本
+    tag: 0.0.4
+    # 镜像拉取策略
+    pullPolicy: IfNotPresent
+
+  # 服务配置参数
+  config:
+    # 应用名称
+    appname: "HWNodeService"
+    # 日志文件路径
+    logfile: "/var/log/hwua-node-service/service.log"
+    # 容器运行时接口配置
+    cri:
+      # CRI 类型（containerd/docker）
+      type: "containerd"
+      # CRI Socket 文件路径
+      socket_addr: "/run/containerd/containerd.sock"
+      # CRI 命名空间
+      namespace: "k8s.io"
+    # 服务器配置
+    server:
+      # 服务监听 IP
+      ip: "0.0.0.0"
+      # 服务监听端口
+      port: 168
+  
+  # 主机别名配置（用于内部 DNS 解析）
+  # 示例配置：
+  # hostAliases:
+  #   - ip: "192.168.1.100"
+  #     hostnames:
+  #     - "internal-api.example.com"
+  #     - "api.local"
+  hostAliases:

@@ -1,0 +1,31 @@
+image:
+  cilium:
+    registry: harbor.hi168.com/quantanexus
+    repository: quay.io-cilium-cilium
+    tag: v1.18.2
+  operator:
+    registry: harbor.hi168.com/quantanexus
+    repository: quay.io-cilium-operator
+    tag: v1.18.2
+  clustermesh:
+    apiserver:
+      registry: harbor.hi168.com/quantanexus
+      repository: quay.io-cilium-clustermesh-apiserver
+      tag: v1.18.2
+  hubble:
+    relay:
+      registry: harbor.hi168.com/quantanexus
+      repository: quay.io-cilium-hubble-relay
+      tag: v1.18.2
+    ui:
+      registry: harbor.hi168.com/quantanexus
+      repository: quay.io-cilium-hubble-ui
+      tag: v0.12.0
+      backend:
+        registry: harbor.hi168.com/quantanexus
+        repository: quay.io-cilium-hubble-ui-backend
+        tag: v0.12.0
+    certgen:
+      registry: harbor.hi168.com/quantanexus
+      repository: quay.io-cilium-certgen
+      tag: v0.2.4

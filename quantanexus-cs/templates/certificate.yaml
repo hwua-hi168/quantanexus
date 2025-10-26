@@ -1,27 +1,40 @@
 {{- if .Values.certManager.enabled }}
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: root-ca-issuer
+spec:
+  selfSigned: {}
 ---
 # 1. 控制面证书
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: quantanexus-controller-tls
+  name:  {{ .Values.ingress.tlsCommonSecret.name }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "quantanexus.labels" . | nindent 4 }}
 spec:
   # 最终 Secret 名字
-  secretName: quantanexus-controller-tls
+  secretName:  {{ .Values.ingress.tlsCommonSecret.name }}
   # 证书有效期 & 续期窗口
   duration: 8760h        # 1 年
   renewBefore: 720h      # 提前 1 个月续期
   # 主体 & SAN
-  commonName: controller.quantanexus.io
+  commonName: "*.{{ include "quantanexus.domainName" . }}"
   dnsNames:
-    - controller.quantanexus.io
-    - controller.{{ .Values.global.domainName }}   # 如 qntest002.hi168.com
-    - 192.168.103.161                              # 节点 IP（可选）
+    - "*.{{ include "quantanexus.domainName" . }}"
   # 签发者（已提前创建）
   issuerRef:
     name: {{ .Values.certManager.issuerName | default "selfsigned-issuer" }}
     kind: {{ .Values.certManager.issuerKind | default "ClusterIssuer" }}
+---
+# # 真正给业务签发证书用的 ClusterIssuer
+# apiVersion: cert-manager.io/v1
+# kind: ClusterIssuer
+# metadata:
+#   name: cluster-service-selfsigned-issuer
+# spec:
+#   ca:
+#     secretName: selfsigned-ca-tls
 {{- end }}
