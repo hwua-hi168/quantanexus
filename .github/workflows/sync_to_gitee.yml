@@ -18,7 +18,7 @@ jobs:
 
       # 解决“dubious ownership”
       - name: Mark workspace safe
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        run: 	git config --global --add safe.directory /github/workspace
 
       - name: Mirror to Gitee
         uses: wearerequired/git-mirror-action@v1
