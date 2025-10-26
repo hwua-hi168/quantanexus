@@ -1,34 +1,31 @@
-name: Mirror to Gitee
+name: Sync to Gitee
 
 on:
   push:
-    branches: [main, master]
-  schedule:
-    - cron: '0 2 * * *'
+    branches: [ main, master ]
 
 jobs:
-  mirror:
+  sync:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # 解决“dubious ownership”
-      - name: Mark workspace safe
+      - name: Setup Git
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@users.noreply.github.com"
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
           git config --global --add safe.directory /github/workspace
 
-      - name: Mirror to Gitee
-        uses: wearerequired/git-mirror-action@v1
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.GITEE_SSH_PRIVATE_KEY }}
+      - name: Setup Gitee remote
         run: |
-          # 移除可能已存在的远程仓库
-          git remote remove gitee || true
-          # 添加 Gitee 远程仓库（使用 HTTPS 和 Token）
-          git remote add gitee https://${{ secrets.GITEE_TOKEN }}@gitee.com/hwua/quantanexus.git
-          # 推送到 Gitee
-          git push gitee HEAD:main --force
+          git remote remove gitee 2>/dev/null || true
+          git remote add gitee https://hwua:${{ secrets.GITEE_SYNC_TOKEN }}@gitee.com/hwua/quantanexus.git
+
+      - name: Push to Gitee
+        run: |
+          CURRENT_BRANCH=$(git branch --show-current)
+          echo "Pushing from $CURRENT_BRANCH to main"
+          git push gitee $CURRENT_BRANCH:main --force
