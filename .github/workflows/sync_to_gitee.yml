@@ -3,6 +3,9 @@ name: Sync to Gitee via SSH
 on:
   push:
     branches: [ main, master ]
+  schedule:
+    # 每天早上6点自动同步（UTC时间，注意时区转换）
+    - cron: '0 22 * * *'  # UTC时间22点 = 北京时间第二天早上6点
 
 jobs:
   sync:
@@ -41,7 +44,7 @@ jobs:
         run: |
           echo "=== Testing SSH connection ==="
           ssh -T -o ConnectTimeout=10 -i ~/.ssh/gitee_key git@gitee.com 2>&1 | head -10
-          
+
       - name: Sync to Gitee
         run: |
           git remote remove gitee || true
