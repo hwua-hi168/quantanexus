@@ -1,28 +1,30 @@
-name: Sync to Gitee
+name: Mirror to Gitee
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
+  schedule:
+    - cron: '0 2 * * *'
 
 jobs:
-  sync:
+  mirror:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
+          # 必须拉取全部历史，否则 --mirror 会缺提交
           fetch-depth: 0
+          # token: ${{ secrets.GITHUB_TOKEN }}   # 私有库需要
 
-      - name: Configure Git
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@users.noreply.github.com"
-          git config --global --add safe.directory /github/workspace
+      # 解决“dubious ownership”
+      - name: Mark workspace safe
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: Add Gitee remote
-        run: |
-          git remote add gitee https://hwua:${{ secrets.GITEE_SYNC_TOKEN }}@gitee.com/hwua/quantanexus.git
-
-      - name: Push to Gitee
-        run: |
-          git push gitee HEAD:main --force
+      - name: Mirror to Gitee
+        uses: wearerequired/git-mirror-action@v1
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.GITEE_SSH_PRIVATE_KEY }}
+        with:
+          source-repo: ${{ github.repository }}   # ← 改成你的 GitHub 仓库
+          destination-repo: 'git@gitee.com:hwua/quantanexus.git'
+          dry-run: false
