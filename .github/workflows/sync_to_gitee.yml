@@ -2,22 +2,21 @@ name: Sync to Gitee
 
 on:
   push:
-    branches: [ main, master ] # 当向 main 或 master 分支推送时触发
+    branches: [ main, master ]
   schedule:
-    - cron: '0 2 * * *' # 可选：每天UTC时间2点（北京时间10点）定时同步一次，作为备用方案
+    - cron: '0 2 * * *'
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
       - name: Mirror to Gitee
-        uses: Yikun/hub-mirror-action@v1
+        uses: Yikun/hub-mirror-action@6ef4a80c6c5b8e9b27a4e85c52d2e371ece833b7
         with:
           src: github/${{ github.repository }}
-          dst: gitee/hwua/quantanexus  # 修正这里
+          dst: gitee/hwua/quantanexus
           static-list: "${{ github.repository }}"
           force-update: true
           debug: true
         env:
-          # 在 Secrets 中设置的 Gitee 私人令牌
-          GITEE_PRIVATE_KEY: ${{ secrets.GITEE_SYNC_TOKEN }}
+          GITEE_PRIVATE_KEY: ${{ secrets.GITEE_TOKEN }}
