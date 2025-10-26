@@ -6,9 +6,9 @@ QuantaNexus 是海文公司基于 Kubernetes（K8S）平台开发的AI云算力�
 
 请帮忙点亮小星星和克隆.
 
-gitee 镜像： <https://gitee.com/hwua/quantanexus.git>
+gitee 镜像(每四个小时从github同步一次)： <https://gitee.com/hwua/quantanexus.git>
 
-WEB Demo:  <https://www.hi168.com>   (公有云版)
+WEB demo:  <https://www.hi168.com>   (公有云版)
 
 加入我们的[Slack](https://join.slack.com/t/hwua/shared_invite/zt-3e8immsaf-DQlHsdEfWsBpIe2UtttieQ)
 
