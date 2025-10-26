@@ -13,10 +13,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Mirror to Gitee
-        uses: wearerequired/git-mirror-action@v1
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.GITEE_SSH_PRIVATE_KEY }}
-        with:
-          source-repo: ${{ github.repository }}
-          destination-repo: git@gitee.com:hwua/quantanexus.git
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@users.noreply.github.com"
+          git config --global --add safe.directory /github/workspace
+
+      - name: Add Gitee remote
+        run: |
+          git remote add gitee https://hwua:${{ secrets.GITEE_SYNC_TOKEN }}@gitee.com/hwua/quantanexus.git
+
+      - name: Push to Gitee
+        run: |
+          git push gitee HEAD:main --force
