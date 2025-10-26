@@ -1,0 +1,43 @@
+grafana:
+  # 1) grafana:
+  # 1) 暴露端口，任选一种方式
+  service:
+    type: NodePort          # 也可改为 LoadBalancer
+    port: 3000
+    nodePort: 30300         # 仅 NodePort 时生效
+
+  # 2) 允许匿名调用 API（只读），或下面单独创建 API Key
+  grafana.ini:
+    auth.anonymous:
+      enabled: true
+      org_name: Main Org.
+      org_role: Viewer      # Viewer/Editor/Admin 按需给
+
+    # 3) 关闭 CSRF，方便脚本裸 curl（可选）
+    security:
+      disable_csrf_protection: true
+
+  # 4) 持久化，避免重启丢 Dashboard
+  persistence:
+    enabled: true
+    size: 10Gi暴露端口，任选一种方式
+  service:
+    type: NodePort          # 也可改为 LoadBalancer
+    port: 3000
+    nodePort: 30300         # 仅 NodePort 时生效
+
+  # 2) 允许匿名调用 API（只读），或下面单独创建 API Key
+  grafana.ini:
+    auth.anonymous:
+      enabled: true
+      org_name: Main Org.
+      org_role: Viewer      # Viewer/Editor/Admin 按需给
+
+    # 3) 关闭 CSRF，方便脚本裸 curl（可选）
+    security:
+      disable_csrf_protection: true
+
+  # 4) 持久化，避免重启丢 Dashboard
+  persistence:
+    enabled: true
+    size: 10Gi
