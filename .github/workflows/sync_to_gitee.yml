@@ -13,34 +13,37 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup SSH and debug
+      - name: Setup SSH
         run: |
-          # 创建 SSH 目录
           mkdir -p ~/.ssh
-          # 写入私钥
-          echo "${{ secrets.GITEE_SSH_PRIVATE_KEY }}" > ~/.ssh/gitee_key
-          # 设置正确的权限
-          chmod 600 ~/.ssh/gitee_key
-          # 添加 Gitee 到 known_hosts
-          ssh-keyscan gitee.com >> ~/.ssh/known_hosts
+          chmod 700 ~/.ssh
           
-          # 调试信息 test 
-          echo "=== SSH Key Info ==="
-          ls -la ~/.ssh/
-          echo "=== Key Content ==="
-          head -n 2 ~/.ssh/gitee_key
-          echo "=== Testing SSH Connection ==="
-          ssh -T -v -i ~/.ssh/gitee_key git@gitee.com || true
+          # 写入私钥并验证
+          echo "${{ secrets.GITEE_SSH_PRIVATE_KEY }}" > ~/.ssh/gitee_key
+          chmod 600 ~/.ssh/gitee_key
+          
+          # 验证密钥格式
+          echo "=== Verifying SSH key ==="
+          ls -la ~/.ssh/gitee_key
+          file ~/.ssh/gitee_key
+          ssh-keygen -l -f ~/.ssh/gitee_key
+          
+          # 配置 known_hosts
+          ssh-keyscan gitee.com >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
 
       - name: Configure Git
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@users.noreply.github.com"
 
+      - name: Test SSH connection
+        run: |
+          echo "=== Testing SSH connection ==="
+          ssh -T -o ConnectTimeout=10 -i ~/.ssh/gitee_key git@gitee.com 2>&1 | head -10
+
       - name: Sync to Gitee
         run: |
           git remote remove gitee || true
           git remote add gitee git@gitee.com:hwua/quantanexus.git
-          # 使用特定的 SSH 密钥
-          git config core.sshCommand "ssh -i ~/.ssh/gitee_key -o IdentitiesOnly=yes"
-          git push gitee HEAD:main --force --verbose
+          GIT_SSH_COMMAND="ssh -i ~/.ssh/gitee_key -o IdentitiesOnly=yes" git push gitee HEAD:main --force --verbose
