@@ -41,7 +41,7 @@ jobs:
         run: |
           echo "=== Testing SSH connection ==="
           ssh -T -o ConnectTimeout=10 -i ~/.ssh/gitee_key git@gitee.com 2>&1 | head -10
-
+          
       - name: Sync to Gitee
         run: |
           git remote remove gitee || true
