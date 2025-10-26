@@ -12,9 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # 必须拉取全部历史，否则 --mirror 会缺提交
           fetch-depth: 0
-          # token: ${{ secrets.GITHUB_TOKEN }}   # 私有库需要
 
       # 解决“dubious ownership”
       - name: Mark workspace safe
@@ -25,6 +23,6 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.GITEE_SSH_PRIVATE_KEY }}
         with:
-          source-repo: ${{ github.repository }}   # ← 改成你的 GitHub 仓库
+          source-repo: 'hwua-hi168/quantanexus'      # ← 必须和 GitHub 上大小写一致
           destination-repo: 'git@gitee.com:hwua/quantanexus.git'
           dry-run: false
