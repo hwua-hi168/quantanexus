@@ -1,11 +1,82 @@
+# global:
+#   imageName: harbor.hi168.com/quantanexus/chrislusf-seaweedfs:3.98
+
+# volume:
+#   resizeHook:
+#     image: harbor.hi168.com/quantanexus/alpine-k8s:1.28.4
+
+# cosi:
+#   image: harbor.hi168.com/quantanexus/ghcr.io-seaweedfs-seaweedfs-cosi-driver:v0.1.2
+#   sidecar:
+#     image: harbor.hi168.com/quantanexus/gcr.io-k8s-staging-sig-storage-objectstorage-sidecar:v20250711-controllerv0.2.0-rc1-80-gc2f6e65
+
+# ========== 全局镜像配置（3.98+ 支持） ==========
 global:
-  imageName: harbor.hi168.com/quantanexus/chrislusf-seaweedfs:3.98
+  imageName: harbor.hi168.com/quantanexus/chrislusf-seaweedfs
+  imageRegistry: ""            # 留空，镜像路径已完整
+  imagePullSecrets: []
 
+# ========== 存储层（volume） ==========
 volume:
+  enabled: true
+  replicaCount: 1
+  persistence:
+    enabled: true
+    storageClass: ""           # 集群默认 SC
+    size: 100Gi
+    accessMode: ReadWriteOnce
+  # resizeHook 镜像替换
   resizeHook:
-    image: harbor.hi168.com/quantanexus/alpine-k8s:1.28.4
+    image: harbor.hi168.com/quantanexus/alpine-k8s
 
+# ========== 元数据层（master） ==========
+master:
+  enabled: true
+  replicaCount: 1
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 10Gi
+    accessMode: ReadWriteOnce
+
+# ========== 文件网关 + S3 + IAM ==========
+filer:
+  enabled: true
+  replicaCount: 1
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 10Gi
+  s3:
+    enabled: true
+    port: 8333
+  iam:
+    enabled: true
+
+# ========== 默认存储桶 ==========
+buckets:
+  - name: bucket1
+    anonymousRead: false
+  - name: bucket2
+    anonymousRead: false
+
+# ========== COSI 驱动（可选） ==========
 cosi:
-  image: harbor.hi168.com/quantanexus/ghcr.io-seaweedfs-seaweedfs-cosi-driver:v0.1.2
+  enabled: false
+  image: harbor.hi168.com/quantanexus/ghcr.io-seaweedfs-seaweedfs-cosi-driver
   sidecar:
-    image: harbor.hi168.com/quantanexus/gcr.io-k8s-staging-sig-storage-objectstorage-sidecar:v20250711-controllerv0.2.0-rc1-80-gc2f6e65
+    image: harbor.hi168.com/quantanexus/gcr.io-k8s-staging-sig-storage-objectstorage-sidecar
+
+# ========== 镜像拉取策略 ==========
+image:
+  registry: chrislusf          # 对 3.98+ 已无效，保留兼容
+  tag: "3.82"                  # 实际被 global.imageName 覆盖
+  pullPolicy: IfNotPresent
+
+# ========== Service 暴露 ==========
+service:
+  type: ClusterIP
+  s3:
+    type: ClusterIP
+    port: 8333
+    # 如需 NodePort 外访，改为 NodePort 并填写 nodePort: 32033
