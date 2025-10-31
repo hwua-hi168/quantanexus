@@ -21,8 +21,13 @@ spec:
       serviceAccountName: quantanexus-mgr-sa
       hostAliases:
         {{- toYaml .Values.quantanexus.hostAliases | nindent 8 }}
-      nodeSelector:
-        kubernetes.io/hostname: {{ .Values.global.masterNode }}
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: mgr-worker-node
+                operator: Exists        
       initContainers:
         - name: data-init-container
           image: {{ .Values.global.registry }}/{{ .Values.quantanexus.manager.repository }}:{{ .Values.quantanexus.manager.tag }}
