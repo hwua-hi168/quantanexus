@@ -8,8 +8,6 @@ global:
   # outside of China, please use docker.io
   # registry: docker.io/hwua
   masterNode: com-calino-master-1
-  masterNodes: "com-calino-master-1,com-calino-master-2"
-  workerNodes: "com-calino-worker-1"
   labelController: true
   
 # Cert Manager 配置块
