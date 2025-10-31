@@ -93,12 +93,31 @@ spec:
           fi
           {{- end }}
           
-          # 第四步：移除 taints
-          # echo "=== Step 4: Removing taints ==="
-          # echo "Removing taints from all nodes..."
-          # kubectl taint nodes --all node-role.kubernetes.io/master- || true
-          # kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
-          # echo "✓ Taints removed"
+          # 第四步：选择并标记 mgr-worker-node
+          echo "=== Step 4: Selecting and labeling mgr-worker-node ==="
+          MGR_WORKER_NODE=""
+          
+          # 首先尝试选择第一个 master 节点
+          if [ -n "$MASTER_NODES" ]; then
+            MGR_WORKER_NODE=$(echo $MASTER_NODES | awk '{print $1}')
+            echo "Selected first master node as mgr-worker-node: $MGR_WORKER_NODE"
+          # 如果没有 master 节点，则选择第一个 worker 节点
+          elif [ -n "$WORKER_NODES" ]; then
+            MGR_WORKER_NODE=$(echo $WORKER_NODES | awk '{print $1}')
+            echo "Selected first worker node as mgr-worker-node: $MGR_WORKER_NODE"
+          else
+            echo "⚠ No nodes available for mgr-worker-node labeling"
+          fi
+          
+          # 如果找到了节点，则打上 mgr-worker-node 标签
+          if [ -n "$MGR_WORKER_NODE" ]; then
+            echo "Labeling mgr-worker-node: $MGR_WORKER_NODE"
+            # 先移除所有节点上的 mgr-worker-node 标签
+            kubectl label nodes --all mgr-worker-node- >/dev/null 2>&1 || true
+            # 然后给选定的节点打上标签
+            kubectl label node $MGR_WORKER_NODE mgr-worker-node=true --overwrite
+            echo "✓ mgr-worker-node label applied to $MGR_WORKER_NODE"
+          fi
           
           # 第五步：验证结果
           echo "=== Step 5: Verification ==="
@@ -107,6 +126,10 @@ spec:
           
           echo "Final node labels:"
           kubectl get nodes --show-labels
+          
+          # 特别显示 mgr-worker-node 标签情况
+          echo "Nodes with mgr-worker-node label:"
+          kubectl get nodes -l mgr-worker-node=true --show-labels || echo "No nodes with mgr-worker-node label"
           
           echo "=== QuantaNexus node labeling completed successfully! ==="
         resources:
