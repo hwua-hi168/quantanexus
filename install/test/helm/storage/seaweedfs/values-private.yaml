@@ -12,7 +12,8 @@
 
 # ========== 全局镜像配置（3.98+ 支持） ==========
 global:
-  imageName: harbor.hi168.com/quantanexus/chrislusf-seaweedfs
+  registry: registry.cn-hangzhou.aliyuncs.com
+  imageName: quantanexus/chrislusf-seaweedfs
   imageRegistry: ""            # 留空，镜像路径已完整
   imagePullSecrets: []
 
@@ -27,7 +28,8 @@ volume:
     accessMode: ReadWriteOnce
   # resizeHook 镜像替换
   resizeHook:
-    image: harbor.hi168.com/quantanexus/alpine-k8s
+    registry: registry.cn-hangzhou.aliyuncs.com
+    image: quantanexus/alpine-k8s
 
 # ========== 元数据层（master） ==========
 master:
@@ -63,9 +65,11 @@ buckets:
 # ========== COSI 驱动（可选） ==========
 cosi:
   enabled: false
-  image: harbor.hi168.com/quantanexus/ghcr.io-seaweedfs-seaweedfs-cosi-driver
+  registry: registry.cn-hangzhou.aliyuncs.com
+  image: quantanexus/ghcr.io-seaweedfs-seaweedfs-cosi-driver
   sidecar:
-    image: harbor.hi168.com/quantanexus/gcr.io-k8s-staging-sig-storage-objectstorage-sidecar
+    registry: registry.cn-hangzhou.aliyuncs.com
+    image: quantanexus/gcr.io-k8s-staging-sig-storage-objectstorage-sidecar
 
 # ========== 镜像拉取策略 ==========
 image:
