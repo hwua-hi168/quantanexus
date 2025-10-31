@@ -57,7 +57,6 @@ Quantanexus 完全支持国内主流的 Linux 发行版，下表列出了经过�
 snap install helm --classic
 snap install jq
 snap install curl
-snap install wget
 ```
 
 ### 2. 基础设施安装阶段
@@ -75,12 +74,28 @@ helm repo add hi168 https://helm.hi168.com/charts
 helm repo update hi168
 ```
 
-#### 3.1 核心基础架构组件
+#### 3.1 核心基础存储组件
 
+先安装longhorn
 ```bash
-# 安装证书管理器
-# helm repo add jetstack https://charts.jetstack.io  # 正式环境建议使用官方仓库，测试环境使用 hi168 仓库
+helm repo add hi168 https://hi168.com/charts 2>/dev/null
+helm repo update hi168
 
+
+cd test/helm/storage/longhorn
+
+echo "Installing Longhorn..."
+
+helm install longhorn hi168/longhorn --namespace longhorn-system --create-namespace --version 1.10.0 \
+    -f .helm/storage/longhorn/values.yaml
+    
+```
+
+#### 3.2 证书管理器Cert-manager
+```bash
+# 安装证书管理器cert-manager
+# helm repo add jetstack https://charts.jetstack.io  # 正式环境建议使用官方仓库，测试环境使用 hi168 仓库
+cd test/helm/cert-manager 
 helm upgrade --install cert-manager hi168/cert-manager \
   -n cert-manager --create-namespace \
   --set installCRDs=true -f ./helm/cert-manager/values-cert-manager.yaml
@@ -142,16 +157,16 @@ spec:
 EOF
 ```
 
-#### 3.2 安装资源指标收集器 Prometheus
+#### 3.3 安装资源指标收集器 Prometheus
 
 ```bash
-
+cd test/helm/monitor/kube-prometheus-stack
 helm upgrade --install prometheus hi168/kube-prometheus-stack \
   --namespace prom --create-namespace \
   -f ./helm/monitor/kube-prometheus-stack/values.yaml
 ```
 
-#### 3.3 安装 Ingress Controller
+#### 3.4 安装 Ingress Controller
 
 ```bash
 # helm repo add ingress-nginx https://helm.hi168.com/charts/
@@ -164,24 +179,6 @@ helm upgrade --install ingress-nginx hi168/ingress-nginx --version 4.0.18 \
 kubectl get pods -n ingress-nginx
 ```
 
-#### 3.4 存储相关组件
-
-安装存储，为了方便测试，默认安装 Longhorn，生产环境强烈建议使用 Ceph：
-
-```bash
-# 生产环境请用官方仓库
-# helm repo add longhorn https://charts.longhorn.io 
-
-echo "Installing Longhorn..."
-
-helm upgrade --install longhorn hi168/longhorn \
-  --namespace longhorn-system --create-namespace \
-  --version 1.10.0 -f ./helm/storage/longhorn/values.yaml
-
-# 安装完毕后检查所有 Pod 是否正常
-kubectl get pods -n longhorn-system
-```
-
 #### 3.5 Harbor 容器镜像仓库
 
 ```bash
@@ -189,16 +186,17 @@ kubectl get pods -n longhorn-system
 # helm repo add harbor https://helm.goharbor.io
 
 # 安装 Harbor，同时应用自定义 Job 和配置
+cd test/helm/harbor
 helm upgrade --install harbor hi168/harbor \
   --namespace harbor \
   --create-namespace \
-  -f ./helm/harbor/values.yaml
+  -f values.yaml
 
 # 安装完毕后检查所有 Pod 是否正常
 kubectl get pods -n harbor
 ```
 
-#### 3.6 GPU Operator 和 Volcano
+#### 3.6 GPU Operator
 
 ```bash
 # 测试环境请使用 Hi168 的仓库，此处测试英伟达 GPU
@@ -216,7 +214,6 @@ helm upgrade --install --wait gpu-operator -n gpu-operator --create-namespace hi
 kubectl get pods -n gpu-operator
 
 ```
-
 #### 3.7 安装 Volcano
 
 ```
@@ -236,10 +233,8 @@ helm upgrade --install volcano hi168/volcano \
 # 执行主控服务安装脚本
 helm install quantanexus hi168/quantanexus-mgr --version 1.0.0 \
   --namespace quantanexus-mgr --create-namespace \
-  --set global.domainName=qntest002.hi168.com \
-  --set global.masterNode=master1 \
-  --set "global.masterNodes=master1\,master2" \
-  --set global.workerNodes=worker1
+  --set global.domainName=qntest005.hi168.com \
+  -f ./helm/quantanexus-mgr/values.yaml
 ```
 
 #### 4.2 安装 quantanexus-cluster-service（集群服务）
@@ -247,9 +242,9 @@ helm install quantanexus hi168/quantanexus-mgr --version 1.0.0 \
 ```bash
 # 执行集群服务安装脚本
 
-helm install quantanexus-cs quantanexus/quantanexus-cs --version 1.0.0 \
+helm install quantanexus-cs hi168/quantanexus-cs --version 1.0.0 \
   --namespace quantanexus-cs --create-namespace \
-  --set global.domainName=qntest002.hi168.com
+  --set global.domainName=qntest005.hi168.com
 ```
 
 | 组件 | Helm参数文档 |

@@ -17,11 +17,11 @@ persistence:
 
 # 其余常用调优
 defaultSettings:
-  defaultDataPath: /var/lib/longhorn
-  createDefaultDiskLabeledNodes: true
-  defaultDiskPath: /var/lib/longhorn
-  createDefaultDisk: true
-  defaultDiskAllowScheduling: true
+  default-data-path: "/var/lib/longhorn"
+  default-disk-path: "/var/lib/longhorn"
+  create-default-disk: "true"
+  create-default-disk-labeled-nodes: "true"
+  default-disk-allow-scheduling: "true"
   
 # custom-images.yaml
 image:
