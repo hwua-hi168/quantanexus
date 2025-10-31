@@ -8,17 +8,15 @@ global:
   # outside of China, please use docker.io
   # registry: docker.io/hwua
   masterNode: com-calino-master-1
-  masterNodes: "com-calino-master-1,com-calino-master-2"
-  workerNodes: "com-calino-worker-1"
   labelController: true
   
 # Cert Manager 配置块
 certManager:
   enabled: true
   certificateName: 
-  issuerName: qn-mgr-selfsigned-ca
+  issuerName: quantanexus-ca-issuer  
   issuerKind: ClusterIssuer 
-  issuerSecret:: qn-selfsigned-ca-tls
+  # issuerSecret:: qn-selfsigned-ca-tls
   dnsNames:
     - controller.quantanexus.io
     - controller.qntest002.hi168.com
