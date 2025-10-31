@@ -19,26 +19,96 @@ spec:
         - /bin/sh
         - -c
         - |
-          # 设置master节点标签
-          {{- range $node := splitList "," .Values.global.masterNodes }}
-          kubectl label node {{ $node }} node-role.kubernetes.io/master= --overwrite
-          kubectl label node {{ $node }} abc_node_type- --overwrite
-          kubectl label node {{ $node }} ingress_node=true --overwrite
-          kubectl label node {{ $node }} ha_node_type=master --overwrite
+          set -x
+          echo "Starting node labeling process for QuantaNexus..."
+          
+          # 显示当前所有节点
+          echo "=== Current nodes ==="
+          kubectl get nodes
+          
+          # 第一步：获取所有节点信息
+          echo "=== Step 1: Discovering nodes ==="
+          
+          # 获取 master 节点
+          echo "Getting master nodes..."
+          MASTER_NODES=$(kubectl get nodes -l node-role.kubernetes.io/control-plane -o name | cut -d'/' -f2)
+          if [ -z "$MASTER_NODES" ]; then
+            echo "No nodes found with control-plane label, trying alternative method..."
+            MASTER_NODES=$(kubectl get nodes --no-headers | awk '$3 ~ /master|control-plane/ {print $1}')
+          fi
+          
+          echo "Master nodes found: $MASTER_NODES"
+          
+          # 获取 worker 节点
+          echo "Getting worker nodes..."
+          WORKER_NODES=$(kubectl get nodes -l node-role.kubernetes.io/node -o name | cut -d'/' -f2)
+          if [ -z "$WORKER_NODES" ]; then
+            echo "No nodes found with node label, trying alternative method..."
+            WORKER_NODES=$(kubectl get nodes --no-headers | awk '$3 ~ /worker|node/ && $3 !~ /master|control-plane/ {print $1}')
+          fi
+          
+          echo "Worker nodes found: $WORKER_NODES"
+          
+          # 第二步：执行标签操作
+          echo "=== Step 2: Applying labels ==="
+          
+          # 为 master 节点打标签
+          echo "Labeling master nodes..."
+          for node in $MASTER_NODES; do
+            echo "Processing master node: $node"
+            kubectl label node $node node-role.kubernetes.io/master= --overwrite
+            kubectl label node $node abc_node_type- --overwrite || true
+            kubectl label node $node ingress_node=true --overwrite
+            kubectl label node $node ha_node_type=master --overwrite
+            echo "✓ Master node $node labeled successfully"
+          done
+          
+          # 为 worker 节点打标签
+          echo "Labeling worker nodes..."
+          for node in $WORKER_NODES; do
+            echo "Processing worker node: $node"
+            kubectl label node $node ha_node_type=worker --overwrite
+            echo "✓ Worker node $node labeled successfully"
+          done
+          
+          # 第三步：设置 ABC master 节点
+          echo "=== Step 3: Setting ABC master node ==="
+          {{- if .Values.global.masterNode }}
+          # 使用配置的特定 master 节点
+          ABC_MASTER="{{ .Values.global.masterNode }}"
+          echo "Setting configured ABC master node: $ABC_MASTER"
+          kubectl label node $ABC_MASTER mark_abc_node_type=true --overwrite
+          kubectl label node $ABC_MASTER abc_node_type=master --overwrite
+          echo "✓ ABC master node $ABC_MASTER configured"
+          {{- else }}
+          # 如果没有配置特定节点，选择第一个 master 节点
+          if [ -n "$MASTER_NODES" ]; then
+            ABC_MASTER=$(echo $MASTER_NODES | awk '{print $1}')
+            echo "Setting first master node as ABC master: $ABC_MASTER"
+            kubectl label node $ABC_MASTER mark_abc_node_type=true --overwrite
+            kubectl label node $ABC_MASTER abc_node_type=master --overwrite
+            echo "✓ ABC master node $ABC_MASTER configured"
+          else
+            echo "⚠ No master nodes found for ABC configuration"
+          fi
           {{- end }}
-
-          # 设置worker节点标签
-          {{- range $node := splitList "," .Values.global.workerNodes }}
-          kubectl label node {{ $node }} ha_node_type=worker --overwrite
-          {{- end }}
-
-          # 设置ABC master节点标签
-          kubectl label node {{ .Values.global.masterNode }} mark_abc_node_type=true --overwrite
-          kubectl label node {{ .Values.global.masterNode }} abc_node_type=master --overwrite
-
-          # 移除taints
-          kubectl taint nodes --all node-role.kubernetes.io/master- || true
-          kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
+          
+          # 第四步：移除 taints
+          # echo "=== Step 4: Removing taints ==="
+          # echo "Removing taints from all nodes..."
+          # kubectl taint nodes --all node-role.kubernetes.io/master- || true
+          # kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
+          # echo "✓ Taints removed"
+          
+          # 第五步：验证结果
+          echo "=== Step 5: Verification ==="
+          echo "Final node status:"
+          kubectl get nodes
+          
+          echo "Final node labels:"
+          kubectl get nodes --show-labels
+          
+          echo "=== QuantaNexus node labeling completed successfully! ==="
         resources:
           requests:
             memory: "64Mi"
@@ -55,7 +125,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   annotations:
     "helm.sh/hook": pre-install
-    "helm.sh/hook-weight": "-6"   # 比 Job 小即可，确保先创建
+    "helm.sh/hook-weight": "-6"
     "helm.sh/hook-delete-policy": before-hook-creation
 ---
 apiVersion: rbac.authorization.k8s.io/v1
