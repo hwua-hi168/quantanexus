@@ -19,8 +19,15 @@ spec:
         {{- include "quantanexus.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: redis
     spec:
-      nodeSelector:
-        kubernetes.io/hostname: {{ .Values.global.masterNode }}
+      # nodeSelector:
+      #   kubernetes.io/hostname: {{ .Values.global.masterNode }}
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: mgr-worker-node
+                operator: Exists
       containers:
         - name: redis-single
           # image: {{ .Values.global.registry }}/{{ .Values.redis.repository }}:{{ .Values.redis.tag }}

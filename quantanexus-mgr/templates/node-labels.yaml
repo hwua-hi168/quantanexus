@@ -5,7 +5,7 @@ metadata:
   name: quantanexus-node-labeler
   namespace: {{ .Release.Namespace }}
   annotations:
-    "helm.sh/hook": pre-install
+    "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "-5"
     "helm.sh/hook-delete-policy": before-hook-creation
 spec:
@@ -147,7 +147,7 @@ metadata:
   name: node-labeler
   namespace: {{ .Release.Namespace }}
   annotations:
-    "helm.sh/hook": pre-install
+    "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "-6"
     "helm.sh/hook-delete-policy": before-hook-creation
 ---
@@ -156,7 +156,7 @@ kind: ClusterRole
 metadata:
   name: node-labeler
   annotations:
-    "helm.sh/hook": pre-install
+    "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "-6"
     "helm.sh/hook-delete-policy": before-hook-creation
 rules:
@@ -169,7 +169,7 @@ kind: ClusterRoleBinding
 metadata:
   name: node-labeler
   annotations:
-    "helm.sh/hook": pre-install
+    "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "-6"
     "helm.sh/hook-delete-policy": before-hook-creation
 roleRef:
