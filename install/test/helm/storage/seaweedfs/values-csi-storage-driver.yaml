@@ -15,7 +15,7 @@ imagePullPolicy: "IfNotPresent"
 #- name: mycredentials
 
 csiProvisioner:
-  image: registry.k8s.io/sig-storage/csi-provisioner:v3.5.0
+  image: registry.cn-hangzhou.aliyuncs.com/quantanexus/registry.k8s.io-sig-storage-csi-provisioner:v3.5.0
   resources: {}
   livenessProbe:
     failureThreshold:
@@ -24,7 +24,7 @@ csiProvisioner:
     periodSeconds: 60
 
 csiResizer:
-  image: registry.k8s.io/sig-storage/csi-resizer:v1.8.0
+  image: registry.cn-hangzhou.aliyuncs.com/quantanexus/registry.k8s.io-sig-storage-csi-resizer:v1.8.0
   resources: {}
   livenessProbe:
     failureThreshold:
@@ -38,7 +38,7 @@ csiAttacher:
   # you need to delete seaweedfs CSIDriver crd manually before upgrading with attacher disabled
   # also you need to delete all seaweedfs VolumeAttachment crd manually after upgrade
   enabled: true
-  image: registry.k8s.io/sig-storage/csi-attacher:v4.3.0
+  image: registry.cn-hangzhou.aliyuncs.com/quantanexus/registry.k8s.io-sig-storage-csi-attacher:v4.3.0
   resources: {}
   livenessProbe:
     failureThreshold:
@@ -51,7 +51,7 @@ csiSnapshotter:
   enabled: false
 
 csiNodeDriverRegistrar:
-  image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.8.0
+  image: registry.cn-hangzhou.aliyuncs.com/quantanexus/registry.k8s.io-sig-storage-csi-node-driver-registrar:v2.8.0
   resources: {}
   livenessProbe:
     failureThreshold:
@@ -60,11 +60,11 @@ csiNodeDriverRegistrar:
     periodSeconds: 60
 
 csiLivenessProbe:
-  image: registry.k8s.io/sig-storage/livenessprobe:v2.10.0
+  image: registry.cn-hangzhou.aliyuncs.com/quantanexus/registry.k8s.io-sig-storage-livenessprobe:v2.10.0
   resources: {}
 
 seaweedfsCsiPlugin:
-  image: chrislusf/seaweedfs-csi-driver:latest
+  image: registry.cn-hangzhou.aliyuncs.com/quantanexus/chrislusf-seaweedfs-csi-driver:latest
   securityContext:
     privileged: true
     capabilities:
