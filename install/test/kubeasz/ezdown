@@ -163,7 +163,10 @@ function logger() {
 function download_docker() {
   if [[ "$REGISTRY_MIRROR" == CN ]];then
     # DOCKER_URL="https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/static/stable/${ARCH}/docker-${DOCKER_VER}.tgz"
-    DOCKER_URL="https://mirrors.aliyun.com/docker-ce/linux/static/stable/${ARCH}/docker-${DOCKER_VER}.tgz"
+    # https://mirrors.huaweicloud.com/docker-ce/linux/static/stable/x86_64/docker-28.0.4.tgz
+    # https://mirrors.cloud.tencent.com/docker-ce/linux/static/stable/x86_64/docker-28.0.4.tgz
+    # DOCKER_URL="https://mirrors.aliyun.com/docker-ce/linux/static/stable/${ARCH}/docker-${DOCKER_VER}.tgz"
+    DOCKER_URL="https://mirrors.huaweicloud.com/docker-ce/linux/static/stable/${ARCH}/docker-${DOCKER_VER}.tgz"
   else
     DOCKER_URL="https://download.docker.com/linux/static/stable/${ARCH}/docker-${DOCKER_VER}.tgz"
   fi
