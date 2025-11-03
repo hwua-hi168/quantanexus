@@ -5,10 +5,24 @@
   shell: 'modprobe fuse || echo "NoFound"'
   register: FUSE  
 
-- name: 追加 fuse 到开机模块加载配置（不存在才写入）
+- name: 加载内核模块
+  modprobe: name={{ item }} state=present
+  with_items:
+    - dm_crypt
+  ignore_errors: true
+
+- name: 追加 fuse 到开机模块加载配置
   lineinfile:
     path: /etc/modules-load.d/10-k8s-modules.conf
     line: 'fuse'
     create: yes
     state: present
     mode: '0644'
+    
+- name: 追加 dm_crypt 到开机模块加载配置
+  lineinfile:
+    path: /etc/modules-load.d/10-k8s-modules.conf
+    line: 'dm_crypt'
+    create: yes
+    state: present
+    mode: '0644'    
