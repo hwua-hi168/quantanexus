@@ -1,0 +1,8 @@
+- name: echo debian hello
+  shell: "echo hello"
+
+- name: 安装 ubuntu/debian基础软件
+  package: 
+    name:
+      - fuse  
+    state: present
