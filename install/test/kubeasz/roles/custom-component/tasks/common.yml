@@ -18,7 +18,7 @@
     create: yes
     state: present
     mode: '0644'
-    
+
 - name: 追加 dm_crypt 到开机模块加载配置
   lineinfile:
     path: /etc/modules-load.d/10-k8s-modules.conf
@@ -26,3 +26,16 @@
     create: yes
     state: present
     mode: '0644'    
+
+- name: 停止 multipathd 服务
+  systemd:
+    name: multipathd
+    state: stopped
+    enabled: no
+  failed_when: false
+
+- name: 卸载 dm_multipath 内核模块
+  modprobe:
+    name: dm_multipath
+    state: absent
+  failed_when: false
