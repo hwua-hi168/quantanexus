@@ -1,0 +1,32 @@
+## 读取quantanexus_tasks文件是否存在，已经存在的话不需要再次执行quantanexus_tasks
+- name: quantanexus custom
+  stat: path="/opt/kubeasz_quantanexus_tasks"
+  register: qn
+
+# - name: 已完成提示
+#   debug:
+#     msg: "节点已完成prepare_tasks，跳过"  
+#   when: qn.stat.isreg is defined
+  
+- block:
+    - import_tasks: debian.yml
+      when: 'ansible_distribution_file_variety in ["Debian"]'
+    
+    - import_tasks: redhat.yml
+      # when: 'ansible_distribution_file_variety in ["RedHat"]'
+      when: ansible_distribution_file_variety in ["RedHat"] or ansible_distribution in ["CentOS"]
+    
+    - import_tasks: suse.yml
+      when: 'ansible_distribution_file_variety in ["SUSE"]'
+    
+    - import_tasks: redhat.yml
+      when: 'ansible_distribution in ["Anolis OS", "openEuler"]'
+    
+    # 公共系统参数设置
+    - import_tasks: common.yml
+    
+
+    ## 最后标记该节点已经完成prepare_tasks
+    - name: 设置quantanexus_tasks文件
+      shell: "echo done > /opt/kubeasz_quantanexus_tasks"
+  # when: qn.stat.isreg is not defined
