@@ -233,8 +233,7 @@ helm upgrade --install volcano hi168/volcano \
 # 执行主控服务安装脚本
 helm install quantanexus hi168/quantanexus-mgr --version 1.0.0 \
   --namespace quantanexus-mgr --create-namespace \
-  --set global.domainName=qntest005.hi168.com \
-  -f ./helm/quantanexus-mgr/values.yaml
+  --set global.domainName=qntest005.hi168.com 
 ```
 
 #### 4.2 安装 quantanexus-cluster-service（集群服务）
