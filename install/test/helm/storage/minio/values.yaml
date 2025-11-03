@@ -1,0 +1,25 @@
+mode: standalone
+replicas: 2
+
+auth:
+  rootUser: admin
+  rootPassword: "admin"
+
+persistence:
+  enabled: true
+  storageClass: ""
+  size: 50Gi
+
+service:
+  type: NodePort
+  nodePorts:
+    api: 31000
+    console: 31001
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: 2000m
+    memory: 2Gi
