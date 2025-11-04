@@ -350,6 +350,6 @@ generate_hosts_file() {
     if [[ "$output_file" != "/dev/stdout" ]]; then
         print_success "hosts文件已保存到: $output_file"
     else
-        print_success "请将上述内容保存到 /etc/kubeasz/clusters/your-cluster-name/hosts 文件中"
+        print_success "请将上述内容保存到 /etc/kubeasz/clusters/-k8s-qn-01/hosts 文件中"
     fi
 }

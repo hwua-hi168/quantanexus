@@ -54,39 +54,49 @@ configure_ssh_access() {
     
     # 为所有节点配置SSH
     for ip in "${all_ips[@]}"; do
+        echo ""
         print_info "配置节点 $ip ..."
         
         # 测试连接并配置SSH
         if sshpass -p "$password" ssh -o StrictHostKeyChecking=no "$username@$ip" "echo '连接测试成功'"; then
             print_success "成功连接到 $ip"
+            echo ""
             
-            # 配置SSH免密登录
+            # 配置SSH免密登录（幂等性操作）
             print_info "配置SSH免密登录..."
             sshpass -p "$password" ssh -o StrictHostKeyChecking=no "$username@$ip" "
                 mkdir -p ~/.ssh
-                echo '$ssh_key_content' >> ~/.ssh/authorized_keys
+                # 检查公钥是否已经存在，避免重复添加
+                grep -qFx '$ssh_key_content' ~/.ssh/authorized_keys 2>/dev/null || echo '$ssh_key_content' >> ~/.ssh/authorized_keys
                 chmod 700 ~/.ssh
                 chmod 600 ~/.ssh/authorized_keys
             "
+            echo ""
             
-            # 配置root登录（如果当前用户不是root）
-            if [[ "$username" != "root" ]]; then
-                print_info "配置root用户SSH访问..."
-                sshpass -p "$password" ssh -o StrictHostKeyChecking=no "$username@$ip" "
-                    sudo mkdir -p /root/.ssh
-                    sudo bash -c \"echo '$ssh_key_content' >> /root/.ssh/authorized_keys\"
-                    sudo chmod 700 /root/.ssh
-                    sudo chmod 600 /root/.ssh/authorized_keys
-                "
-            fi
+            # 配置root登录（无论当前用户是否为root，都要把公钥加入root账户，保证幂等性）
+            print_info "配置root用户SSH访问..."
+            sshpass -p "$password" ssh -o StrictHostKeyChecking=no "$username@$ip" "
+                echo '$password' | sudo -S mkdir -p /root/.ssh
+                # 检查公钥是否已经存在，避免重复添加
+                echo '$password' | sudo -S grep -qFx '$ssh_key_content' /root/.ssh/authorized_keys 2>/dev/null || echo '$password' | sudo -S tee -a /root/.ssh/authorized_keys <<< '$ssh_key_content' > /dev/null
+                echo '$password' | sudo -S chmod 700 /root/.ssh
+                echo '$password' | sudo -S chmod 600 /root/.ssh/authorized_keys
+            "
+            echo ""
             
             # 修改SSH配置允许root登录
             print_info "修改SSH配置允许root登录..."
             sshpass -p "$password" ssh -o StrictHostKeyChecking=no "$username@$ip" "
-                sudo sed -i 's/^#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
-                sudo sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
-                sudo systemctl restart sshd
+                echo '$password' | sudo -S sed -i 's/^#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+                echo '$password' | sudo -S sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+                # 检查sshd服务状态，只有在运行时才重启
+                if echo '$password' | sudo -S systemctl is-active ssh >/dev/null 2>&1; then
+                    echo '$password' | sudo -S systemctl restart ssh
+                elif echo '$password' | sudo -S systemctl is-active sshd >/dev/null 2>&1; then
+                    echo '$password' | sudo -S systemctl restart sshd
+                fi
             "
+            echo ""
             
             print_success "节点 $ip SSH配置完成"
         else
@@ -95,6 +105,7 @@ configure_ssh_access() {
         fi
     done
     
+    echo ""
     print_success "所有节点SSH免密登录配置完成"
     return 0
 }
@@ -103,65 +114,80 @@ configure_ssh_access() {
 configure_hostnames() {
     print_info "开始配置主机名..."
     
-    # 创建Ansible inventory文件
-    local inventory_file="/tmp/k8s_hosts_$$"
-    cat > "$inventory_file" << EOF
-[all]
-$(for ip in "${all_ips[@]}"; do echo "$ip"; done)
-
-[all:vars]
-ansible_ssh_private_key_file=$HOME/.ssh/id_ed25519
-ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-EOF
-    
-    # 创建Ansible playbook配置主机名
-    local playbook_file="/tmp/k8s_hostname_$$.yml"
-    cat > "$playbook_file" << EOF
----
-- name: Configure K8s node hostnames
-  hosts: all
-  become: yes
-  tasks:
-    - name: Set hostname according to mapping
-      hostname:
-        name: "{{ hostname_map[inventory_hostname] }}"
-      when: hostname_map[inventory_hostname] is defined
-      
-    - name: Update /etc/hosts with all nodes
-      lineinfile:
-        path: /etc/hosts
-        line: "{{ item.value }} {{ item.key }}"
-        state: present
-      loop: "{{ hostname_map | dict2items }}"
-      when: hostname_map[inventory_hostname] is defined
-EOF
-    
-    # 准备主机名映射变量
-    local hostname_vars=""
-    for ip in "${!node_names[@]}"; do
-        hostname_vars+="\"$ip\": \"${node_names[$ip]}\","
-    done
-    hostname_vars="{${hostname_vars%,}}"
-    
-    # 执行Ansible配置主机名
-    if ansible all -i "$inventory_file" -m ping > /dev/null 2>&1; then
-        print_info "通过Ansible配置主机名..."
-        ansible-playbook -i "$inventory_file" "$playbook_file" \
-            --extra-vars "hostname_map=$hostname_vars"
+    # 为所有节点配置主机名
+    for ip in "${all_ips[@]}"; do
+        echo ""
+        print_info "配置节点 $ip 的主机名..."
         
-        if [ $? -eq 0 ]; then
-            print_success "主机名配置完成"
+        # 获取该IP对应的主机名
+        hostname="${node_names[$ip]}"
+        if [[ -z "$hostname" ]]; then
+            print_warning "未找到IP $ip 的主机名映射，跳过配置"
+            continue
+        fi
+        
+        # 构建 hosts 条目（仅包含我们的节点映射）
+        {
+            echo "# K8s集群节点映射 - 由k8s配置工具自动生成"
+            for host_ip in "${!node_names[@]}"; do
+                echo "$host_ip ${node_names[$host_ip]}"
+            done
+        } > /tmp/hosts_nodes_$$_$ip
+        
+        # 使用SSH密钥认证方式，以root用户连接
+        if ssh -o StrictHostKeyChecking=no "root@$ip" "echo '连接测试成功'"; then
+            print_success "成功连接到 $ip"
+            
+            # 设置主机名
+            print_info "设置主机名为 $hostname..."
+            ssh -o StrictHostKeyChecking=no "root@$ip" "
+                hostnamectl set-hostname '$hostname'
+            "
+            
+            # 更新/etc/hosts文件 - 使用追加方式并保持幂等性
+            print_info "更新 /etc/hosts 文件（追加模式）..."
+            
+            # 将节点映射文件传输到远程主机
+            scp -o StrictHostKeyChecking=no /tmp/hosts_nodes_$$_$ip "root@$ip":/tmp/hosts_nodes_$$_$ip
+            
+            # 在远程主机上执行更新操作
+            ssh -o StrictHostKeyChecking=no "root@$ip" "
+                # 备份原始hosts文件
+                cp /etc/hosts /etc/hosts.backup.$(date +%Y%m%d_%H%M%S)
+                
+                # 删除之前由本工具添加的节点映射块（如果存在）
+                # 使用特定的开始和结束标记来识别我们添加的内容
+                sed -i '/# K8s集群节点映射 - 由k8s配置工具自动生成/,/# K8s集群节点映射 - 结束/d' /etc/hosts
+                
+                # 追加新的节点映射块到hosts文件末尾
+                echo '' >> /etc/hosts
+                echo '# K8s集群节点映射 - 由k8s配置工具自动生成' >> /etc/hosts
+                cat /tmp/hosts_nodes_$$_$ip | tail -n +2 >> /etc/hosts  # 跳过第一行的注释
+                echo '# K8s集群节点映射 - 结束' >> /etc/hosts
+                
+                # 清理临时文件
+                rm -f /tmp/hosts_nodes_$$_$ip
+                
+                # 验证hosts文件格式
+                echo '更新后的hosts文件内容：'
+                echo '======================='
+                cat /etc/hosts
+                echo '======================='
+            "
+            
+            print_success "节点 $ip 主机名配置完成"
         else
-            print_error "主机名配置失败"
+            # 清理临时文件
+            rm -f /tmp/hosts_nodes_$$_$ip
+            print_error "无法连接到 $ip，请检查SSH配置"
             return 1
         fi
-    else
-        print_error "Ansible连接测试失败，无法配置主机名"
-        return 1
-    fi
+        
+        # 清理本地临时文件
+        rm -f /tmp/hosts_nodes_$$_$ip
+    done
     
-    # 清理临时文件
-    rm -f "$inventory_file" "$playbook_file"
-    
+    echo ""
+    print_success "所有节点主机名配置完成"
     return 0
 }
