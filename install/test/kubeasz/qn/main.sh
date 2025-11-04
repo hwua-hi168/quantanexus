@@ -17,6 +17,8 @@ source "$SCRIPT_DIR/install_tools.sh"
 source "$SCRIPT_DIR/download_source.sh"
 # 新增kubeasz安装模块
 source "$SCRIPT_DIR/install_kubeasz.sh"
+# 新增kubeasz配置模块
+source "$SCRIPT_DIR/configure_kubeasz.sh"
 
 # 显示使用说明
 show_usage() {
@@ -28,6 +30,7 @@ show_usage() {
     echo "  hostname     配置主机名"
     echo "  download     下载Quantanexus源码"
     echo "  kubeasz      安装kubeasz并创建集群实例"
+    echo "  configure    配置kubeasz（hosts文件和自定义代码）"
     echo "  all          执行所有步骤（默认）"
     echo "  show         显示当前配置"
     echo "  generate     生成hosts文件"
@@ -41,6 +44,7 @@ show_usage() {
     echo "  $0 hostname       # 仅配置主机名"
     echo "  $0 download       # 仅下载源码"
     echo "  $0 kubeasz        # 仅安装kubeasz"
+    echo "  $0 configure      # 仅配置kubeasz"
     echo "  $0 all            # 执行完整流程"
     echo "  $0 show           # 显示当前配置"
     echo "  $0 generate       # 生成hosts文件"
@@ -214,6 +218,16 @@ cmd_kubeasz() {
     print_success "kubeasz安装和集群实例创建完成"
 }
 
+# 配置kubeasz命令
+cmd_configure() {
+    print_banner
+    if ! configure_kubeasz; then
+        print_error "kubeasz配置失败"
+        return 1
+    fi
+    print_success "kubeasz配置完成"
+}
+
 # 主函数
 main() {
     print_banner
@@ -245,6 +259,11 @@ main() {
         "kubeasz")
             cmd_kubeasz
             ;;
+        "configure")
+            check_config_file || exit 1
+            load_config
+            cmd_configure
+            ;;
         "all")
             cmd_collect
             if ! install_required_commands; then
@@ -268,7 +287,10 @@ main() {
                 print_error "kubeasz安装失败"
                 exit 1
             fi
-            generate_hosts_file
+            if ! configure_kubeasz; then
+                print_error "kubeasz配置失败"
+                exit 1
+            fi
             print_success "所有配置完成！"
             ;;
         "show")
