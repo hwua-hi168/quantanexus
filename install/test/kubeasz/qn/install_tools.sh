@@ -7,7 +7,8 @@ install_required_commands() {
     print_info "检查所需命令工具..."
     
     local missing_tools=()
-    local required_tools=("ssh" "sshpass" "ansible" "ssh-keygen" "tr" "fold" "head" "cat" "sed" "unzip")
+    # 添加 rsync 到必需工具列表
+    local required_tools=("ssh" "sshpass" "ansible" "ssh-keygen" "tr" "fold" "head" "cat" "sed" "unzip" "rsync")
     
     # 检查每个必需的工具
     for tool in "${required_tools[@]}"; do
@@ -52,8 +53,8 @@ install_required_commands() {
             esac
         done
         
-        # 添加通用工具包
-        packages_to_install+=("coreutils" "sed")
+        # 添加通用工具包和 rsync
+        packages_to_install+=("coreutils" "sed" "rsync")
         
         # 去重
         local unique_packages=($(echo "${packages_to_install[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
@@ -88,8 +89,8 @@ install_required_commands() {
             esac
         done
         
-        # 添加通用工具包
-        packages_to_install+=("coreutils" "sed")
+        # 添加通用工具包和 rsync
+        packages_to_install+=("coreutils" "sed" "rsync")
         
         # 去重
         local unique_packages=($(echo "${packages_to_install[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
