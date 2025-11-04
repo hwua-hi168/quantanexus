@@ -4,7 +4,7 @@
 
 1. **给所有文件添加执行权限**：
    ```bash
-   chmod +x main.sh common.sh collect_info.sh remote_config.sh
+   chmod +x main.sh common.sh collect_info.sh remote_config.sh install_tools.sh download_source.sh install_kubeasz.sh
    ```
 
 2. **查看帮助信息**：

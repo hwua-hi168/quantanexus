@@ -118,3 +118,16 @@ generate_node_names() {
         node_names["${worker_ips[i]}"]="$node_name"
     done
 }
+
+# 通用执行函数，自动处理sudo权限
+execute_with_privileges() {
+    local command="$*"
+    if [[ $EUID -ne 0 ]] && command -v sudo &> /dev/null; then
+        sudo $command
+    elif [[ $EUID -eq 0 ]]; then
+        $command
+    else
+        print_error "权限不足，请以root用户运行此脚本或确保sudo可用"
+        return 1
+    fi
+}

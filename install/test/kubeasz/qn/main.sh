@@ -11,6 +11,12 @@ source "$SCRIPT_DIR/common.sh"
 # 导入其他模块
 source "$SCRIPT_DIR/collect_info.sh"
 source "$SCRIPT_DIR/remote_config.sh"
+# 新增工具安装模块
+source "$SCRIPT_DIR/install_tools.sh"
+# 新增源码下载模块
+source "$SCRIPT_DIR/download_source.sh"
+# 新增kubeasz安装模块
+source "$SCRIPT_DIR/install_kubeasz.sh"
 
 # 显示使用说明
 show_usage() {
@@ -20,6 +26,8 @@ show_usage() {
     echo "  collect      收集节点信息和认证信息"
     echo "  ssh          配置SSH免密登录"
     echo "  hostname     配置主机名"
+    echo "  download     下载Quantanexus源码"
+    echo "  kubeasz      安装kubeasz并创建集群实例"
     echo "  all          执行所有步骤（默认）"
     echo "  show         显示当前配置"
     echo "  generate     生成hosts文件"
@@ -31,6 +39,8 @@ show_usage() {
     echo "  $0 collect        # 仅收集信息"
     echo "  $0 ssh            # 仅配置SSH"
     echo "  $0 hostname       # 仅配置主机名"
+    echo "  $0 download       # 仅下载源码"
+    echo "  $0 kubeasz        # 仅安装kubeasz"
     echo "  $0 all            # 执行完整流程"
     echo "  $0 show           # 显示当前配置"
     echo "  $0 generate       # 生成hosts文件"
@@ -115,7 +125,10 @@ cmd_ssh() {
         exit 1
     fi
     
-    install_required_tools
+    if ! install_required_commands; then
+        print_error "必需工具安装失败"
+        exit 1
+    fi
     
     if $use_password_auth; then
         if [[ -z "$password" ]]; then
@@ -141,7 +154,10 @@ cmd_hostname() {
         exit 1
     fi
     
-    install_required_tools
+    if ! install_required_commands; then
+        print_error "必需工具安装失败"
+        exit 1
+    fi
     
     if ! configure_hostnames; then
         print_error "主机名配置失败"
@@ -171,87 +187,107 @@ cmd_generate() {
     generate_hosts_file
 }
 
-# 执行所有步骤
-cmd_all() {
+# 下载源码命令
+cmd_download() {
     print_banner
-    
-    # 收集信息
-    configure_nodes
-    collect_auth_info
-    save_config
-    
-    # 安装工具
-    install_required_tools
-    
-    # 配置SSH
-    if $use_password_auth; then
-        if [[ -z "$password" ]]; then
-            echo -n "密码: "
-            read -s password
-            echo ""
-        fi
-        
-        if ! configure_ssh_access; then
-            print_error "SSH配置失败"
-            exit 1
-        fi
-    else
-        print_info "使用现有SSH密钥，跳过密码认证配置"
+    if ! download_source_code; then
+        print_error "源码下载失败"
+        return 1
+    fi
+    print_success "源码下载完成"
+}
+
+# 安装kubeasz命令
+cmd_kubeasz() {
+    print_banner
+    if ! install_kubeasz; then
+        print_error "kubeasz安装失败"
+        return 1
     fi
     
-    # 配置主机名
-    if ! configure_hostnames; then
-        print_warning "主机名配置失败，但继续生成配置文件"
+    # 创建默认集群实例
+    if ! create_cluster_instance "k8s-qn-01"; then
+        print_error "集群实例创建失败"
+        return 1
     fi
     
-    # 显示结果
-    show_config_summary
-    generate_hosts_file
-    
-    print_success "所有配置完成！"
+    print_success "kubeasz安装和集群实例创建完成"
 }
 
 # 主函数
 main() {
-    local command="all"
+    print_banner
     
     # 解析命令行参数
-    if [[ $# -gt 0 ]]; then
-        case "$1" in
-            -h|--help)
-                show_usage
-                exit 0
-                ;;
-            collect|ssh|hostname|all|show|generate)
-                command="$1"
-                ;;
-            *)
-                print_error "未知命令: $1"
-                show_usage
-                exit 1
-                ;;
-        esac
-    fi
-    
-    # 执行对应命令
-    case "$command" in
-        collect)
+    case "${1:-all}" in
+        "collect")
             cmd_collect
             ;;
-        ssh)
-            cmd_ssh
+        "ssh")
+            check_config_file || exit 1
+            load_config
+            if ! configure_ssh_access; then
+                print_error "SSH免密登录配置失败"
+                exit 1
+            fi
             ;;
-        hostname)
-            cmd_hostname
+        "hostname")
+            check_config_file || exit 1
+            load_config
+            if ! configure_hostnames; then
+                print_error "主机名配置失败"
+                exit 1
+            fi
             ;;
-        all)
-            cmd_all
+        "download")
+            cmd_download
             ;;
-        show)
-            cmd_show
+        "kubeasz")
+            cmd_kubeasz
             ;;
-        generate)
-            cmd_generate
+        "all")
+            cmd_collect
+            if ! install_required_commands; then
+                print_error "必要工具安装失败"
+                exit 1
+            fi
+            if $use_password_auth; then
+                if ! configure_ssh_access; then
+                    print_error "SSH免密登录配置失败"
+                    exit 1
+                fi
+            fi
+            if ! configure_hostnames; then
+                print_warning "主机名配置失败，但继续生成配置文件"
+            fi
+            if ! download_source_code; then
+                print_error "源码下载失败"
+                exit 1
+            fi
+            if ! install_kubeasz; then
+                print_error "kubeasz安装失败"
+                exit 1
+            fi
+            generate_hosts_file
+            print_success "所有配置完成！"
+            ;;
+        "show")
+            check_config_file || exit 1
+            load_config
+            show_config_summary
+            ;;
+        "generate")
+            check_config_file || exit 1
+            load_config
+            generate_hosts_file
+            ;;
+        "-h"|"--help")
+            show_usage
+            ;;
+        *)
+            print_error "未知命令: $1"
+            show_usage
+            exit 1
             ;;
     esac
 }
