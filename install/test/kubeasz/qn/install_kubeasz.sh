@@ -33,6 +33,16 @@ install_kubeasz() {
         return 1
     fi
     
+    # 下载额外容器镜像（cilium）
+    print_info "下载cilium容器镜像..."
+    if execute_with_privileges ./ezdown -X cilium; then
+        print_success "cilium容器镜像下载完成"
+    else
+        print_error "cilium容器镜像下载失败"
+        cd ../../..
+        return 1
+    fi
+    
     # 容器化运行kubeasz
     print_info "容器化运行kubeasz..."
     if execute_with_privileges ./ezdown -S; then

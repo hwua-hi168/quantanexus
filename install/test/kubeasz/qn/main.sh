@@ -33,6 +33,7 @@ show_usage() {
     echo "  status       检查集群状态"
     echo "  info         显示集群信息"
     echo "  helm         安装Helm"
+    echo "  longhorn     安装Longhorn存储"
     echo "  all          执行所有步骤（默认）"
     echo "  show         显示当前配置"
     echo "  generate     生成hosts文件"
@@ -52,6 +53,7 @@ show_usage() {
     echo "  $0 status              # 检查集群状态"
     echo "  $0 info                # 显示集群信息"
     echo "  $0 helm                # 安装Helm"
+    echo "  $0 longhorn            # 安装Longhorn"
     echo "  $0 all                 # 执行完整流程"
     echo "  $0 show                # 显示当前配置"
     echo "  $0 generate            # 生成hosts文件"
@@ -333,6 +335,24 @@ cmd_helm() {
     print_success "Helm安装完成"
 }
 
+# 安装Longhorn命令
+cmd_longhorn() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! install_longhorn "$cluster_name"; then
+        print_error "Longhorn安装失败"
+        return 1
+    fi
+    
+    print_success "Longhorn安装完成"
+}
+
 # 主函数
 main() {
     print_banner
@@ -392,6 +412,9 @@ main() {
         "helm")
             cmd_helm
             ;;
+        "longhorn")
+            cmd_longhorn
+            ;;
         "all")
             cmd_collect
             if ! install_required_commands; then
@@ -425,6 +448,10 @@ main() {
             fi
             if ! install_helm; then
                 print_error "Helm安装失败"
+                exit 1
+            fi
+            if ! install_longhorn; then
+                print_error "Longhorn安装失败"
                 exit 1
             fi
             print_success "所有配置完成！"

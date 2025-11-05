@@ -1,0 +1,8 @@
+- hosts: kube_master[0]  # 或任意一个可以执行 kubectl/helm 的节点，但建议使用 delegate_to: localhost (部署机)
+  vars:
+    CLUSTER_DIR: "{{ cluster_dir | default('/etc/kubeasz/cluster') }}"
+    # longhorn_values_config:
+    #   defaultSettings:
+    #     defaultDataPath: "/data/longhorn"
+  roles:
+    - role: helloworld
