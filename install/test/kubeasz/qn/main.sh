@@ -11,14 +11,11 @@ source "$SCRIPT_DIR/common.sh"
 # 导入其他模块
 source "$SCRIPT_DIR/collect_info.sh"
 source "$SCRIPT_DIR/remote_config.sh"
-# 新增工具安装模块
 source "$SCRIPT_DIR/install_tools.sh"
-# 新增源码下载模块
 source "$SCRIPT_DIR/download_source.sh"
-# 新增kubeasz安装模块
 source "$SCRIPT_DIR/install_kubeasz.sh"
-# 新增kubeasz配置模块
 source "$SCRIPT_DIR/configure_kubeasz.sh"
+source "$SCRIPT_DIR/install_helm.sh"
 
 # 显示使用说明
 show_usage() {
@@ -31,6 +28,11 @@ show_usage() {
     echo "  download     下载Quantanexus源码"
     echo "  kubeasz      安装kubeasz并创建集群实例"
     echo "  configure    配置kubeasz（hosts文件和自定义代码）"
+    echo "  setup        分步执行kubeasz安装"
+    echo "  setup-step   执行指定的kubeasz安装步骤"
+    echo "  status       检查集群状态"
+    echo "  info         显示集群信息"
+    echo "  helm         安装Helm"
     echo "  all          执行所有步骤（默认）"
     echo "  show         显示当前配置"
     echo "  generate     生成hosts文件"
@@ -39,15 +41,20 @@ show_usage() {
     echo "  -h, --help   显示此帮助信息"
     echo ""
     echo "示例:"
-    echo "  $0 collect        # 仅收集信息"
-    echo "  $0 ssh            # 仅配置SSH"
-    echo "  $0 hostname       # 仅配置主机名"
-    echo "  $0 download       # 仅下载源码"
-    echo "  $0 kubeasz        # 仅安装kubeasz"
-    echo "  $0 configure      # 仅配置kubeasz"
-    echo "  $0 all            # 执行完整流程"
-    echo "  $0 show           # 显示当前配置"
-    echo "  $0 generate       # 生成hosts文件"
+    echo "  $0 collect              # 仅收集信息"
+    echo "  $0 ssh                  # 仅配置SSH"
+    echo "  $0 hostname             # 仅配置主机名"
+    echo "  $0 download             # 仅下载源码"
+    echo "  $0 kubeasz              # 仅安装kubeasz"
+    echo "  $0 configure            # 仅配置kubeasz"
+    echo "  $0 setup               # 分步执行kubeasz安装"
+    echo "  $0 setup-step 01       # 执行第01步安装"
+    echo "  $0 status              # 检查集群状态"
+    echo "  $0 info                # 显示集群信息"
+    echo "  $0 helm                # 安装Helm"
+    echo "  $0 all                 # 执行完整流程"
+    echo "  $0 show                # 显示当前配置"
+    echo "  $0 generate            # 生成hosts文件"
 }
 
 # 检查配置文件是否存在
@@ -228,6 +235,104 @@ cmd_configure() {
     print_success "kubeasz配置完成"
 }
 
+# 执行kubeasz分步安装命令
+cmd_setup() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! run_kubeasz_setup "$cluster_name"; then
+        print_error "kubeasz分步安装失败"
+        return 1
+    fi
+    
+    print_success "kubeasz分步安装完成"
+}
+
+# 执行kubeasz指定步骤命令
+cmd_setup_step() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="$1"
+    local step="$2"
+    
+    if [[ -z "$cluster_name" || -z "$step" ]]; then
+        print_error "缺少参数: 集群名称和步骤编号"
+        print_info "用法: $0 setup-step <cluster_name> <step>"
+        print_info "示例: $0 setup-step k8s-qn-01 01"
+        exit 1
+    fi
+    
+    if ! run_kubeasz_single_step "$cluster_name" "$step"; then
+        print_error "kubeasz步骤 $step 安装失败"
+        return 1
+    fi
+    
+    print_success "kubeasz步骤 $step 安装完成"
+}
+
+# 检查集群状态命令
+cmd_status() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! check_cluster_status "$cluster_name"; then
+        print_error "集群状态检查失败"
+        return 1
+    fi
+    
+    print_success "集群状态检查完成"
+}
+
+# 显示集群信息命令
+cmd_info() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! show_cluster_info "$cluster_name"; then
+        print_error "集群信息显示失败"
+        return 1
+    fi
+    
+    print_success "集群信息显示完成"
+}
+
+# 安装Helm命令
+cmd_helm() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! install_helm "$cluster_name"; then
+        print_error "Helm安装失败"
+        return 1
+    fi
+    
+    print_success "Helm安装完成"
+}
+
 # 主函数
 main() {
     print_banner
@@ -264,6 +369,29 @@ main() {
             load_config
             cmd_configure
             ;;
+        "setup")
+            check_config_file || exit 1
+            load_config
+            cmd_setup "${2:-k8s-qn-01}"
+            ;;
+        "setup-step")
+            check_config_file || exit 1
+            load_config
+            cmd_setup_step "$2" "$3"
+            ;;
+        "status")
+            check_config_file || exit 1
+            load_config
+            cmd_status "${2:-k8s-qn-01}"
+            ;;
+        "info")
+            check_config_file || exit 1
+            load_config
+            cmd_info "${2:-k8s-qn-01}"
+            ;;
+        "helm")
+            cmd_helm
+            ;;
         "all")
             cmd_collect
             if ! install_required_commands; then
@@ -289,6 +417,14 @@ main() {
             fi
             if ! configure_kubeasz; then
                 print_error "kubeasz配置失败"
+                exit 1
+            fi
+            if ! run_kubeasz_setup; then
+                print_error "kubeasz分步安装失败"
+                exit 1
+            fi
+            if ! install_helm; then
+                print_error "Helm安装失败"
                 exit 1
             fi
             print_success "所有配置完成！"

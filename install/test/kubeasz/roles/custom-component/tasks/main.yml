@@ -3,10 +3,10 @@
   stat: path="/opt/kubeasz_quantanexus_tasks"
   register: qn
 
-# - name: 已完成提示
-#   debug:
-#     msg: "节点已完成prepare_tasks，跳过"  
-#   when: qn.stat.isreg is defined
+- name: 已完成提示
+  debug:
+    msg: "节点已完成prepare_tasks，跳过"  
+  when: qn.stat.isreg is defined
   
 - block:
     - import_tasks: debian.yml
@@ -29,4 +29,4 @@
     ## 最后标记该节点已经完成prepare_tasks
     - name: 设置quantanexus_tasks文件
       shell: "echo done > /opt/kubeasz_quantanexus_tasks"
-  # when: qn.stat.isreg is not defined
+  when: qn.stat.isreg is not defined
