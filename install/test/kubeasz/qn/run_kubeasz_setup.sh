@@ -9,7 +9,8 @@ declare -A kubeasz_steps=(
     ["03"]="安装docker"
     ["04"]="安装k8s基础组件"
     ["05"]="安装master节点"
-    ["07"]="安装网络插件"
+    ["06"]="安装网络插件"
+    ["07"]="安装localDNS"
 )
 
 # 显示kubeasz步骤信息
@@ -86,7 +87,7 @@ run_kubeasz_setup() {
     fi
     
     # 定义安装步骤顺序
-    local steps=("01" "02" "03" "04" "05" "07")
+    local steps=("01" "02" "03" "04" "05" "06" "07")
     
     # 执行每个步骤
     for step in "${steps[@]}"; do

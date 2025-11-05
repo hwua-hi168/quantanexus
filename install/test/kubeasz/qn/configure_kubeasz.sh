@@ -122,10 +122,18 @@ configure_kubeasz() {
                 fi
                 ;;
             "vars")
-                # 处理QN_DOMAIN变量
+                # 处理QN_DOMAIN变量，确保幂等性
                 if [[ "$line" =~ ^QN_DOMAIN= ]]; then
-                    # 替换现有的QN_DOMAIN
-                    echo "$qn_domain" >> "$temp_updated_file"
+                    # 如果还没有更新QN_DOMAIN，则替换现有的QN_DOMAIN
+                    if [[ "$section_updated" == false ]]; then
+                        echo "$qn_domain" >> "$temp_updated_file"
+                        section_updated=true
+                    fi
+                    # 如果已经更新过QN_DOMAIN，则跳过重复的定义
+                    continue
+                # 处理CLUSTER_NETWORK变量，将其从calico改为cilium
+                elif [[ "$line" =~ ^CLUSTER_NETWORK= ]]; then
+                    echo "CLUSTER_NETWORK=\"cilium\"" >> "$temp_updated_file"
                     section_updated=true
                 else
                     echo "$line" >> "$temp_updated_file"

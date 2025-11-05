@@ -7,7 +7,7 @@ global:
   registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
   # outside of China, please use docker.io
   # registry: docker.io/hwua
-  masterNode: com-calino-master-1
+  # masterNode: com-calino-master-1
   labelController: true
   
 # Cert Manager 配置块
