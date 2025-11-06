@@ -1,0 +1,94 @@
+# alertmanager
+alertmanager:
+  alertmanagerSpec:
+    image:
+      registry: {{ prometheus_image_registry }}
+      repository: {{ prometheus_alertmanager_image_repository }}
+      tag: {{ prometheus_alertmanager_image_tag }}
+
+# prometheus-operator
+prometheusOperator:
+  image:
+    registry: {{ prometheus_image_registry }}
+    repository: {{ prometheus_operator_image_repository }}
+    tag: {{ prometheus_operator_image_tag }}
+  prometheusConfigReloader:
+    image:
+      registry: {{ prometheus_image_registry }}
+      repository: {{ prometheus_prometheus_config_reloader_image_repository }}
+      tag: {{ prometheus_prometheus_config_reloader_image_tag }}
+  thanosImage:
+    registry: {{ prometheus_image_registry }}
+    repository: {{ prometheus_thanos_image_repository }}
+    tag: {{ prometheus_thanos_image_tag }}
+
+# prometheus
+prometheus:
+  prometheusSpec:
+    image:
+      registry: {{ prometheus_image_registry }}
+      repository: {{ prometheus_server_image_repository }}
+      tag: {{ prometheus_server_image_tag }}
+
+# crds upgrade job
+crds:
+  upgradeJob:
+    image:
+      busybox:
+        registry: {{ prometheus_image_registry }}
+        repository: {{ prometheus_busybox_image_repository }}
+        tag: {{ prometheus_busybox_image_tag }}
+      kubectl:
+        registry: {{ prometheus_image_registry }}
+        repository: {{ prometheus_kubectl_image_repository }}
+        tag: {{ prometheus_kubectl_image_tag }}
+
+# admission webhook patch
+prometheusOperator:
+  admissionWebhooks:
+    patch:
+      image:
+        registry: {{ prometheus_image_registry }}
+        repository: {{ prometheus_webhook_image_repository }}
+        tag: {{ prometheus_webhook_image_tag }}
+
+# kube-state-metrics
+kube-state-metrics:
+  image:
+    registry: {{ prometheus_image_registry }}
+    repository: {{ prometheus_kube_state_metrics_image_repository }}
+    tag: {{ prometheus_kube_state_metrics_image_tag }}
+
+# grafana
+grafana:
+  image:
+    registry: {{ prometheus_image_registry }}
+    repository: {{ prometheus_grafana_image_repository }}
+    tag: {{ prometheus_grafana_image_tag }}
+  service:
+    type: {{ prometheus_grafana_service_type }}
+    port: {{ prometheus_grafana_service_port }}
+    nodePort: {{ prometheus_grafana_service_nodePort }}
+
+  # 2) 允许匿名调用 API（只读），或下面单独创建 API Key
+  grafana.ini:
+    auth.anonymous:
+      enabled: {{ prometheus_grafana_anonymous_enabled }}
+      org_name: {{ prometheus_grafana_org_name }}
+      org_role: {{ prometheus_grafana_org_role }}
+
+    # 3) 关闭 CSRF，方便脚本裸 curl（可选）
+    security:
+      disable_csrf_protection: {{ prometheus_grafana_disable_csrf_protection }}
+
+  # 4) 持久化，避免重启丢 Dashboard
+  persistence:
+    enabled: {{ prometheus_grafana_persistence_enabled }}
+    size: {{ prometheus_grafana_persistence_size }}
+
+# node-exporter
+prometheus-node-exporter:
+  image:
+    registry: {{ prometheus_image_registry }}
+    repository: {{ prometheus_node_exporter_image_repository }}
+    tag: {{ prometheus_node_exporter_image_tag }}

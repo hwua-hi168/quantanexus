@@ -1,0 +1,61 @@
+---
+# Prometheus 配置默认值
+prometheus_version: "62.7.0"
+prometheus_work_dir: "{{ CLUSTER_DIR }}/helm/monitor"
+kube_config_file: "{{ CLUSTER_DIR }}/config"
+
+# 镜像仓库配置
+prometheus_image_registry: "{{ IMAGE_REGISTRY }}"
+
+# Alertmanager 镜像
+prometheus_alertmanager_image_repository: "quay.io-prometheus-alertmanager"
+prometheus_alertmanager_image_tag: "v0.28.1"
+
+# Prometheus Operator 镜像
+prometheus_operator_image_repository: "quay.io-prometheus-operator-prometheus-operator"
+prometheus_operator_image_tag: "v0.86.0"
+prometheus_prometheus_config_reloader_image_repository: "quay.io-prometheus-operator-prometheus-config-reloader"
+prometheus_prometheus_config_reloader_image_tag: "v0.86.0"
+prometheus_thanos_image_repository: "quay.io-thanos-thanos"
+prometheus_thanos_image_tag: "v0.39.2"
+
+# Prometheus 镜像
+prometheus_server_image_repository: "quay.io-prometheus-prometheus"
+prometheus_server_image_tag: "v3.6.0"
+
+# CRDs 镜像
+prometheus_busybox_image_repository: "docker.io-busybox"
+prometheus_busybox_image_tag: "latest"
+prometheus_kubectl_image_repository: "registry.k8s.io-kubectl"
+prometheus_kubectl_image_tag: "v1.33.1"
+
+# Admission Webhook 镜像
+prometheus_webhook_image_repository: "registry.k8s.io-ingress-nginx-kube-webhook-certgen"
+prometheus_webhook_image_tag: "v1.6.3"
+
+# Kube State Metrics 镜像
+prometheus_kube_state_metrics_image_repository: "registry.k8s.io-kube-state-metrics-kube-state-metrics"
+prometheus_kube_state_metrics_image_tag: "v2.17.0"
+
+# Grafana 镜像
+prometheus_grafana_image_repository: "docker.io-grafana-grafana"
+prometheus_grafana_image_tag: "12.2.0"
+
+# Node Exporter 镜像
+prometheus_node_exporter_image_repository: "quay.io-prometheus-node-exporter"
+prometheus_node_exporter_image_tag: "v1.9.1"
+
+# Grafana 服务配置
+prometheus_grafana_service_type: "NodePort"
+prometheus_grafana_service_port: 3000
+prometheus_grafana_service_nodePort: 30300
+
+# Grafana 配置
+prometheus_grafana_anonymous_enabled: true
+prometheus_grafana_org_name: "Main Org."
+prometheus_grafana_org_role: "Viewer"
+prometheus_grafana_disable_csrf_protection: true
+
+# 持久化配置
+prometheus_grafana_persistence_enabled: true
+prometheus_grafana_persistence_size: "10Gi"
