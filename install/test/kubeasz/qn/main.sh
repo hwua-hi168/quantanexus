@@ -15,6 +15,7 @@ source "$SCRIPT_DIR/install_tools.sh"
 source "$SCRIPT_DIR/download_source.sh"
 source "$SCRIPT_DIR/install_kubeasz.sh"
 source "$SCRIPT_DIR/configure_kubeasz.sh"
+source "$SCRIPT_DIR/run_kubeasz_setup.sh"
 source "$SCRIPT_DIR/install_helm.sh"
 
 # 新增组件安装模块
@@ -273,6 +274,7 @@ cmd_setup() {
     fi
     
     print_success "kubeasz分步安装完成"
+    return 0  # 成功执行返回0
 }
 
 # 执行kubeasz指定步骤命令
@@ -622,6 +624,7 @@ main() {
             cmd_quantanexus_cs "${2:-k8s-qn-01}"
             ;;
         "all")
+            load_config
             cmd_collect
             if ! install_required_commands; then
                 print_error "必要工具安装失败"
@@ -648,8 +651,9 @@ main() {
                 print_error "kubeasz配置失败"
                 exit 1
             fi
-            if ! run_kubeasz_setup; then
-                print_error "kubeasz分步安装失败"
+            # 检查run_kubeasz_setup是否成功执行（用户未取消）
+            if ! cmd_setup; then
+                print_error "kubeasz分步安装失败或被用户取消"
                 exit 1
             fi
             if ! install_helm; then

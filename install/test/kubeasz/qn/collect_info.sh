@@ -2,8 +2,38 @@
 
 # 收集用户信息模块
 
+# 检查是否已有配置
+check_existing_config() {
+    echo "all_ips $all_ips"
+    echo "etcd_ips $etcd_ips"
+    echo "master_ips $master_ips"
+    echo "worker_ips $worker_ips"
+    echo "QN_DOMAIN $QN_DOMAIN"
+    echo "IMAGE_REGISTRY $IMAGE_REGISTRY"
+    if [[ -n "$all_ips" && -n "$etcd_ips" && -n "$master_ips" && -n "$worker_ips" && -n "$QN_DOMAIN" && -n "$IMAGE_REGISTRY" ]]; then
+        echo "=== 检测到已有配置信息 ==="
+        show_config_summary
+        
+        read -p "是否使用以上配置? (y/n, 默认y): " use_existing_config
+        if [[ ! $use_existing_config =~ ^[Nn]$ ]]; then
+            print_success "使用现有配置"
+            return 0
+        else
+            print_info "重新配置节点信息..."
+            # 清空现有配置
+            unset all_ips etcd_ips master_ips worker_ips QN_DOMAIN IMAGE_REGISTRY node_names
+        fi
+    fi
+    return 1
+}
+
 # 配置节点信息
 configure_nodes() {
+    # 首先检查是否已有配置
+    if check_existing_config; then
+        return 0
+    fi
+    
     print_info "本脚本将帮助您配置K8s高可用集群的节点信息"
     echo ""
 
@@ -266,37 +296,42 @@ collect_auth_info() {
     fi
     
     # 询问是否使用密码认证
-    echo ""
-    print_info "您可以选择使用密码认证来配置SSH免密登录"
-    read -p "是否使用密码认证配置SSH免密登录? (y/n, 默认y): " use_password
-    
-    if [[ $use_password =~ ^[Nn]$ ]]; then
-        print_info "跳过密码认证配置，请确保已配置SSH免密登录"
-        use_password_auth=false
-        return 0
+    if [[ -z $use_password_auth ]]; then
+      echo ""
+      print_info "您可以选择使用密码认证来配置SSH免密登录"
+      read -p "是否使用密码认证配置SSH免密登录? (y/n, 默认y): " use_password
+      
+      if [[ $use_password =~ ^[Nn]$ ]]; then
+          print_info "跳过密码认证配置，请确保已配置SSH免密登录"
+          use_password_auth=false
+          return 0
+      fi
     fi
     
     use_password_auth=true
     
     # 收集用户名和密码
-    echo ""
-    print_info "请输入远程主机的登录信息"
-    read -p "用户名 (默认: root): " input_username
-    username=${input_username:-root}
-    
-    echo -n "密码: "
-    read -s password
-    echo ""
-    
-    # 确认密码
-    echo -n "确认密码: "
-    read -s password_confirm
-    echo ""
-    
-    if [[ "$password" != "$password_confirm" ]]; then
-        print_error "密码不匹配"
-        return 1
+    if [[ -z $username ]]; then
+      echo ""
+      print_info "请输入远程主机的登录信息"
+      read -p "用户名 (默认: root): " input_username
+      username=${input_username:-root}
     fi
+    if [[ -z $password ]]; then
+      echo -n "密码: "
+      read -s password
+      echo ""
+      
+      # 确认密码
+      echo -n "确认密码: "
+      read -s password_confirm
+      echo ""
+      
+      if [[ "$password" != "$password_confirm" ]]; then
+          print_error "密码不匹配"
+          return 1
+      fi
+    fi    
     
     print_success "认证信息收集完成"
     return 0
