@@ -1,0 +1,39 @@
+---
+- name: 添加 Jetstack Helm 仓库
+  shell: |
+    helm repo list | grep -q "hi168" || helm repo add hi168 https://helm.hi168.com/charts 2>/dev/null
+    helm repo update hi168
+  changed_when: false
+
+- name: 确保 Cert-Manager 配置目录存在
+  file:
+    path: "{{ cert_manager_work_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: 创建 values.yaml 配置文件
+  template:
+    src: values.yaml.j2
+    dest: "{{ cert_manager_work_dir }}/values.yaml"
+  when: not ansible_check_mode and not (cert_manager_work_dir + "/values.yaml") is file
+
+# - name: 创建 Cert-Manager 命名空间
+#   shell: |
+#     /opt/kube/bin/kubectl create namespace cert-manager 2>/dev/null || true
+#   changed_when: false
+
+# - name: 部署 Cert-Manager
+#   shell: |
+#     cd {{ cert_manager_work_dir }}
+#     helm upgrade --install cert-manager hi168/cert-manager \
+#       --namespace cert-manager \
+#       --version {{ cert_manager_version }} \
+#       --set installCRDs=true \
+#       -f values.yaml
+#   environment:
+#     KUBECONFIG: "{{ kube_config_file }}"
+
+# - name: 等待 Cert-Manager Pods 就绪
+#   shell: |
+#     /opt/kube/bin/kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=300s
+#   changed_when: false

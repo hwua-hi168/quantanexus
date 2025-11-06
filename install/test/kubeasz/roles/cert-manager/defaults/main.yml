@@ -1,0 +1,16 @@
+---
+# Cert-Manager 配置默认值
+cert_manager_version: "v1.19.1"
+# 修改工作目录路径为 CLUSTER_DIR/helm/cert-manager 格式
+cert_manager_work_dir: "{{ CLUSTER_DIR }}/helm/cert-manager"
+kube_config_file: "{{ CLUSTER_DIR }}/config"
+
+# 镜像仓库配置
+cert_manager_image_registry: "{{ IMAGE_REGISTRY }}"
+
+# 核心组件镜像
+cert_manager_controller_repository: "quay.io-jetstack-cert-manager-controller"
+cert_manager_webhook_repository: "quay.io-jetstack-cert-manager-webhook"
+cert_manager_cainjector_repository: "quay.io-jetstack-cert-manager-cainjector"
+cert_manager_acmesolver_repository: "quay.io-jetstack-cert-manager-acmesolver"
+cert_manager_startupapicheck_repository: "quay.io-jetstack-cert-manager-startupapicheck"
