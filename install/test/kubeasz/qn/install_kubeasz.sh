@@ -5,8 +5,7 @@
 # 安装kubeasz
 install_kubeasz() {
     print_info "开始安装kubeasz..."
-    cd $SCRIPT_DIR
-    
+    cd $SCRIPT_DIR    
     # 检查quantanexus源码是否存在
     if [[ ! -d "quantanexus-main" ]]; then
         print_error "quantanexus源码目录不存在，请先下载源码"
@@ -63,6 +62,13 @@ create_cluster_instance() {
     local cluster_name="${1:-k8s-qn-01}"
     
     print_info "创建集群配置实例: $cluster_name"
+    
+    # 检查集群实例目录是否已存在
+    local cluster_dir="/etc/kubeasz/clusters/$cluster_name"
+    if [[ -d "$cluster_dir" ]]; then
+        print_info "集群实例 $cluster_name 已存在，跳过创建"
+        return 0
+    fi
     
     # 检查kubeasz容器是否运行
     if ! docker ps | grep -q kubeasz; then
