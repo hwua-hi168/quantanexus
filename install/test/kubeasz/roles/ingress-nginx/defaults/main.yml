@@ -1,0 +1,20 @@
+---
+# Ingress-Nginx 配置默认值
+ingress_nginx_version: "4.0.18"
+ingress_nginx_work_dir: "{{ CLUSTER_DIR }}/helm/ingress-nginx"
+kube_config_file: "{{ CLUSTER_DIR }}/config"
+
+# 镜像仓库配置
+ingress_nginx_image_registry: "{{ IMAGE_REGISTRY }}"
+
+# Controller 镜像
+ingress_nginx_controller_image_repository: "k8s.gcr.io-ingress-nginx-controller"
+ingress_nginx_controller_image_tag: "v1.1.2"
+
+# DefaultBackend 镜像
+ingress_nginx_default_backend_image_repository: "k8s.gcr.io-defaultbackend-amd64"
+ingress_nginx_default_backend_image_tag: "1.5"
+
+# Webhook 镜像
+ingress_nginx_webhook_image_repository: "k8s.gcr.io-ingress-nginx-kube-webhook-certgen"
+ingress_nginx_webhook_image_tag: "v1.1.1"
