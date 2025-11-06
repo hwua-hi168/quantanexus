@@ -26,6 +26,7 @@ etcd_ips_str=""
 master_ips_str=""
 worker_ips_str=""
 node_names_mappings=""
+IMAGE_REGISTRY=""
 
 # 打印带颜色的信息
 print_info() {

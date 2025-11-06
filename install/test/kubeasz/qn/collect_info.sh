@@ -222,6 +222,22 @@ configure_nodes() {
     print_success "域名配置完成: $QN_DOMAIN"
     echo ""
 
+    # 第6步：配置镜像仓库地址
+    echo "=== 第6步：配置镜像仓库地址 ==="
+    default_registry="harbor.hi168.com/quantanexus"
+    print_info "默认镜像仓库地址: $default_registry"
+    read -p "是否使用默认镜像仓库地址? (y/n, 默认y): " use_default_registry
+
+    if [[ $use_default_registry =~ ^[Nn]$ ]]; then
+        read -p "请输入自定义镜像仓库地址: " custom_registry
+        IMAGE_REGISTRY=$custom_registry
+    else
+        IMAGE_REGISTRY=$default_registry
+    fi
+
+    print_success "镜像仓库地址配置完成: $IMAGE_REGISTRY"
+    echo ""
+
     # 生成节点名称映射
     generate_node_names
 }
@@ -296,6 +312,7 @@ show_config_summary() {
     print_success "master节点: ${master_ips[*]}"
     print_success "worker节点: ${worker_ips[*]}"
     print_success "域名: $QN_DOMAIN"
+    print_success "镜像仓库: $IMAGE_REGISTRY"
     echo ""
     
     # 显示节点名称映射
@@ -305,7 +322,6 @@ show_config_summary() {
     done
     echo ""
 }
-
 # 生成hosts文件
 generate_hosts_file() {
     local output_file="${1:-/dev/stdout}"
@@ -344,12 +360,13 @@ generate_hosts_file() {
         echo "[all:vars]"
         echo "# --------- Main Variables ---------------"
         echo "QN_DOMAIN=\"$QN_DOMAIN\""
+        echo "IMAGE_REGISTRY=\"$IMAGE_REGISTRY\""
         echo ""
     } > "$output_file"
     
     if [[ "$output_file" != "/dev/stdout" ]]; then
         print_success "hosts文件已保存到: $output_file"
     else
-        print_success "请将上述内容保存到 /etc/kubeasz/clusters/-k8s-qn-01/hosts 文件中"
+        print_success "请将上述内容保存到 /etc/kubeasz/clusters/k8s-qn-01/hosts 文件中"
     fi
 }

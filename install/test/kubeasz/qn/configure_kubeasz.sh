@@ -43,12 +43,14 @@ configure_kubeasz() {
     local master_content=$(sed -n '/^\[kube_master\]/,/^$/p' "$temp_config_file" | grep -v '^#' | grep -v '^$' | tail -n +2)
     local worker_content=$(sed -n '/^\[kube_node\]/,/^$/p' "$temp_config_file" | grep -v '^#' | grep -v '^$' | tail -n +2)
     local qn_domain=$(grep "QN_DOMAIN=" "$temp_config_file")
+    local image_registry=$(grep "IMAGE_REGISTRY=" "$temp_config_file")  # 新增镜像仓库变量提取
     
     print_info "提取的配置内容:"
     echo "etcd: $etcd_content"
     echo "master: $master_content" 
     echo "worker: $worker_content"
     echo "domain: $qn_domain"
+    echo "image_registry: $image_registry"
     
     # 创建临时文件用于存储更新后的内容
     local temp_updated_file=$(mktemp)
@@ -122,24 +124,22 @@ configure_kubeasz() {
                 fi
                 ;;
             "vars")
-                # 处理QN_DOMAIN变量，确保幂等性
+                # 处理QN_DOMAIN变量
                 if [[ "$line" =~ ^QN_DOMAIN= ]]; then
-                    # 如果还没有更新QN_DOMAIN，则替换现有的QN_DOMAIN
-                    if [[ "$section_updated" == false ]]; then
-                        echo "$qn_domain" >> "$temp_updated_file"
-                        section_updated=true
-                    fi
-                    # 如果已经更新过QN_DOMAIN，则跳过重复的定义
-                    continue
-                # 处理CLUSTER_NETWORK变量，将其从calico改为cilium
-                elif [[ "$line" =~ ^CLUSTER_NETWORK= ]]; then
-                    echo "CLUSTER_NETWORK=\"cilium\"" >> "$temp_updated_file"
+                    # 替换现有的QN_DOMAIN
+                    echo "$qn_domain" >> "$temp_updated_file"
+                    section_updated=true
+                # 处理IMAGE_REGISTRY变量
+                elif [[ "$line" =~ ^IMAGE_REGISTRY= ]]; then
+                    # 替换现有的IMAGE_REGISTRY
+                    echo "$image_registry" >> "$temp_updated_file"
                     section_updated=true
                 else
                     echo "$line" >> "$temp_updated_file"
                     # 如果没有找到QN_DOMAIN，在适当位置添加
                     if [[ "$section_updated" == false ]] && [[ "$line" =~ ^#.*Main.Variables ]]; then
                         echo "$qn_domain" >> "$temp_updated_file"
+                        echo "$image_registry" >> "$temp_updated_file"
                         section_updated=true
                     fi
                 fi
@@ -154,6 +154,11 @@ configure_kubeasz() {
     # 如果QN_DOMAIN在vars section中还没有被处理，添加到vars section末尾
     if grep -q "\[all:vars\]" "$temp_updated_file" && ! grep -q "QN_DOMAIN=" "$temp_updated_file"; then
         sed -i '/\[all:vars\]/a\'"$qn_domain" "$temp_updated_file"
+    fi
+    
+    # 如果IMAGE_REGISTRY在vars section中还没有被处理，添加到vars section末尾
+    if grep -q "\[all:vars\]" "$temp_updated_file" && ! grep -q "IMAGE_REGISTRY=" "$temp_updated_file"; then
+        sed -i '/\[all:vars\]/a\'"$image_registry" "$temp_updated_file"
     fi
     
     # 替换原文件
