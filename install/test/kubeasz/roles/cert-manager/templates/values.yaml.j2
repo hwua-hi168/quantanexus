@@ -1,0 +1,33 @@
+# cert-manager-controller 镜像
+image:
+  repository: "{{ cert_manager_image_registry }}/{{ cert_manager_controller_repository }}"
+  tag: {{ cert_manager_version }}
+  pullPolicy: IfNotPresent
+
+# cert-manager-webhook 镜像
+webhook:
+  image:
+    repository: "{{ cert_manager_image_registry }}/{{ cert_manager_webhook_repository }}"
+    tag: {{ cert_manager_version }}
+    pullPolicy: IfNotPresent
+
+# cert-manager-cainjector 镜像
+cainjector:
+  image:
+    repository: "{{ cert_manager_image_registry }}/{{ cert_manager_cainjector_repository }}"
+    tag: {{ cert_manager_version }}
+    pullPolicy: IfNotPresent
+
+# cert-manager-acmesolver 镜像
+acmesolver:
+  image:
+    repository: "{{ cert_manager_image_registry }}/{{ cert_manager_acmesolver_repository }}"
+    tag: {{ cert_manager_version }}
+    pullPolicy: IfNotPresent
+
+# cert-manager-startupapicheck 镜像
+startupapicheck:
+  image:
+    repository: "{{ cert_manager_image_registry }}/{{ cert_manager_startupapicheck_repository }}"
+    tag: {{ cert_manager_version }}
+    pullPolicy: IfNotPresent
