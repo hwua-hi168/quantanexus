@@ -5,6 +5,7 @@
 # 配置kubeasz
 configure_kubeasz() {
     print_info "开始配置kubeasz..."
+    cd $SCRIPT_DIR
     
     # 检查quantanexus源码是否存在
     if [[ ! -d "quantanexus-main" ]]; then
@@ -58,6 +59,7 @@ configure_kubeasz() {
     # 使用更简单的方法处理文件
     local in_section=""
     local section_updated=false
+    local image_registry_added=false  // 添加变量跟踪IMAGE_REGISTRY是否已添加
     
     while IFS= read -r line; do
         # 检测是否进入我们关心的section
@@ -79,6 +81,7 @@ configure_kubeasz() {
         elif [[ "$line" =~ ^\[all:vars\]$ ]]; then
             in_section="vars"
             section_updated=false
+            image_registry_added=false  // 重置IMAGE_REGISTRY添加状态
             echo "$line" >> "$temp_updated_file"
             continue
         fi
@@ -124,23 +127,39 @@ configure_kubeasz() {
                 fi
                 ;;
             "vars")
-                # 处理QN_DOMAIN变量
+                # 处理QN_DOMAIN变量，确保幂等性
                 if [[ "$line" =~ ^QN_DOMAIN= ]]; then
-                    # 替换现有的QN_DOMAIN
-                    echo "$qn_domain" >> "$temp_updated_file"
-                    section_updated=true
+                    # 如果还没有更新QN_DOMAIN，则替换现有的QN_DOMAIN
+                    if [[ "$section_updated" == false ]]; then
+                        echo "$qn_domain" >> "$temp_updated_file"
+                        section_updated=true
+                    fi
+                    # 如果已经更新过QN_DOMAIN，则跳过重复的定义
+                    continue
                 # 处理IMAGE_REGISTRY变量
                 elif [[ "$line" =~ ^IMAGE_REGISTRY= ]]; then
-                    # 替换现有的IMAGE_REGISTRY
-                    echo "$image_registry" >> "$temp_updated_file"
+                    # 如果还没有更新IMAGE_REGISTRY，则替换现有的IMAGE_REGISTRY
+                    if [[ "$image_registry_added" == false ]]; then
+                        echo "$image_registry" >> "$temp_updated_file"
+                        image_registry_added=true
+                    fi
+                    # 如果已经更新过IMAGE_REGISTRY，则跳过重复的定义
+                    continue
+                # 处理CLUSTER_NETWORK变量，将其从calico改为cilium
+                elif [[ "$line" =~ ^CLUSTER_NETWORK= ]]; then
+                    echo "CLUSTER_NETWORK=\"cilium\"" >> "$temp_updated_file"
                     section_updated=true
                 else
                     echo "$line" >> "$temp_updated_file"
                     # 如果没有找到QN_DOMAIN，在适当位置添加
                     if [[ "$section_updated" == false ]] && [[ "$line" =~ ^#.*Main.Variables ]]; then
                         echo "$qn_domain" >> "$temp_updated_file"
-                        echo "$image_registry" >> "$temp_updated_file"
                         section_updated=true
+                        # 如果还没有添加IMAGE_REGISTRY，则也添加
+                        if [[ "$image_registry_added" == false ]]; then
+                            echo "$image_registry" >> "$temp_updated_file"
+                            image_registry_added=true
+                        fi
                     fi
                 fi
                 ;;

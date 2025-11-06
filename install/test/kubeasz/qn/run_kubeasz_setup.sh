@@ -2,7 +2,7 @@
 
 # kubeasz执行模块
 
-# kubeasz步骤描述
+# kubeasz步骤描述 - 按正确的执行顺序排列
 declare -A kubeasz_steps=(
     ["01"]="准备节点环境"
     ["02"]="安装etcd集群"
@@ -19,7 +19,8 @@ show_kubeasz_steps() {
     echo "           kubeasz 安装步骤说明"
     echo "=================================================="
     echo ""
-    for step in "${!kubeasz_steps[@]}"; do
+    # 按顺序显示步骤
+    for step in "01" "02" "03" "04" "05" "06" "07"; do
         echo "步骤 $step: ${kubeasz_steps[$step]}"
     done
     echo ""
@@ -83,6 +84,7 @@ run_kubeasz_setup() {
     read -p "是否开始执行kubeasz安装? (y/n, 默认y): " confirm_start
     if [[ $confirm_start =~ ^[Nn]$ ]]; then
         print_info "用户取消安装"
+        exit 0;
         return 0
     fi
     
@@ -97,22 +99,24 @@ run_kubeasz_setup() {
         # 执行当前步骤
         if ! run_kubeasz_single_step "$cluster_name" "$step"; then
             print_error "步骤 $step 执行失败，安装中止"
+            exit 1;
             
-            # 询问是否继续执行后续步骤
-            read -p "是否跳过此步骤继续执行后续步骤? (y/n, 默认n): " skip_step
-            if [[ ! $skip_step =~ ^[Yy]$ ]]; then
-                return 1
-            else
-                print_warning "跳过步骤 $step，继续执行后续步骤"
-                continue
-            fi
+            # # 询问是否继续执行后续步骤
+            # read -p "是否跳过此步骤继续执行后续步骤? (y/n, 默认n): " skip_step
+            # if [[ ! $skip_step =~ ^[Yy]$ ]]; then
+            #     return 1
+            # else
+            #     print_warning "跳过步骤 $step，继续执行后续步骤"
+            #     continue
+            # fi
         fi
         
         # 步骤间暂停（可选）
-        if [[ "$step" != "07" ]]; then
+        # if [[ "$step" != "07" ]]; then
             echo ""
-            read -p "步骤 $step 完成，按回车继续下一步骤..." dummy
-        fi
+            # read -p "步骤 $step 完成，按回车继续下一步骤..." dummy
+            echo  "步骤 $step 完成"
+        # fi
     done
     
     echo ""

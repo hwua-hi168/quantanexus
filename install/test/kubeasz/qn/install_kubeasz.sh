@@ -5,6 +5,7 @@
 # 安装kubeasz
 install_kubeasz() {
     print_info "开始安装kubeasz..."
+    cd $SCRIPT_DIR
     
     # 检查quantanexus源码是否存在
     if [[ ! -d "quantanexus-main" ]]; then
