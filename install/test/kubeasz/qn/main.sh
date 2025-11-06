@@ -17,6 +17,17 @@ source "$SCRIPT_DIR/install_kubeasz.sh"
 source "$SCRIPT_DIR/configure_kubeasz.sh"
 source "$SCRIPT_DIR/install_helm.sh"
 
+# 新增组件安装模块
+source "$SCRIPT_DIR/run_longhorn.sh"
+source "$SCRIPT_DIR/run_cert_manager.sh"
+source "$SCRIPT_DIR/run_prometheus.sh"
+source "$SCRIPT_DIR/run_ingress_nginx.sh"
+source "$SCRIPT_DIR/run_harbor.sh"
+source "$SCRIPT_DIR/run_gpu_operator.sh"
+source "$SCRIPT_DIR/run_volcano.sh"
+source "$SCRIPT_DIR/run_quantanexus_mgr.sh"
+source "$SCRIPT_DIR/run_quantanexus_cs.sh"
+
 # 显示使用说明
 show_usage() {
     echo "用法: $0 [命令] [选项]"
@@ -34,6 +45,14 @@ show_usage() {
     echo "  info         显示集群信息"
     echo "  helm         安装Helm"
     echo "  longhorn     安装Longhorn存储"
+    echo "  cert-manager 安装Cert-Manager"
+    echo "  prometheus   安装Prometheus监控"
+    echo "  ingress-nginx 安装Ingress-Nginx"
+    echo "  harbor       安装Harbor镜像仓库"
+    echo "  gpu-operator 安装GPU Operator"
+    echo "  volcano      安装Volcano批处理系统"
+    echo "  quantanexus-mgr 安装Quantanexus管理组件"
+    echo "  quantanexus-cs 安装Quantanexus计算服务"
     echo "  all          执行所有步骤（默认）"
     echo "  show         显示当前配置"
     echo "  generate     生成hosts文件"
@@ -335,7 +354,7 @@ cmd_helm() {
     print_success "Helm安装完成"
 }
 
-# 安装Longhorn命令
+# 执行Longhorn存储安装命令
 cmd_longhorn() {
     print_banner
     if ! load_config; then
@@ -345,12 +364,156 @@ cmd_longhorn() {
     
     local cluster_name="${1:-k8s-qn-01}"
     
-    if ! install_longhorn "$cluster_name"; then
-        print_error "Longhorn安装失败"
+    if ! run_longhorn_playbook "$cluster_name"; then
+        print_error "Longhorn存储安装失败"
         return 1
     fi
     
-    print_success "Longhorn安装完成"
+    print_success "Longhorn存储安装完成"
+}
+
+# 执行Cert-Manager安装命令
+cmd_cert_manager() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! run_cert_manager_playbook "$cluster_name"; then
+        print_error "Cert-Manager安装失败"
+        return 1
+    fi
+    
+    print_success "Cert-Manager安装完成"
+}
+
+# 执行Prometheus监控安装命令
+cmd_prometheus() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! run_prometheus_playbook "$cluster_name"; then
+        print_error "Prometheus监控安装失败"
+        return 1
+    fi
+    
+    print_success "Prometheus监控安装完成"
+}
+
+# 执行Ingress-Nginx安装命令
+cmd_ingress_nginx() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! run_ingress_nginx_playbook "$cluster_name"; then
+        print_error "Ingress-Nginx安装失败"
+        return 1
+    fi
+    
+    print_success "Ingress-Nginx安装完成"
+}
+
+# 执行Harbor镜像仓库安装命令
+cmd_harbor() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! run_harbor_playbook "$cluster_name"; then
+        print_error "Harbor镜像仓库安装失败"
+        return 1
+    fi
+    
+    print_success "Harbor镜像仓库安装完成"
+}
+
+# 执行GPU Operator安装命令
+cmd_gpu_operator() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! run_gpu_operator_playbook "$cluster_name"; then
+        print_error "GPU Operator安装失败"
+        return 1
+    fi
+    
+    print_success "GPU Operator安装完成"
+}
+
+# 执行Volcano批处理系统安装命令
+cmd_volcano() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! run_volcano_playbook "$cluster_name"; then
+        print_error "Volcano批处理系统安装失败"
+        return 1
+    fi
+    
+    print_success "Volcano批处理系统安装完成"
+}
+
+# 执行Quantanexus管理组件安装命令
+cmd_quantanexus_mgr() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! run_quantanexus_mgr_playbook "$cluster_name"; then
+        print_error "Quantanexus管理组件安装失败"
+        return 1
+    fi
+    
+    print_success "Quantanexus管理组件安装完成"
+}
+
+# 执行Quantanexus计算服务安装命令
+cmd_quantanexus_cs() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! run_quantanexus_cs_playbook "$cluster_name"; then
+        print_error "Quantanexus计算服务安装失败"
+        return 1
+    fi
+    
+    print_success "Quantanexus计算服务安装完成"
 }
 
 # 主函数
@@ -413,7 +576,49 @@ main() {
             cmd_helm
             ;;
         "longhorn")
-            cmd_longhorn
+            check_config_file || exit 1
+            load_config
+            cmd_longhorn "${2:-k8s-qn-01}"
+            ;;
+        "cert-manager")
+            check_config_file || exit 1
+            load_config
+            cmd_cert_manager "${2:-k8s-qn-01}"
+            ;;
+        "prometheus")
+            check_config_file || exit 1
+            load_config
+            cmd_prometheus "${2:-k8s-qn-01}"
+            ;;
+        "ingress-nginx")
+            check_config_file || exit 1
+            load_config
+            cmd_ingress_nginx "${2:-k8s-qn-01}"
+            ;;
+        "harbor")
+            check_config_file || exit 1
+            load_config
+            cmd_harbor "${2:-k8s-qn-01}"
+            ;;
+        "gpu-operator")
+            check_config_file || exit 1
+            load_config
+            cmd_gpu_operator "${2:-k8s-qn-01}"
+            ;;
+        "volcano")
+            check_config_file || exit 1
+            load_config
+            cmd_volcano "${2:-k8s-qn-01}"
+            ;;
+        "quantanexus-mgr")
+            check_config_file || exit 1
+            load_config
+            cmd_quantanexus_mgr "${2:-k8s-qn-01}"
+            ;;
+        "quantanexus-cs")
+            check_config_file || exit 1
+            load_config
+            cmd_quantanexus_cs "${2:-k8s-qn-01}"
             ;;
         "all")
             cmd_collect
@@ -450,8 +655,40 @@ main() {
                 print_error "Helm安装失败"
                 exit 1
             fi
-            if ! install_longhorn; then
+            if ! run_longhorn_playbook; then
                 print_error "Longhorn安装失败"
+                exit 1
+            fi
+            if ! run_cert_manager_playbook; then
+                print_error "Cert-Manager安装失败"
+                exit 1
+            fi
+            if ! run_prometheus_playbook; then
+                print_error "Prometheus安装失败"
+                exit 1
+            fi
+            if ! run_ingress_nginx_playbook; then
+                print_error "Ingress-Nginx安装失败"
+                exit 1
+            fi
+            if ! run_harbor_playbook; then
+                print_error "Harbor安装失败"
+                exit 1
+            fi
+            if ! run_gpu_operator_playbook; then
+                print_error "GPU Operator安装失败"
+                exit 1
+            fi
+            if ! run_volcano_playbook; then
+                print_error "Volcano安装失败"
+                exit 1
+            fi
+            if ! run_quantanexus_mgr_playbook; then
+                print_error "Quantanexus管理组件安装失败"
+                exit 1
+            fi
+            if ! run_quantanexus_cs_playbook; then
+                print_error "Quantanexus计算服务安装失败"
                 exit 1
             fi
             print_success "所有配置完成！"
