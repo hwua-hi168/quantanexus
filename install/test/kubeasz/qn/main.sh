@@ -647,6 +647,10 @@ main() {
                 print_error "kubeasz安装失败"
                 exit 1
             fi
+            if ! create_cluster_instance; then
+                print_error "kubeasz实例化集群"
+                exit 1
+            fi
             if ! configure_kubeasz; then
                 print_error "kubeasz配置失败"
                 exit 1
