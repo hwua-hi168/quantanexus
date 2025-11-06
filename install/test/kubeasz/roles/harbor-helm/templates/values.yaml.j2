@@ -1,0 +1,43 @@
+nginx:
+  image:
+    repository: {{ harbor_image_registry }}/{{ harbor_nginx_image_repository }}
+    tag: {{ harbor_nginx_image_tag }}
+portal:
+  image:
+    repository: {{ harbor_image_registry }}/{{ harbor_portal_image_repository }}
+    tag: {{ harbor_portal_image_tag }}
+core:
+  image:
+    repository: {{ harbor_image_registry }}/{{ harbor_core_image_repository }}
+    tag: {{ harbor_core_image_tag }}
+jobservice:
+  image:
+    repository: {{ harbor_image_registry }}/{{ harbor_jobservice_image_repository }}
+    tag: {{ harbor_jobservice_image_tag }}
+registry:
+  registry:
+    image:
+      repository: {{ harbor_image_registry }}/{{ harbor_registry_image_repository }}
+      tag: {{ harbor_registry_image_tag }}
+  controller:
+    image:
+      repository: {{ harbor_image_registry }}/{{ harbor_registryctl_image_repository }}
+      tag: {{ harbor_registryctl_image_tag }}
+trivy:
+  image:
+    repository: {{ harbor_image_registry }}/{{ harbor_trivy_image_repository }}
+    tag: {{ harbor_trivy_image_tag }}
+database:
+  internal:
+    image:
+      repository: {{ harbor_image_registry }}/{{ harbor_database_image_repository }}
+      tag: {{ harbor_database_image_tag }}
+redis:
+  internal:
+    image:
+      repository: {{ harbor_image_registry }}/{{ harbor_redis_image_repository }}
+      tag: {{ harbor_redis_image_tag }}
+exporter:
+  image:
+    repository: {{ harbor_image_registry }}/{{ harbor_exporter_image_repository }}
+    tag: {{ harbor_exporter_image_tag }}
