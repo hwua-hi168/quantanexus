@@ -1,0 +1,12 @@
+---
+# Quantanexus CS 配置默认值
+quantanexus_cs_version: "1.0.0"
+quantanexus_cs_work_dir: "{{ CLUSTER_DIR }}/helm/quantanexus-cs"
+kube_config_file: "{{ CLUSTER_DIR }}/config"
+
+# 镜像仓库配置
+quantanexus_cs_image_registry: "{{ IMAGE_REGISTRY }}"
+
+# Quantanexus CS 组件配置
+quantanexus_cs_service_namespace: "quantanexus-cs"
+quantanexus_cs_domain_name: "{{ QN_DOMAIN }}"
