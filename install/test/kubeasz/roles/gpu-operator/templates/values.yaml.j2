@@ -1,0 +1,90 @@
+validator:
+  repository: {{ gpu_operator_image_registry }}
+  image: {{ gpu_operator_validator_repository }}
+  version: v25.3.4
+
+operator:
+  repository: {{ gpu_operator_image_registry }}
+  image: {{ gpu_operator_operator_repository }}
+  version: v25.3.4
+  initContainer:
+    repository: {{ gpu_operator_image_registry }}
+    image: {{ gpu_operator_operator_initContainer_repository }}
+    version: 13.0.1-base-ubi9
+
+toolkit:
+  enabled: true
+  repository: {{ gpu_operator_image_registry }}
+  image: {{ gpu_operator_toolkit_repository }}
+  version: v1.17.8-ubuntu20.04
+
+devicePlugin:
+  enabled: true
+  repository: {{ gpu_operator_image_registry }}
+  image: {{ gpu_operator_devicePlugin_repository }}
+  version: v0.17.4
+
+dcgm:
+  repository: {{ gpu_operator_image_registry }}
+  image: {{ gpu_operator_dcgm_repository }}
+  version: 4.3.1-1-ubuntu22.04
+
+dcgmExporter:
+  enabled: true  
+  repository: {{ gpu_operator_image_registry }}
+  image: {{ gpu_operator_dcgmExporter_repository }}
+  version: 4.3.1-4.4.0-ubuntu22.04
+
+gfd:
+  repository: {{ gpu_operator_image_registry }}
+  image: {{ gpu_operator_gfd_repository }}
+  version: v0.17.4
+
+migManager:
+  repository: {{ gpu_operator_image_registry }}
+  image: {{ gpu_operator_migManager_repository }}
+  version: v0.12.3-ubuntu20.04
+
+nodeStatusExporter:
+  repository: {{ gpu_operator_image_registry }}
+  image: {{ gpu_operator_nodeStatusExporter_repository }}
+  version: v25.3.4
+
+vgpuManager:
+  driverManager:
+    repository: {{ gpu_operator_image_registry }}
+    image: {{ gpu_operator_vgpuManager_driverManager_repository }}
+    version: v0.8.1
+
+vgpuDeviceManager:
+  repository: {{ gpu_operator_image_registry }}
+  image: {{ gpu_operator_vgpuDeviceManager_repository }}
+  version: v0.4.0
+
+vfioManager:
+  repository: {{ gpu_operator_image_registry }}
+  image: {{ gpu_operator_vfioManager_repository }}
+  version: 13.0.1-base-ubi9
+  driverManager:
+    repository: {{ gpu_operator_image_registry }}
+    image: {{ gpu_operator_vfioManager_driverManager_repository }}
+    version: v0.8.1
+
+kataManager:
+  repository: {{ gpu_operator_image_registry }}
+  image: {{ gpu_operator_kataManager_repository }}
+  version: v0.2.3
+
+sandboxDevicePlugin:
+  repository: {{ gpu_operator_image_registry }}
+  image: {{ gpu_operator_sandboxDevicePlugin_repository }}
+  version: v1.4.0
+
+ccManager:
+  repository: {{ gpu_operator_image_registry }}
+  image: {{ gpu_operator_ccManager_repository }}
+  version: v0.1.1
+
+node-feature-discovery:
+  image:
+    repository: {{ gpu_operator_image_registry }}/{{ gpu_operator_node_feature_discovery_repository }}
