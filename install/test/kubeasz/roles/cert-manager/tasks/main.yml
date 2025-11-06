@@ -17,23 +17,35 @@
     dest: "{{ cert_manager_work_dir }}/values.yaml"
   when: not ansible_check_mode and not (cert_manager_work_dir + "/values.yaml") is file
 
-# - name: 创建 Cert-Manager 命名空间
-#   shell: |
-#     /opt/kube/bin/kubectl create namespace cert-manager 2>/dev/null || true
-#   changed_when: false
+- name: 创建 Cert-Manager 命名空间
+  shell: |
+    /opt/kube/bin/kubectl create namespace cert-manager 2>/dev/null || true
+  changed_when: false
 
-# - name: 部署 Cert-Manager
-#   shell: |
-#     cd {{ cert_manager_work_dir }}
-#     helm upgrade --install cert-manager hi168/cert-manager \
-#       --namespace cert-manager \
-#       --version {{ cert_manager_version }} \
-#       --set installCRDs=true \
-#       -f values.yaml
-#   environment:
-#     KUBECONFIG: "{{ kube_config_file }}"
+- name: 部署 Cert-Manager
+  shell: |
+    cd {{ cert_manager_work_dir }}
+    helm upgrade --install cert-manager hi168/cert-manager \
+      --namespace cert-manager \
+      --version {{ cert_manager_version }} \
+      --set installCRDs=true \
+      -f values.yaml
+  environment:
+    KUBECONFIG: "{{ kube_config_file }}"
 
-# - name: 等待 Cert-Manager Pods 就绪
-#   shell: |
-#     /opt/kube/bin/kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=300s
-#   changed_when: false
+- name: 等待 Cert-Manager Pods 就绪
+  shell: |
+    /opt/kube/bin/kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=300s
+  changed_when: false
+
+- name: 创建证书和 ClusterIssuer 资源文件
+  template:
+    src: certificates.yaml.j2
+    dest: "{{ cert_manager_work_dir }}/certificates.yaml"
+  delegate_to: localhost
+
+- name: 应用证书和 ClusterIssuer 资源
+  shell: |
+    /opt/kube/bin/kubectl apply -f {{ cert_manager_work_dir }}/certificates.yaml
+  environment:
+    KUBECONFIG: "{{ kube_config_file }}"
