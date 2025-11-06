@@ -1,0 +1,39 @@
+---
+# Harbor 配置默认值
+harbor_version: "1.18.0"
+harbor_work_dir: "{{ CLUSTER_DIR }}/helm/harbor"
+kube_config_file: "{{ CLUSTER_DIR }}/config"
+
+# 镜像仓库配置
+harbor_image_registry: "{{ IMAGE_REGISTRY }}"
+
+# 各组件镜像配置
+harbor_nginx_image_repository: "goharbor-nginx-photon"
+harbor_nginx_image_tag: "v2.14.0"
+
+harbor_portal_image_repository: "goharbor-harbor-portal"
+harbor_portal_image_tag: "v2.14.0"
+
+harbor_core_image_repository: "goharbor-harbor-core"
+harbor_core_image_tag: "v2.14.0"
+
+harbor_jobservice_image_repository: "goharbor-harbor-jobservice"
+harbor_jobservice_image_tag: "v2.14.0"
+
+harbor_registry_image_repository: "goharbor-registry-photon"
+harbor_registry_image_tag: "v2.14.0"
+
+harbor_registryctl_image_repository: "goharbor-harbor-registryctl"
+harbor_registryctl_image_tag: "v2.14.0"
+
+harbor_trivy_image_repository: "goharbor-trivy-adapter-photon"
+harbor_trivy_image_tag: "v2.14.0"
+
+harbor_database_image_repository: "goharbor-harbor-db"
+harbor_database_image_tag: "v2.14.0"
+
+harbor_redis_image_repository: "goharbor-redis-photon"
+harbor_redis_image_tag: "v2.14.0"
+
+harbor_exporter_image_repository: "goharbor-harbor-exporter"
+harbor_exporter_image_tag: "v2.14.0"
