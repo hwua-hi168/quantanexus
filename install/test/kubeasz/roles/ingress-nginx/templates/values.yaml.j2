@@ -1,0 +1,37 @@
+className: "nginx"
+defaultBackend:
+  enabled: true
+  image:
+    registry: {{ ingress_nginx_image_registry }}
+    image: {{ ingress_nginx_default_backend_image_repository }}
+    tag: "{{ ingress_nginx_default_backend_image_tag }}"
+
+controller:
+  image:
+    registry: {{ ingress_nginx_image_registry }}
+    image: {{ ingress_nginx_controller_image_repository }}
+    tag: "{{ ingress_nginx_controller_image_tag }}"
+    digest: ""
+  kind: DaemonSet
+  # added by David  , to expose the metrics to prom . 
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: prometheus
+  hostNetwork: true
+  # 启用 Webhooks (推荐)
+  admissionWebhooks:
+    enabled: true
+    patch:
+      enabled: true
+      image:
+        registry: {{ ingress_nginx_image_registry }}
+        image: {{ ingress_nginx_webhook_image_repository }}
+        tag: {{ ingress_nginx_webhook_image_tag }}
+        digest: ""
+  # 额外的 args, 如果需要
+  extraArgs:
+    enable-ssl-passthrough: true
+    default-ssl-certificate: "ingress-nginx/default-tls"
