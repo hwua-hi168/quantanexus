@@ -1,6 +1,6 @@
 # 1. 加仓库
 # helm repo add seaweedfs https://seaweedfs.github.io/seaweedfs/helm
-helm repo add hi168 https://hi168.com/charts
+helm repo add hi168 https://helm.hi168.com/charts
 helm repo update
 
 # 2. 安装（可改 storageClass / 节点亲和）

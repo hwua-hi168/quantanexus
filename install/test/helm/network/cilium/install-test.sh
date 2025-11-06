@@ -1,7 +1,7 @@
 #!/bin/bash 
 
 #helm repo add cilium https://helm.cilium.io/
-helm repo add hi168 https://hi168.com/charts/
+helm repo add hi168 https://helm.hi168.com/charts/
 #local install 
 #helm install cilium ./cilium -n kube-system  \
 

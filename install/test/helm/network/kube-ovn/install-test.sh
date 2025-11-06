@@ -13,7 +13,7 @@
 # node/kube-ovn-worker labeled
 
 # helm repo add kubeovn https://kubeovn.github.io/kube-ovn/
-helm repo add hi168 https://hi168.com/charts
+helm repo add hi168 https://helm.hi168.com/charts
 helm repo update kubeovn
 
 helm install kube-ovn hi168/kube-ovn --wait -n kube-system --version v1.14.11 -f values-kube-ovn.yaml
