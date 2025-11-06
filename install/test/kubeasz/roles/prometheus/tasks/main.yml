@@ -1,0 +1,37 @@
+---
+- name: 添加 Prometheus Helm 仓库
+  shell: |
+    helm repo add hi168 https://helm.hi168.com/charts 2>/dev/null || true
+    helm repo update hi168
+  changed_when: false
+
+- name: 确保 Prometheus 配置目录存在
+  file:
+    path: "{{ prometheus_work_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: 创建 values.yaml 配置文件
+  template:
+    src: values.yaml.j2
+    dest: "{{ prometheus_work_dir }}/values.yaml"
+
+- name: 创建 Prometheus 命名空间
+  shell: |
+    /opt/kube/bin/kubectl create namespace prom 2>/dev/null || true
+  changed_when: false
+
+- name: 部署 Prometheus
+  shell: |
+    cd {{ prometheus_work_dir }}
+    helm upgrade --install prometheus hi168/kube-prometheus-stack \
+      --namespace prom \
+      --version {{ prometheus_version }} \
+      -f values.yaml
+  environment:
+    KUBECONFIG: "{{ kube_config_file }}"
+
+- name: 等待 Prometheus Pods 就绪
+  shell: |
+    /opt/kube/bin/kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=prometheus -n prom --timeout=300s
+  changed_when: false

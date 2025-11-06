@@ -1,5 +1,5 @@
 ---
-- name: 添加 Jetstack Helm 仓库
+- name: 添加 Helm 仓库
   shell: |
     helm repo list | grep -q "hi168" || helm repo add hi168 https://helm.hi168.com/charts 2>/dev/null
     helm repo update hi168
