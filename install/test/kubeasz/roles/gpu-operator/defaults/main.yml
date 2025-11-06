@@ -1,0 +1,28 @@
+---
+# GPU Operator 配置默认值
+gpu_operator_version: "v25.3.4"
+gpu_operator_work_dir: "{{ CLUSTER_DIR }}/helm/gpu-operator"
+kube_config_file: "{{ CLUSTER_DIR }}/config"
+
+# 镜像仓库配置
+gpu_operator_image_registry: "{{ IMAGE_REGISTRY }}"
+
+# GPU Operator 组件镜像配置
+gpu_operator_validator_repository: "nvcr.io-nvidia-cloud-native-gpu-operator-validator"
+gpu_operator_operator_repository: "nvcr.io-nvidia-gpu-operator"
+gpu_operator_operator_initContainer_repository: "nvcr.io-nvidia-cuda"
+gpu_operator_toolkit_repository: "nvcr.io-nvidia-k8s-container-toolkit"
+gpu_operator_devicePlugin_repository: "nvcr.io-nvidia-k8s-device-plugin"
+gpu_operator_dcgm_repository: "nvcr.io-nvidia-cloud-native-dcgm"
+gpu_operator_dcgmExporter_repository: "nvcr.io-nvidia-k8s-dcgm-exporter"
+gpu_operator_gfd_repository: "nvcr.io-nvidia-k8s-device-plugin"
+gpu_operator_migManager_repository: "nvcr.io-nvidia-cloud-native-k8s-mig-manager"
+gpu_operator_nodeStatusExporter_repository: "nvcr.io-nvidia-cloud-native-gpu-operator-validator"
+gpu_operator_vgpuManager_driverManager_repository: "nvcr.io-nvidia-cloud-native-k8s-driver-manager"
+gpu_operator_vgpuDeviceManager_repository: "nvcr.io-nvidia-cloud-native-vgpu-device-manager"
+gpu_operator_vfioManager_repository: "nvcr.io-nvidia-cuda"
+gpu_operator_vfioManager_driverManager_repository: "nvcr.io-nvidia-cloud-native-k8s-driver-manager"
+gpu_operator_kataManager_repository: "nvcr.io-nvidia-cloud-native-k8s-kata-manager"
+gpu_operator_sandboxDevicePlugin_repository: "nvcr.io-nvidia-kubevirt-gpu-device-plugin"
+gpu_operator_ccManager_repository: "nvcr.io-nvidia-cloud-native-k8s-cc-manager"
+gpu_operator_node_feature_discovery_repository: "registry.k8s.io-nfd-node-feature-discovery"

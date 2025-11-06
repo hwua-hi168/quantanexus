@@ -1,0 +1,38 @@
+---
+- name: 添加 GPU Operator Helm 仓库
+  shell: |
+    helm repo list | grep -q "hi168" || helm repo add hi168 https://helm.hi168.com/charts 2>/dev/null
+    helm repo update hi168
+  changed_when: false
+
+- name: 确保 GPU Operator 配置目录存在
+  file:
+    path: "{{ gpu_operator_work_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: 创建 values.yaml 配置文件
+  template:
+    src: values.yaml.j2
+    dest: "{{ gpu_operator_work_dir }}/values.yaml"
+
+- name: 创建 GPU Operator 命名空间
+  shell: |
+    /opt/kube/bin/kubectl create namespace gpu-operator 2>/dev/null || true
+  changed_when: false
+
+- name: 部署 GPU Operator
+  shell: |
+    cd {{ gpu_operator_work_dir }}
+    helm upgrade --install --wait gpu-operator hi168/gpu-operator \
+      --namespace gpu-operator \
+      --version {{ gpu_operator_version }} \
+      --set driver.enabled=false \
+      -f values.yaml
+  environment:
+    KUBECONFIG: "{{ kube_config_file }}"
+
+- name: 等待 GPU Operator Pods 就绪
+  shell: |
+    /opt/kube/bin/kubectl wait --for=condition=Ready pod -l app=gpu-operator -n gpu-operator --timeout=300s
+  changed_when: false
