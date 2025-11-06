@@ -1,9 +1,0 @@
----
-- name: 🚀 LONGHORN ROLE IS RUNNING CHECK
-  debug:
-    msg: "Role longhorn is active and running tasks."
-  run_once: true
-
-- name: tb
-  shell: echo hello2
-
