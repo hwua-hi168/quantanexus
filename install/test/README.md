@@ -78,7 +78,7 @@ helm repo update hi168
 
 先安装longhorn
 ```bash
-helm repo add hi168 https://hi168.com/charts 2>/dev/null
+helm repo add hi168 https://helm.hi168.com/charts 2>/dev/null
 helm repo update hi168
 
 
@@ -87,7 +87,7 @@ cd test/helm/storage/longhorn
 echo "Installing Longhorn..."
 
 helm install longhorn hi168/longhorn --namespace longhorn-system --create-namespace --version 1.10.0 \
-    -f .helm/storage/longhorn/values.yaml
+    -f ./helm/storage/longhorn/values.yaml
     
 ```
 

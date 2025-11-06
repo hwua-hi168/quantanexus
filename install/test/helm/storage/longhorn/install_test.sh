@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # helm repo add longhorn https://charts.longhorn.io
-helm repo add hi168 https://hi168.com/charts 2>/dev/null
+helm repo add hi168 https://helm.hi168.com/charts 2>/dev/null
 helm repo update hi168
 
 

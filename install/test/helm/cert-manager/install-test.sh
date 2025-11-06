@@ -1,7 +1,7 @@
 #!/bin/bash
 # 原仓库，测试原因使用了hi168镜像仓库
 # helm repo add jetstack https://charts.jetstack.io
-helm repo add hi168 https://hi168.com/charts 
+helm repo add hi168 https://helm.hi168.com/charts 
 helm repo update
 helm upgrade --install cert-manager hi168/cert-manager \
   -n cert-manager --create-namespace \

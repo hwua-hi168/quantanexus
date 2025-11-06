@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #helm repo add flannel https://flannel-io.github.io/flannel/
-helm repo add hi168 https://hi168.com/charts
+helm repo add hi168 https://helm.hi168.com/charts
 helm repo update
 
 helm install flannel \
