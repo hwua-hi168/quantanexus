@@ -1,0 +1,25 @@
+basic:
+  controller_image_name: "{{ volcano_controller_image_repository }}"
+  scheduler_image_name: "{{ volcano_scheduler_image_repository }}"
+  admission_image_name: "{{ volcano_admission_image_repository }}"
+  agent_image_name: "{{ volcano_agent_image_repository }}"
+  image_registry: "{{ volcano_image_registry }}"
+
+scheduler:
+  replicaCount: 1
+  service:
+    type: ClusterIP
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8080"
+      prometheus.io/path: "/metrics"
+      # 可选：自定义抓取间隔
+      prometheus.io/interval: "30s"
+
+controller-manager:
+  replicaCount: 1
+  service:
+    annotations:
+      prometheus.io/scrape: "true" 
+      prometheus.io/port: "8081"
+      prometheus.io/path: "/metrics"
