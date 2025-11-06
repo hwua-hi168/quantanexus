@@ -239,10 +239,18 @@ cmd_kubeasz() {
         return 1
     fi
     
-    # 创建默认集群实例
-    if ! create_cluster_instance "k8s-qn-01"; then
-        print_error "集群实例创建失败"
-        return 1
+    # 检查默认集群实例是否已存在
+    local cluster_name="k8s-qn-01"
+    local cluster_dir="/etc/kubeasz/clusters/$cluster_name"
+    
+    if [[ -d "$cluster_dir" ]]; then
+        print_info "集群实例 $cluster_name 已存在，跳过创建"
+    else
+        # 创建默认集群实例
+        if ! create_cluster_instance "$cluster_name"; then
+            print_error "集群实例创建失败"
+            return 1
+        fi
     fi
     
     print_success "kubeasz安装和集群实例创建完成"
