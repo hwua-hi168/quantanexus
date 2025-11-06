@@ -1,5 +1,10 @@
 # alertmanager
 alertmanager:
+  # 添加 NodePort 配置
+  service:
+    type: NodePort
+    port: 9093
+    nodePort: 30093
   alertmanagerSpec:
     image:
       registry: harbor.hi168.com/quantanexus
@@ -24,6 +29,11 @@ prometheusOperator:
 
 # prometheus
 prometheus:
+  # 添加 NodePort 配置
+  service:
+    type: NodePort
+    port: 9090
+    nodePort: 30090
   prometheusSpec:
     image:
       registry: harbor.hi168.com/quantanexus
@@ -59,16 +69,36 @@ kube-state-metrics:
     repository: registry.k8s.io-kube-state-metrics-kube-state-metrics
     tag: v2.17.0
 
-# grafana
-grafana:
-  image:
-    registry: harbor.hi168.com/quantanexus
-    repository: docker.io-grafana-grafana
-    tag: 12.2.0
-
 # node-exporter
 prometheus-node-exporter:
   image:
     registry: harbor.hi168.com/quantanexus
     repository: quay.io-prometheus-node-exporter
     tag: v1.9.1
+
+# grafana
+grafana:
+  image:
+    registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+    repository: docker.io-grafana-grafana
+    tag: 12.2.0
+  service:
+    type: NodePort
+    port: 3000
+    nodePort: 30300
+
+  # 允许匿名调用 API（只读）
+  grafana.ini:
+    auth.anonymous:
+      enabled: true
+      org_name: Main Org.
+      org_role: Viewer
+
+    # 关闭 CSRF，方便脚本裸 curl（可选）
+    security:
+      disable_csrf_protection: true
+
+  # 持久化，避免重启丢 Dashboard
+  persistence:
+    enabled: true
+    size: 10Gi
