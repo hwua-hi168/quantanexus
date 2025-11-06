@@ -153,26 +153,11 @@ configure_hostnames() {
             # 在远程主机上执行更新操作
             ssh -o StrictHostKeyChecking=no "root@$ip" "
                 # 备份原始hosts文件
-                cp /etc/hosts /etc/hosts.backup.$(date +%Y%m%d_%H%M%S)
-                
-                # 删除之前由本工具添加的节点映射块（如果存在）
-                # 使用特定的开始和结束标记来识别我们添加的内容
-                sed -i '/# K8s集群节点映射 - 由k8s配置工具自动生成/,/# K8s集群节点映射 - 结束/d' /etc/hosts
-                
-                # 追加新的节点映射块到hosts文件末尾
-                echo '' >> /etc/hosts
-                echo '# K8s集群节点映射 - 由k8s配置工具自动生成' >> /etc/hosts
-                cat /tmp/hosts_nodes_$$_$ip | tail -n +2 >> /etc/hosts  # 跳过第一行的注释
-                echo '# K8s集群节点映射 - 结束' >> /etc/hosts
-                
-                # 清理临时文件
-                rm -f /tmp/hosts_nodes_$$_$ip
-                
-                # 验证hosts文件格式
-                echo '更新后的hosts文件内容：'
-                echo '======================='
-                cat /etc/hosts
-                echo '======================='
+                cp /etc/hosts /etc/hosts.backup
+                # 检查是否已存在该主机名条目，避免重复添加
+                if ! grep -q \"127.0.0.1 $hostname\" /etc/hosts; then
+                    echo '127.0.0.1 $hostname' >> /etc/hosts
+                fi
             "
             
             print_success "节点 $ip 主机名配置完成"
