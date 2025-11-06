@@ -1,65 +1,67 @@
 service:
   ui:
-    type: {{ longhorn_service_ui_type }}
-    nodePort: {{ longhorn_service_ui_nodePort }}
-    port: {{ longhorn_service_ui_port }}
+    type: NodePort          # 集群外访问,QN默认从32600开始占用端口，方便用来写文档测试。
+    nodePort:  {{ longhorn_service_ui_port }}         # 物理节点监听端口（可改）
+    port: 80                # ClusterIP 端口
   manager:
-    type: {{ longhorn_service_manager_type }}
+    type: ClusterIP
   backend:
-    type: {{ longhorn_service_backend_type }}
+    type: ClusterIP
 
+# 让 Longhorn 成为默认 StorageClass
 persistence:
-  defaultClass: {{ longhorn_persistence_defaultClass }}
+  defaultClass: true
   defaultClassReplicaCount: {{ longhorn_persistence_defaultClassReplicaCount }}
-  defaultFsType: {{ longhorn_persistence_defaultFsType }}
-  reclaimPolicy: {{ longhorn_persistence_reclaimPolicy }}
+  defaultFsType: ext4
+  reclaimPolicy: Delete
 
+# 其余常用调优
 defaultSettings:
   default-data-path: "{{ longhorn_defaultSettings_default_data_path }}"
-  default-disk-path: "{{ longhorn_defaultSettings_default_disk_path }}"
-  create-default-disk: "{{ longhorn_defaultSettings_create_default_disk }}"
-  create-default-disk-labeled-nodes: "{{ longhorn_defaultSettings_create_default_disk_labeled_nodes }}"
-  default-disk-allow-scheduling: "{{ longhorn_defaultSettings_default_disk_allow_scheduling }}"
-
+  default-disk-path: "{{ longhorn_defaultSettings_default_data_path }}"
+  create-default-disk: "true"
+  create-default-disk-labeled-nodes: "true"
+  default-disk-allow-scheduling: "true"
+  
 image:
   longhorn:
     engine:
-      registry: {{ longhorn_image_registry }}
+      registry: {{ IMAGE_REGISTRY }}
       repository: {{ longhorn_image_longhorn_engine_repository }}
     manager:
-      registry: {{ longhorn_image_registry }}
+      registry: {{ IMAGE_REGISTRY }}
       repository: {{ longhorn_image_longhorn_manager_repository }}
     ui:
-      registry: {{ longhorn_image_registry }}
+      registry: {{ IMAGE_REGISTRY }}
       repository: {{ longhorn_image_longhorn_ui_repository }}
     instanceManager:
-      registry: {{ longhorn_image_registry }}
+      registry: {{ IMAGE_REGISTRY }}
       repository: {{ longhorn_image_longhorn_instanceManager_repository }}
     shareManager:
-      registry: {{ longhorn_image_registry }}
+      registry: {{ IMAGE_REGISTRY }}
       repository: {{ longhorn_image_longhorn_shareManager_repository }}
     backingImageManager:
-      registry: {{ longhorn_image_registry }}
+      registry: {{ IMAGE_REGISTRY }}
       repository: {{ longhorn_image_longhorn_backingImageManager_repository }}
     supportBundleKit:
-      registry: {{ longhorn_image_registry }}
+      registry: {{ IMAGE_REGISTRY }}
       repository: {{ longhorn_image_longhorn_supportBundleKit_repository }}
   csi:
     attacher:
-      registry: {{ longhorn_image_registry }}
+      registry: {{ IMAGE_REGISTRY }}
       repository: {{ longhorn_image_csi_attacher_repository }}
     provisioner:
-      registry: {{ longhorn_image_registry }}
+      registry: {{ IMAGE_REGISTRY }}
       repository: {{ longhorn_image_csi_provisioner_repository }}
     nodeDriverRegistrar:
-      registry: {{ longhorn_image_registry }}
+      registry: {{ IMAGE_REGISTRY }}
       repository: {{ longhorn_image_csi_nodeDriverRegistrar_repository }}
     resizer:
-      registry: {{ longhorn_image_registry }}
+      registry: {{ IMAGE_REGISTRY }}
       repository: {{ longhorn_image_csi_resizer_repository }}
     snapshotter:
-      registry: {{ longhorn_image_registry }}
+      registry: {{ IMAGE_REGISTRY }}
       repository: {{ longhorn_image_csi_snapshotter_repository }}
     livenessProbe:
-      registry: {{ longhorn_image_registry }}
+      registry: {{ IMAGE_REGISTRY }}
       repository: {{ longhorn_image_csi_livenessProbe_repository }}
