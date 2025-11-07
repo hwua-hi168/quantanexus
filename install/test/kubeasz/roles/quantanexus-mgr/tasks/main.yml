@@ -28,8 +28,6 @@
       --namespace quantanexus-mgr \
       --version {{ quantanexus_version }} \
       -f values.yaml
-  environment:
-    KUBECONFIG: "{{ kube_config_file }}"
 
 - name: 等待 Quantanexus Pods 就绪
   shell: |

@@ -30,8 +30,6 @@
       --version {{ cert_manager_version }} \
       --set installCRDs=true \
       -f values.yaml
-  environment:
-    KUBECONFIG: "{{ kube_config_file }}"
 
 - name: 等待 Cert-Manager Pods 就绪
   shell: |
@@ -42,10 +40,7 @@
   template:
     src: certificates.yaml.j2
     dest: "{{ cert_manager_work_dir }}/certificates.yaml"
-  delegate_to: localhost
 
 - name: 应用证书和 ClusterIssuer 资源
   shell: |
     /opt/kube/bin/kubectl apply -f {{ cert_manager_work_dir }}/certificates.yaml
-  environment:
-    KUBECONFIG: "{{ kube_config_file }}"

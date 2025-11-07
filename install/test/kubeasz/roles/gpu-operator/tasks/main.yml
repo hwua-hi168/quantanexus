@@ -29,8 +29,6 @@
       --version {{ gpu_operator_version }} \
       --set driver.enabled=false \
       -f values.yaml
-  environment:
-    KUBECONFIG: "{{ kube_config_file }}"
 
 - name: 等待 GPU Operator Pods 就绪
   shell: |

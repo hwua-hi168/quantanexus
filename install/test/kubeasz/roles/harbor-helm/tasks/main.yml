@@ -28,8 +28,6 @@
       --version {{ harbor_version }} \
       --create-namespace \
       -f values.yaml
-  environment:
-    KUBECONFIG: "{{ kube_config_file }}"
 
 - name: 等待 Harbor Pods 就绪
   shell: |
