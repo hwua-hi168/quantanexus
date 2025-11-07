@@ -35,6 +35,16 @@ run_prometheus_playbook() {
     local original_dir=$(pwd)
     cd /etc/kubeasz || return 1
     
+    # 检查Prometheus是否已经安装
+    print_info "检查Prometheus是否已经安装..."
+    if execute_with_privileges helm status prometheus -n prom >/dev/null 2>&1; then
+        print_warning "Prometheus已经安装，跳过安装步骤"
+        cd "$original_dir"
+        return 0
+    else
+        print_info "Prometheus未安装，继续执行安装"
+    fi
+    
     # 执行Prometheus安装的ansible-playbook
     print_info "执行Prometheus安装: ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/prometheus.yml"
     

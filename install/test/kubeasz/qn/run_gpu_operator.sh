@@ -31,6 +31,16 @@ run_gpu_operator_playbook() {
         return 1
     fi
     
+    # 检查GPU Operator是否已经安装
+    print_info "检查GPU Operator是否已经安装..."
+    if execute_with_privileges helm status gpu-operator -n gpu-operator >/dev/null 2>&1; then
+        print_warning "GPU Operator已经安装，跳过安装步骤"
+        cd "$original_dir"
+        return 0
+    else
+        print_info "GPU Operator未安装，继续执行安装"
+    fi
+    
     # 进入kubeasz目录执行安装
     local original_dir=$(pwd)
     cd /etc/kubeasz || return 1

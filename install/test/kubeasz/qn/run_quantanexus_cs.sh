@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Quantanexus计算服务安装模块
+# Quantanexus CS安装模块
 
 run_quantanexus_cs_playbook() {
     local cluster_name="${1:-k8s-qn-01}"
@@ -34,6 +34,16 @@ run_quantanexus_cs_playbook() {
     # 进入kubeasz目录执行安装
     local original_dir=$(pwd)
     cd /etc/kubeasz || return 1
+    
+    # 检查Quantanexus CS是否已经安装
+    print_info "检查Quantanexus计算服务是否已经安装..."
+    if execute_with_privileges helm status quantanexus-cs -n quantanexus-cs >/dev/null 2>&1; then
+        print_warning "Quantanexus计算服务已经安装，跳过安装步骤"
+        cd "$original_dir"
+        return 0
+    else
+        print_info "Quantanexus计算服务未安装，继续执行安装"
+    fi
     
     # 执行Quantanexus计算服务安装的ansible-playbook
     print_info "执行Quantanexus计算服务安装: ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/quantanexus-cs.yml"

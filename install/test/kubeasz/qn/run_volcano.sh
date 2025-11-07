@@ -35,6 +35,16 @@ run_volcano_playbook() {
     local original_dir=$(pwd)
     cd /etc/kubeasz || return 1
     
+    # 检查Volcano是否已经安装
+    print_info "检查Volcano批处理系统是否已经安装..."
+    if execute_with_privileges helm status volcano -n volcano-system >/dev/null 2>&1; then
+        print_warning "Volcano批处理系统已经安装，跳过安装步骤"
+        cd "$original_dir"
+        return 0
+    else
+        print_info "Volcano批处理系统未安装，继续执行安装"
+    fi
+    
     # 执行Volcano安装的ansible-playbook
     print_info "执行Volcano安装: ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/volcano.yml"
     

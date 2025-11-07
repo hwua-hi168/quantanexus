@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Quantanexus管理组件安装模块
+# Quantanexus Manager安装模块
 
 run_quantanexus_mgr_playbook() {
     local cluster_name="${1:-k8s-qn-01}"
@@ -29,6 +29,16 @@ run_quantanexus_mgr_playbook() {
     if [[ ! -f "$cluster_dir/config.yml" ]]; then
         print_error "集群配置文件不存在: $cluster_dir/config.yml"
         return 1
+    fi
+    
+    # 检查Quantanexus Manager是否已经安装
+    print_info "检查Quantanexus管理组件是否已经安装..."
+    if execute_with_privileges helm status quantanexus-mgr -n quantanexus-mgr >/dev/null 2>&1; then
+        print_warning "Quantanexus管理组件已经安装，跳过安装步骤"
+        cd "$original_dir"
+        return 0
+    else
+        print_info "Quantanexus管理组件未安装，继续执行安装"
     fi
     
     # 进入kubeasz目录执行安装

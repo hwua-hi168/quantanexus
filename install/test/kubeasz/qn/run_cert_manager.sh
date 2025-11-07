@@ -31,6 +31,16 @@ run_cert_manager_playbook() {
         return 1
     fi
     
+    # 检查Cert-Manager是否已经安装
+    print_info "检查Cert-Manager是否已经安装..."
+    if execute_with_privileges helm status cert-manager -n cert-manager >/dev/null 2>&1; then
+        print_warning "Cert-Manager已经安装，跳过安装步骤"
+        cd "$original_dir"
+        return 0
+    else
+        print_info "Cert-Manager未安装，继续执行安装"
+    fi
+    
     # 进入kubeasz目录执行安装
     local original_dir=$(pwd)
     cd /etc/kubeasz || return 1
