@@ -254,7 +254,7 @@ configure_nodes() {
 
     # 第6步：配置镜像仓库地址
     echo "=== 第6步：配置镜像仓库地址 ==="
-    default_registry="harbor.hi168.com/quantanexus"
+    default_registry="registry.cn-hangzhou.aliyuncs.com/quantanexus"
     print_info "默认镜像仓库地址: $default_registry"
     read -p "是否使用默认镜像仓库地址? (y/n, 默认y): " use_default_registry
 
