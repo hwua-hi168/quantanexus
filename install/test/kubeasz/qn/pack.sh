@@ -1,529 +1,339 @@
 #!/bin/bash
-
-# 编译脚本 - 将多个脚本文件合并成一个独立的可执行文件
+# packer.sh - 将K8s集群配置工具打包成单个文件
 
 set -e
 
-# 输出文件
-OUTPUT_FILE="kct.sh"
-
-# 临时文件
-TEMP_FILE=$(mktemp)
-
-# 颜色定义
+# 颜色输出
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+NC='\033[0m' # No Color
 
 print_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
-
-print_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
-}
-
-print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    echo -e "${GREEN}[INFO]${NC} $1"
 }
 
 print_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
 # 检查文件是否存在
-check_file() {
-    if [[ ! -f "$1" ]]; then
-        print_error "文件不存在: $1"
-        return 1
-    fi
-    return 0
-}
-
-# 检查文件是否可读
-check_file_readable() {
-    if [[ ! -r "$1" ]]; then
-        print_error "文件不可读: $1"
-        return 1
-    fi
-    return 0
-}
-
-# 验证bash语法
-check_bash_syntax() {
-    local file="$1"
-    if bash -n "$file" 2>/dev/null; then
-        return 0
-    else
-        print_error "语法检查失败: $file"
-        bash -n "$file" 2>&1 | head -10
-        return 1
-    fi
-}
-
-# 修复文件结尾，确保每个文件以换行符结束
-ensure_trailing_newline() {
-    local file="$1"
-    if [[ -f "$file" ]]; then
-        # 检查文件是否以换行符结束
-        if [[ $(tail -c1 "$file" | wc -l) -eq 0 ]]; then
-            echo "" >> "$file"
-            print_warning "为文件添加结尾换行符: $file"
-        fi
-    fi
-}
-
-# 添加文件到输出，跳过shebang和重复的source行
-add_file() {
-    local file="$1"
-    local skip_shebang="${2:-true}"
-    local skip_sources="${3:-true}"
-    
-    print_info "添加文件: $file"
-    
-    if ! check_file "$file"; then
-        return 1
-    fi
-    
-    if ! check_file_readable "$file"; then
-        return 1
-    fi
-    
-    # 确保文件以换行符结束
-    ensure_trailing_newline "$file"
-    
-    # 添加文件注释分隔符
-    echo "" >> "$TEMP_FILE"
-    echo "# ==================================================" >> "$TEMP_FILE"
-    echo "# 文件: $file" >> "$TEMP_FILE"
-    echo "# ==================================================" >> "$TEMP_FILE"
-    echo "" >> "$TEMP_FILE"
-    
-    # 读取文件内容，跳过shebang行和source导入行
-    local line_number=0
-    local in_comment_block=false
-    local prev_line=""
-    
-    while IFS= read -r line || [[ -n "$line" ]]; do
-        line_number=$((line_number + 1))
-        
-        # 跳过shebang行
-        if [[ "$skip_shebang" == "true" && "$line" =~ ^#!/ ]]; then
-            continue
-        fi
-        
-        # 跳过source导入行
-        if [[ "$skip_sources" == "true" && "$line" =~ ^[[:space:]]*source[[:space:]]+ ]]; then
-            continue
-        fi
-        
-        # 处理注释块
-        if [[ "$line" =~ ^\s*$ && "$prev_line" =~ ^\s*$ ]]; then
-            # 跳过连续的空行
-            continue
-        fi
-        
-        # 处理未闭合的代码块
-        if [[ "$line" =~ ^[[:space:]]*then[[:space:]]*$ && "$prev_line" =~ ^[[:space:]]*if[[:space:]] ]]; then
-            # 确保if和then在同一文件中
-            echo "$line" >> "$TEMP_FILE"
-            prev_line="$line"
-            continue
-        fi
-        
-        # 处理函数定义
-        if [[ "$line" =~ ^[[:space:]]*[a-zA-Z_][a-zA-Z0-9_]*[[:space:]]*\(\)[[:space:]]*\{?[[:space:]]*$ ]]; then
-            # 确保函数定义前有空行（除了第一个函数）
-            if [[ "$prev_line" != "" && ! "$prev_line" =~ ^[[:space:]]*$ ]]; then
-                echo "" >> "$TEMP_FILE"
-            fi
-        fi
-        
-        echo "$line" >> "$TEMP_FILE"
-        prev_line="$line"
-        
-    done < "$file"
-    
-    # 确保文件以空行结束
-    echo "" >> "$TEMP_FILE"
-    
-    print_success "成功添加文件: $file (共 $line_number 行)"
-    return 0
-}
-
-# 创建输出文件头部
-create_header() {
-    cat > "$TEMP_FILE" << 'EOF'
-#!/bin/bash
-
-# ==================================================
-# K8s 高可用集群规划配置工具 - 编译版本
-# 由 pack.sh 自动生成
-# 包含所有模块的独立可执行文件
-# ==================================================
-
-set -e
-
-# 检查是否在容器中运行（kubeasz相关功能需要）
-check_environment() {
-    if [[ -f "/.dockerenv" ]] || grep -q docker /proc/1/cgroup 2>/dev/null; then
-        return 0
-    fi
-    return 1
-}
-
-# 显示编译信息
-show_build_info() {
-    echo "=================================================="
-    echo "    K8s 高可用集群规划配置工具 (编译版本)"
-    echo "=================================================="
-    echo "编译时间: $(date)"
-    echo "包含模块: common.sh, collect_info.sh, remote_config.sh,"
-    echo "          install_tools.sh, download_source.sh,"
-    echo "          install_kubeasz.sh, configure_kubeasz.sh,"
-    echo "          run_kubeasz_setup.sh, install_helm.sh,"
-    echo "          run_longhorn.sh, run_cert_manager.sh,"
-    echo "          run_prometheus.sh, run_ingress_nginx.sh,"
-    echo "          run_harbor.sh, run_gpu_operator.sh,"
-    echo "          run_volcano.sh, run_quantanexus_mgr.sh,"
-    echo "          run_quantanexus_cs.sh, run_uncordon.sh, main.sh"
-    echo "=================================================="
-    echo ""
-}
-
-# 在脚本开始时显示编译信息
-# show_build_info
-
-EOF
-}
-
-# 验证所有源文件是否存在
-validate_source_files() {
+check_files_exist() {
     local files=(
-        "common.sh" "collect_info.sh" "remote_config.sh" 
-        "install_tools.sh" "download_source.sh" 
-        "install_kubeasz.sh" "configure_kubeasz.sh" 
-        "run_kubeasz_setup.sh" "install_helm.sh"
-        "run_longhorn.sh" "run_cert_manager.sh"
-        "run_prometheus.sh" "run_ingress_nginx.sh"
-        "run_harbor.sh" "run_gpu_operator.sh"
-        "run_volcano.sh" "run_quantanexus_mgr.sh"
-        "run_quantanexus_cs.sh" "run_uncordon.sh" "main.sh"
+        "main.sh"
+        "common.sh"
+        "collect_info.sh"
+        "remote_config.sh"
+        "install_tools.sh"
+        "download_source.sh"
+        "install_kubeasz.sh"
+        "configure_kubeasz.sh"
+        "run_kubeasz_setup.sh"
+        "install_helm.sh"
+        "run_longhorn.sh"
+        "run_cert_manager.sh"
+        "run_prometheus.sh"
+        "run_ingress_nginx.sh"
+        "run_harbor.sh"
+        "run_gpu_operator.sh"
+        "run_volcano.sh"
+        "run_quantanexus_mgr.sh"
+        "run_quantanexus_cs.sh"
+        "run_uncordon.sh"
     )
     
     local missing_files=()
-    local existing_files=()
     
-    # 首先检查所有文件的语法
-    print_info "检查源文件语法..."
-    local syntax_errors=()
     for file in "${files[@]}"; do
-        if [[ -f "$file" ]]; then
-            if check_bash_syntax "$file"; then
-                existing_files+=("$file")
-            else
-                syntax_errors+=("$file")
-            fi
-        else
+        if [[ ! -f "$file" ]]; then
             missing_files+=("$file")
         fi
     done
     
-    if [[ ${#syntax_errors[@]} -gt 0 ]]; then
-        print_error "以下源文件存在语法错误:"
-        for file in "${syntax_errors[@]}"; do
-            echo "  - $file"
-        done
-        echo ""
-        return 1
-    fi
-    
     if [[ ${#missing_files[@]} -gt 0 ]]; then
-        print_warning "以下文件不存在，将被跳过:"
+        print_error "以下文件缺失:"
         for file in "${missing_files[@]}"; do
             echo "  - $file"
         done
-        echo ""
-    fi
-    
-    if [[ ${#existing_files[@]} -eq 0 ]]; then
-        print_error "没有找到任何有效的源文件！"
         return 1
     fi
     
-    print_success "找到 ${#existing_files[@]} 个语法正确的源文件"
+    print_info "所有必需文件都存在"
     return 0
 }
 
-# 主编译函数
-compile_script() {
-    print_info "开始编译脚本..."
-    
-    # 创建文件头部
-    create_header
-    
-    # 按依赖顺序添加文件
-    print_info "添加核心模块..."
-    add_file "common.sh"
-    add_file "collect_info.sh" 
-    add_file "remote_config.sh"
-    add_file "install_tools.sh"
-    add_file "download_source.sh"
-    
-    print_info "添加kubeasz相关模块..."
-    add_file "install_kubeasz.sh"
-    add_file "configure_kubeasz.sh"
-    add_file "run_kubeasz_setup.sh"
-    
-    print_info "添加Helm安装模块..."
-    add_file "install_helm.sh"
-    
-    print_info "添加组件安装模块..."
-    add_file "run_longhorn.sh"
-    add_file "run_cert_manager.sh"
-    add_file "run_prometheus.sh"
-    add_file "run_ingress_nginx.sh"
-    add_file "run_harbor.sh"
-    add_file "run_gpu_operator.sh"
-    add_file "run_volcano.sh"
-    add_file "run_quantanexus_mgr.sh"
-    add_file "run_quantanexus_cs.sh"
-    add_file "run_uncordon.sh"
-    
-    print_info "添加主控模块..."
-    add_file "main.sh"
-    
-    # 添加执行权限并保存
-    chmod +x "$TEMP_FILE"
-    
-    # 检查输出文件是否已存在
-    if [[ -f "$OUTPUT_FILE" ]]; then
-        local backup_file="${OUTPUT_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
-        print_warning "输出文件已存在，创建备份: $backup_file"
-        cp "$OUTPUT_FILE" "$backup_file"
+# 提取文件内容（去除shebang和source行）
+extract_file_content() {
+    local file="$1"
+    if [[ ! -f "$file" ]]; then
+        print_error "文件不存在: $file"
+        return 1
     fi
     
-    # 复制到输出文件
-    cp "$TEMP_FILE" "$OUTPUT_FILE"
+    # 使用sed处理文件内容
+    sed -E '
+        # 删除shebang行
+        /^#!/d
+        # 删除空行
+        /^[[:space:]]*$/d
+        # 删除source命令（但保留函数定义和其他内容）
+        /^[[:space:]]*source[[:space:]]+.*\.sh/d
+        # 删除相对路径的source
+        /^[[:space:]]*\.[[:space:]]+.*\.sh/d
+    ' "$file"
+}
+
+# 创建打包文件
+create_packed_file() {
+    local output_file="${1:-kct.sh}"
     
-    # 清理临时文件
-    rm -f "$TEMP_FILE"
+    print_info "开始创建打包文件: $output_file"
     
-    print_success "编译完成！输出文件: $OUTPUT_FILE"
+    # 创建文件头部
+    cat > "$output_file" << 'EOF'
+#!/bin/bash
+# K8s集群配置工具 - 打包版本
+# 此文件由packer.sh自动生成，包含所有必要的脚本文件
+
+set -e
+
+print_banner() {
+    echo "================================================"
+    echo "    K8s集群配置工具 - 打包版本"
+    echo "================================================"
+    echo ""
+}
+EOF
+
+    print_info "添加公共函数库..."
+    echo "" >> "$output_file"
+    echo "# ==================== common.sh ====================" >> "$output_file"
+    extract_file_content "common.sh" >> "$output_file"
     
-    # 显示文件信息
-    echo ""
-    echo "文件信息:"
-    echo "  - 大小: $(du -h "$OUTPUT_FILE" | cut -f1)"
-    echo "  - 行数: $(wc -l < "$OUTPUT_FILE")"
-    echo "  - 权限: $(ls -l "$OUTPUT_FILE" | cut -d' ' -f1)"
-    echo ""
-    echo "使用方式:"
-    echo "  ./$OUTPUT_FILE [command]"
-    echo "  ./$OUTPUT_FILE --help"
-    echo ""
-    print_info "可以使用 './$OUTPUT_FILE --help' 查看所有可用命令"
+    print_info "添加节点信息收集模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== collect_info.sh ====================" >> "$output_file"
+    extract_file_content "collect_info.sh" >> "$output_file"
+    
+    print_info "添加远程配置模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== remote_config.sh ====================" >> "$output_file"
+    extract_file_content "remote_config.sh" >> "$output_file"
+    
+    print_info "添加工具安装模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== install_tools.sh ====================" >> "$output_file"
+    extract_file_content "install_tools.sh" >> "$output_file"
+    
+    print_info "添加源码下载模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== download_source.sh ====================" >> "$output_file"
+    extract_file_content "download_source.sh" >> "$output_file"
+    
+    print_info "添加kubeasz安装模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== install_kubeasz.sh ====================" >> "$output_file"
+    extract_file_content "install_kubeasz.sh" >> "$output_file"
+    
+    print_info "添加kubeasz配置模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== configure_kubeasz.sh ====================" >> "$output_file"
+    extract_file_content "configure_kubeasz.sh" >> "$output_file"
+    
+    print_info "添加kubeasz安装执行模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== run_kubeasz_setup.sh ====================" >> "$output_file"
+    extract_file_content "run_kubeasz_setup.sh" >> "$output_file"
+    
+    print_info "添加Helm安装模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== install_helm.sh ====================" >> "$output_file"
+    extract_file_content "install_helm.sh" >> "$output_file"
+    
+    print_info "添加Longhorn安装模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== run_longhorn.sh ====================" >> "$output_file"
+    extract_file_content "run_longhorn.sh" >> "$output_file"
+    
+    print_info "添加Cert-Manager安装模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== run_cert_manager.sh ====================" >> "$output_file"
+    extract_file_content "run_cert_manager.sh" >> "$output_file"
+    
+    print_info "添加Prometheus安装模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== run_prometheus.sh ====================" >> "$output_file"
+    extract_file_content "run_prometheus.sh" >> "$output_file"
+    
+    print_info "添加Ingress-Nginx安装模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== run_ingress_nginx.sh ====================" >> "$output_file"
+    extract_file_content "run_ingress_nginx.sh" >> "$output_file"
+    
+    print_info "添加Harbor安装模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== run_harbor.sh ====================" >> "$output_file"
+    extract_file_content "run_harbor.sh" >> "$output_file"
+    
+    print_info "添加GPU Operator安装模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== run_gpu_operator.sh ====================" >> "$output_file"
+    extract_file_content "run_gpu_operator.sh" >> "$output_file"
+    
+    print_info "添加Volcano安装模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== run_volcano.sh ====================" >> "$output_file"
+    extract_file_content "run_volcano.sh" >> "$output_file"
+    
+    print_info "添加Quantanexus管理组件安装模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== run_quantanexus_mgr.sh ====================" >> "$output_file"
+    extract_file_content "run_quantanexus_mgr.sh" >> "$output_file"
+    
+    print_info "添加Quantanexus计算服务安装模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== run_quantanexus_cs.sh ====================" >> "$output_file"
+    extract_file_content "run_quantanexus_cs.sh" >> "$output_file"
+    
+    print_info "添加节点uncordon模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== run_uncordon.sh ====================" >> "$output_file"
+    extract_file_content "run_uncordon.sh" >> "$output_file"
+    
+    print_info "添加主程序..."
+    echo "" >> "$output_file"
+    echo "# ==================== main.sh ====================" >> "$output_file"
+    # 对于main.sh，我们需要特殊处理，保留除source之外的所有内容
+    sed -E '
+        /^#!/d
+        /^[[:space:]]*source[[:space:]]+.*common\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*collect_info\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*remote_config\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*install_tools\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*download_source\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*install_kubeasz\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*configure_kubeasz\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*run_kubeasz_setup\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*install_helm\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*run_longhorn\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*run_cert_manager\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*run_prometheus\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*run_ingress_nginx\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*run_harbor\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*run_gpu_operator\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*run_volcano\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*run_quantanexus_mgr\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*run_quantanexus_cs\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*run_uncordon\.sh/d
+    ' main.sh >> "$output_file"
+    
+    # 添加执行权限
+    chmod +x "$output_file"
+    
+    print_info "打包完成！生成文件: $output_file"
+    print_info "文件大小: $(du -h "$output_file" | cut -f1)"
+    print_info "行数: $(wc -l < "$output_file")"
+}
+
+# 验证打包文件
+validate_packed_file() {
+    local packed_file="$1"
+    
+    print_info "验证打包文件..."
+    
+    # 检查文件是否存在且可执行
+    if [[ ! -f "$packed_file" || ! -x "$packed_file" ]]; then
+        print_error "打包文件不存在或不可执行"
+        return 1
+    fi
+    
+    # 检查是否包含关键函数
+    local required_functions=(
+        "print_success"
+        "print_error"
+        "print_info"
+        "print_warning"
+        "print_banner"
+        "show_usage"
+        "main"
+    )
+    
+    for func in "${required_functions[@]}"; do
+        if ! grep -q "$func" "$packed_file"; then
+            print_warning "未找到函数: $func"
+        fi
+    done
+    
+    # 测试语法检查
+    if bash -n "$packed_file"; then
+        print_info "语法检查通过"
+    else
+        print_error "语法检查失败"
+        return 1
+    fi
+    
+    print_info "打包文件验证完成"
 }
 
 # 显示使用说明
 show_usage() {
-    echo "使用说明: $0 [选项]"
+    echo "用法: $0 [输出文件名]"
     echo ""
     echo "选项:"
-    echo "  -h, --help        显示此帮助信息"
-    echo "  -c, --clean       清理编译生成的文件"
-    echo "  -v, --verify      验证源文件是否存在"
-    echo "  -i, --info        显示编译信息"
-    echo "  -f, --force       强制覆盖已存在的输出文件"
+    echo "  -h, --help    显示此帮助信息"
     echo ""
     echo "示例:"
-    echo "  $0                编译生成 kct.sh"
-    echo "  $0 --clean        清理编译文件"
-    echo "  $0 --verify       验证源文件"
-    echo "  $0 --info         显示编译信息"
-}
-
-# 显示编译信息
-show_build_info() {
-    echo "编译脚本信息:"
-    echo "  - 输出文件: $OUTPUT_FILE"
-    echo "  - 临时文件: $TEMP_FILE"
+    echo "  $0                       # 生成 kct.sh"
+    echo "  $0 my_k8s_tool.sh        # 生成指定文件名的打包文件"
     echo ""
-    echo "支持的源文件:"
-    local files=(
-        "common.sh" "collect_info.sh" "remote_config.sh" 
-        "install_tools.sh" "download_source.sh" 
-        "install_kubeasz.sh" "configure_kubeasz.sh" 
-        "run_kubeasz_setup.sh" "install_helm.sh"
-        "run_longhorn.sh" "run_cert_manager.sh"
-        "run_prometheus.sh" "run_ingress_nginx.sh"
-        "run_harbor.sh" "run_gpu_operator.sh"
-        "run_volcano.sh" "run_quantanexus_mgr.sh"
-        "run_quantanexus_cs.sh" "run_uncordon.sh" "main.sh"
-    )
-    
-    for file in "${files[@]}"; do
-        if [[ -f "$file" ]]; then
-            if check_bash_syntax "$file" 2>/dev/null; then
-                echo "  ✓ $file ($(wc -l < "$file") 行)"
-            else
-                echo "  ✗ $file (语法错误)"
-            fi
-        else
-            echo "  ✗ $file (缺失)"
-        fi
-    done
+    echo "说明:"
+    echo "  此脚本将所有的.sh文件打包成一个独立的可执行文件"
 }
 
-# 清理函数
-cleanup() {
-    print_info "清理编译文件..."
-    
-    local files_to_clean=("$OUTPUT_FILE" "$TEMP_FILE")
-    local cleaned_files=()
-    
-    for file in "${files_to_clean[@]}"; do
-        if [[ -f "$file" ]]; then
-            rm -f "$file"
-            cleaned_files+=("$file")
-        fi
-    done
-    
-    # 清理备份文件
-    local backup_files=($(ls -1 "${OUTPUT_FILE}.backup."* 2>/dev/null || true))
-    if [[ ${#backup_files[@]} -gt 0 ]]; then
-        rm -f "${OUTPUT_FILE}.backup."*
-        cleaned_files+=("${#backup_files[@]} 个备份文件")
-    fi
-    
-    if [[ ${#cleaned_files[@]} -gt 0 ]]; then
-        print_success "清理完成: ${cleaned_files[*]}"
-    else
-        print_info "没有需要清理的文件"
-    fi
-}
-
-# 验证编译结果
-verify_output() {
-    if [[ ! -f "$OUTPUT_FILE" ]]; then
-        print_error "输出文件不存在: $OUTPUT_FILE"
-        return 1
-    fi
-    
-    print_info "验证编译结果..."
-    
-    # 检查文件是否可执行
-    if [[ ! -x "$OUTPUT_FILE" ]]; then
-        print_warning "输出文件不可执行，尝试添加执行权限"
-        chmod +x "$OUTPUT_FILE"
-    fi
-    
-    # 检查文件大小
-    local file_size=$(du -h "$OUTPUT_FILE" | cut -f1)
-    local line_count=$(wc -l < "$OUTPUT_FILE")
-    
-    echo "  - 文件大小: $file_size"
-    echo "  - 代码行数: $line_count"
-    
-    # 检查shebang
-    if ! head -1 "$OUTPUT_FILE" | grep -q "^#!/bin/bash"; then
-        print_warning "输出文件缺少正确的shebang"
-    else
-        echo "  - Shebang: 正常"
-    fi
-    
-    # 详细语法检查
-    print_info "执行详细语法检查..."
-    local syntax_output=$(mktemp)
-    if bash -n "$OUTPUT_FILE" 2>"$syntax_output"; then
-        echo "  - 语法检查: 通过"
-        print_success "编译验证通过"
-        rm -f "$syntax_output"
-        return 0
-    else
-        echo "  - 语法检查: 失败"
-        print_error "语法错误信息:"
-        # 显示前5个错误
-        head -10 "$syntax_output" | while IFS= read -r error_line; do
-            echo "    $error_line"
-        done
-        rm -f "$syntax_output"
-        
-        # 尝试定位错误位置
-        print_info "尝试定位错误位置..."
-        local error_line=$(grep -o "line [0-9]*" "$syntax_output" 2>/dev/null | head -1 | grep -o "[0-9]*" || echo "unknown")
-        if [[ "$error_line" != "unknown" ]]; then
-            print_info "错误可能出现在第 $error_line 行附近:"
-            local start=$((error_line > 10 ? error_line - 10 : 1))
-            local end=$((error_line + 5))
-            sed -n "${start},${end}p" "$OUTPUT_FILE" | cat -n
-        fi
-        
-        return 1
-    fi
-}
-
-# 主函数
 main() {
-    local force_compile=false
+    local output_file="${1:-kct.sh}"
     
-    case "${1:-}" in
-        "-h"|"--help")
-            show_usage
-            ;;
-        "-c"|"--clean")
-            cleanup
-            ;;
-        "-v"|"--verify")
-            validate_source_files
-            ;;
-        "-i"|"--info")
-            show_build_info
-            ;;
-        "-f"|"--force")
-            force_compile=true
-            ;;
-        "")
-            # 继续执行编译
-            ;;
-        *)
-            print_error "未知选项: $1"
-            show_usage
-            exit 1
-            ;;
-    esac
+    # 检查帮助选项
+    if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+        show_usage
+        exit 0
+    fi
     
-    # 如果不是帮助或清理等命令，则执行编译
-    if [[ "$1" != "-h" && "$1" != "--help" && "$1" != "-c" && "$1" != "--clean" && "$1" != "-i" && "$1" != "--info" ]]; then
-        if [[ "$force_compile" == "false" && -f "$OUTPUT_FILE" ]]; then
-            print_warning "输出文件已存在: $OUTPUT_FILE"
-            read -p "是否覆盖? (y/N): " -n 1 -r
-            echo
-            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-                print_info "编译取消"
-                exit 0
-            fi
-        fi
-        
-        if validate_source_files; then
-            compile_script
-            if verify_output; then
-                print_success "所有步骤完成！"
-            else
-                print_warning "编译完成但验证失败，请检查输出文件"
-                exit 1
-            fi
+    print_banner() {
+        echo "================================================"
+        echo "      K8s集群工具打包脚本"
+        echo "================================================"
+        echo ""
+    }
+    
+    print_banner
+    
+    # 检查所有文件是否存在
+    if ! check_files_exist; then
+        print_error "文件检查失败，请确保所有脚本文件都在当前目录"
+        exit 1
+    fi
+    
+    # 创建打包文件
+    if create_packed_file "$output_file"; then
+        # 验证打包文件
+        if validate_packed_file "$output_file"; then
+            print_info "打包成功！"
+            echo ""
+            print_info "使用方法:"
+            echo "  ./$output_file --help       # 查看完整帮助"
         else
-            print_error "源文件验证失败，编译中止"
-            exit 1
+            print_warning "打包文件验证发现一些问题，但文件已生成"
         fi
+    else
+        print_error "打包失败"
+        exit 1
     fi
 }
-
-# 信号处理
-trap 'rm -f "$TEMP_FILE" "$syntax_output" 2>/dev/null; print_error "编译过程被中断"; exit 1' INT TERM
 
 # 执行主函数
 main "$@"
