@@ -236,7 +236,7 @@ configure_nodes() {
     # 第5步：配置域名
     echo "=== 第5步：配置域名 ==="
     # 生成8位随机字符串
-    random_str=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
+    random_str=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1 | tr 'A-Z' 'a-z')
     default_domain="qn-${random_str}.hi168.com"
 
     print_info "默认生成域名: $default_domain"
