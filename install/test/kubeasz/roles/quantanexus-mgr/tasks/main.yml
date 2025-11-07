@@ -31,5 +31,6 @@
 
 - name: 等待 Quantanexus Pods 就绪
   shell: |
-    /opt/kube/bin/kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=quantanexus -n quantanexus-mgr --timeout=300s
+    /opt/kube/bin/kubectl wait --for=condition=Ready pod -l app=quantanexus -n quantanexus-mgr --timeout=300s
+
   changed_when: false
