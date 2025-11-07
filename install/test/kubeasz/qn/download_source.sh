@@ -34,11 +34,11 @@ download_source_code() {
     # 解压文件
     print_info "解压源码文件..."
     if unzip main.zip; then
-        // 修改解压后的目录名确保为quantanexus-main
+        # 修改解压后的目录名确保为quantanexus-main
         if [[ -d "quantanexus-main" ]]; then
             print_success "源码解压成功"
         else
-            // 如果目录名不是quantanexus-main，则重命名
+             # 如果目录名不是quantanexus-main，则重命名
             dir_name=$(ls -d quantanexus-* | head -n 1)
             if [[ -n "$dir_name" && -d "$dir_name" ]]; then
                 mv "$dir_name" quantanexus-main
