@@ -77,6 +77,14 @@ run_kubeasz_setup() {
         return 1
     fi
     
+    # 检查集群是否已经存在并且状态正常
+    print_info "检查集群 $cluster_name 是否已经存在..."
+    if check_cluster_exists "$cluster_name" && check_cluster_status_quiet "$cluster_name"; then
+        print_warning "集群 $cluster_name 已经存在并且状态正常，跳过安装"
+        show_cluster_info "$cluster_name"
+        return 0
+    fi
+    
     # 显示步骤信息
     show_kubeasz_steps
     
@@ -136,8 +144,8 @@ run_kubeasz_setup() {
     echo ""
     echo "下一步操作:"
     echo "  1. 检查集群状态: docker exec -it kubeasz ezctl status $cluster_name"
-    echo "  2. 查看集群节点: docker exec -it kubeasz kubectl get nodes"
-    echo "  3. 查看所有Pod: docker exec -it kubeasz kubectl get pods -A"
+    echo "  2. 查看集群节点: /opt/kube/bin/kubectl get nodes"
+    echo "  3. 查看所有Pod: /opt/kube/bin/kubectl get pods -A"
     echo ""
     
     return 0
@@ -158,6 +166,7 @@ check_cluster_status() {
         return 0
     else
         print_error "集群状态检查失败"
+        exit 1
         return 1
     fi
 }
@@ -176,17 +185,19 @@ show_cluster_info() {
     echo "=================================================="
     echo "          集群节点信息"
     echo "=================================================="
-    if ! execute_with_privileges docker exec -it kubeasz kubectl get nodes -o wide; then
+    if ! execute_with_privileges /opt/kube/bin/kubectl get nodes -o wide; then
         print_error "获取节点信息失败"
         return 1
+        exit 1
     fi
     
     echo ""
     echo "=================================================="
     echo "          集群Pod状态"
     echo "=================================================="
-    if ! execute_with_privileges docker exec -it kubeasz kubectl get pods -A; then
+    if ! execute_with_privileges /opt/kube/bin/kubectl get pods -A; then
         print_error "获取Pod信息失败"
+        exit 1
         return 1
     fi
     
@@ -194,10 +205,38 @@ show_cluster_info() {
     echo "=================================================="
     echo "          集群服务状态"
     echo "=================================================="
-    if ! execute_with_privileges docker exec -it kubeasz kubectl get svc -A; then
+    if ! execute_with_privileges /opt/kube/bin/kubectl get svc -A; then
         print_error "获取服务信息失败"
+        exit 1
         return 1
     fi
     
     return 0
+}
+
+# 检查集群是否存在
+check_cluster_exists() {
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if execute_with_privileges docker exec -it kubeasz ezctl list | grep -q "$cluster_name"; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# 静默检查集群状态(无输出)
+check_cluster_status_quiet() {
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! check_kubeasz_container; then
+        return 1
+    fi
+    
+    # 尝试执行status命令，但不输出到终端
+    if execute_with_privileges docker exec -it kubeasz ezctl status "$cluster_name" >/dev/null 2>&1; then
+        return 0
+    else
+        return 1
+    fi
 }
