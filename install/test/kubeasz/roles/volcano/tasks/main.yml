@@ -32,5 +32,5 @@
 
 - name: 等待 Volcano Pods 就绪
   shell: |
-    /opt/kube/bin/kubectl wait --for=condition=Ready pod -n volcano-system --all --timeout=300s
+    /opt/kube/bin/kubectl wait --for=condition=Ready pod -n volcano-system --all --timeout=3600s
   changed_when: false

@@ -59,7 +59,7 @@ configure_kubeasz() {
     # 使用更简单的方法处理文件
     local in_section=""
     local section_updated=false
-    local image_registry_added=false  // 添加变量跟踪IMAGE_REGISTRY是否已添加
+    local image_registry_added=false  # 添加变量跟踪IMAGE_REGISTRY是否已添加
     
     while IFS= read -r line; do
         # 检测是否进入我们关心的section
@@ -81,7 +81,7 @@ configure_kubeasz() {
         elif [[ "$line" =~ ^\[all:vars\]$ ]]; then
             in_section="vars"
             section_updated=false
-            image_registry_added=false  // 重置IMAGE_REGISTRY添加状态
+            image_registry_added=false  # 重置IMAGE_REGISTRY添加状态
             echo "$line" >> "$temp_updated_file"
             continue
         fi

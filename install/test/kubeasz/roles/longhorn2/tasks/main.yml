@@ -31,4 +31,4 @@
 
 - name: 等待 Longhorn Pods 就绪
   shell: |
-    /opt/kube/bin/kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=longhorn -n longhorn-system --timeout=300s
+    /opt/kube/bin/kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=longhorn -n longhorn-system --timeout=3600s
