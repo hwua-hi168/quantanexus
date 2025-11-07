@@ -18,7 +18,7 @@ download_source_code() {
     print_info "尝试通过镜像代理下载..."
     # 下载main分支以确保解压后目录名为quantanexus-main
     # if wget -O main.zip "https://hub.gitmirror.com/https://github.com/hwua-hi168/quantanexus/archive/refs/heads/main.zip"; then
-    if wget -O main.zip "https://hub.gitmirror.com/https://github.com/hwua-hi168/quantanexus/archive/refs/tags/0.0.1.zip"; then
+    if wget -O main.zip "https://hub.gitmirror.com/https://github.com/hwua-hi168/quantanexus/archive/refs/tags/0.0.2.zip"; then
         print_success "通过镜像代理下载成功"
     else
         print_warning "镜像代理下载失败，尝试通过源站下载..."
