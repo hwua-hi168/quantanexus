@@ -5,7 +5,7 @@
 set -e
 
 # 输出文件
-OUTPUT_FILE="k8s-cluster-tool.sh"
+OUTPUT_FILE="kct.sh"
 
 # 临时文件
 TEMP_FILE=$(mktemp)
@@ -338,7 +338,7 @@ show_usage() {
     echo "  -f, --force       强制覆盖已存在的输出文件"
     echo ""
     echo "示例:"
-    echo "  $0                编译生成 k8s-cluster-tool.sh"
+    echo "  $0                编译生成 kct.sh"
     echo "  $0 --clean        清理编译文件"
     echo "  $0 --verify       验证源文件"
     echo "  $0 --info         显示编译信息"
