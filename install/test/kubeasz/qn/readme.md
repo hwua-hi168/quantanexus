@@ -1,5 +1,10 @@
 ## 使用说明
 
+一键安装命令行
+````
+curl -sSl https://d.hi168.com/kct.sh -o kct.sh & bash kct.sh
+```
+
 ### 安装和使用
 
 1. **给所有文件添加执行权限**：
