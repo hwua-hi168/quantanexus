@@ -35,6 +35,16 @@ run_harbor_playbook() {
     local original_dir=$(pwd)
     cd /etc/kubeasz || return 1
     
+    # 检查Harbor是否已经安装
+    print_info "检查Harbor是否已经安装..."
+    if execute_with_privileges helm status harbor -n harbor >/dev/null 2>&1; then
+        print_warning "Harbor已经安装，跳过安装步骤"
+        cd "$original_dir"
+        return 0
+    else
+        print_info "Harbor未安装，继续执行安装"
+    fi
+    
     # 执行Harbor安装的ansible-playbook
     print_info "执行Harbor安装: ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/harbor.yml"
     
