@@ -8,7 +8,7 @@ kube_config_file: "{{ CLUSTER_DIR }}/config"
 volcano_image_registry: "{{ IMAGE_REGISTRY }}"
 
 # Volcano 组件镜像配置
-volcano_controller_image_repository: "{{ volcano_image_registry }}/docker.io-volcanosh-vc-controller-manager"
-volcano_scheduler_image_repository: "{{ volcano_image_registry }}/docker.io-volcanosh-vc-scheduler"
-volcano_admission_image_repository: "{{ volcano_image_registry }}/docker.io-volcanosh-vc-webhook-manager"
-volcano_agent_image_repository: "{{ volcano_image_registry }}/docker.io-volcanosh-vc-agent"
+volcano_controller_image_repository: "docker.io-volcanosh-vc-controller-manager"
+volcano_scheduler_image_repository: "docker.io-volcanosh-vc-scheduler"
+volcano_admission_image_repository: "docker.io-volcanosh-vc-webhook-manager"
+volcano_agent_image_repository: "docker.io-volcanosh-vc-agent"
