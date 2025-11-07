@@ -188,7 +188,7 @@ show_build_info() {
     echo "          run_prometheus.sh, run_ingress_nginx.sh,"
     echo "          run_harbor.sh, run_gpu_operator.sh,"
     echo "          run_volcano.sh, run_quantanexus_mgr.sh,"
-    echo "          run_quantanexus_cs.sh, main.sh"
+    echo "          run_quantanexus_cs.sh, run_uncordon.sh, main.sh"
     echo "=================================================="
     echo ""
 }
@@ -210,7 +210,7 @@ validate_source_files() {
         "run_prometheus.sh" "run_ingress_nginx.sh"
         "run_harbor.sh" "run_gpu_operator.sh"
         "run_volcano.sh" "run_quantanexus_mgr.sh"
-        "run_quantanexus_cs.sh" "main.sh"
+        "run_quantanexus_cs.sh" "run_uncordon.sh" "main.sh"
     )
     
     local missing_files=()
@@ -290,6 +290,7 @@ compile_script() {
     add_file "run_volcano.sh"
     add_file "run_quantanexus_mgr.sh"
     add_file "run_quantanexus_cs.sh"
+    add_file "run_uncordon.sh"
     
     print_info "添加主控模块..."
     add_file "main.sh"
@@ -360,7 +361,7 @@ show_build_info() {
         "run_prometheus.sh" "run_ingress_nginx.sh"
         "run_harbor.sh" "run_gpu_operator.sh"
         "run_volcano.sh" "run_quantanexus_mgr.sh"
-        "run_quantanexus_cs.sh" "main.sh"
+        "run_quantanexus_cs.sh" "run_uncordon.sh" "main.sh"
     )
     
     for file in "${files[@]}"; do
