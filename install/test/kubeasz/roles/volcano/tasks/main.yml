@@ -29,8 +29,6 @@
       --version {{ volcano_version }} \
       --create-namespace \
       -f values.yaml
-  environment:
-    KUBECONFIG: "{{ kube_config_file }}"
 
 - name: 等待 Volcano Pods 就绪
   shell: |

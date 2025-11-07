@@ -29,8 +29,6 @@
       --version {{ ingress_nginx_version }} \
       --create-namespace \
       -f values.yaml
-  environment:
-    KUBECONFIG: "{{ kube_config_file }}"
 
 - name: 等待 Ingress-Nginx Pods 就绪
   shell: |
