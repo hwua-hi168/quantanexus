@@ -28,6 +28,7 @@ source "$SCRIPT_DIR/run_gpu_operator.sh"
 source "$SCRIPT_DIR/run_volcano.sh"
 source "$SCRIPT_DIR/run_quantanexus_mgr.sh"
 source "$SCRIPT_DIR/run_quantanexus_cs.sh"
+source "$SCRIPT_DIR/run_uncordon.sh"
 
 # 显示使用说明
 show_usage() {
@@ -54,6 +55,7 @@ show_usage() {
     echo "  volcano      安装Volcano批处理系统"
     echo "  quantanexus-mgr 安装Quantanexus管理组件"
     echo "  quantanexus-cs 安装Quantanexus计算服务"
+    echo "  uncordon     执行节点 uncordon 操作"
     echo "  all          执行所有步骤（默认）"
     echo "  show         显示当前配置"
     echo "  generate     生成hosts文件"
@@ -74,6 +76,15 @@ show_usage() {
     echo "  $0 info                # 显示集群信息"
     echo "  $0 helm                # 安装Helm"
     echo "  $0 longhorn            # 安装Longhorn"
+    echo "  $0 cert-manager        # 安装Cert-Manager"
+    echo "  $0 prometheus          # 安装Prometheus"
+    echo "  $0 ingress-nginx       # 安装Ingress-Nginx"
+    echo "  $0 harbor              # 安装Harbor"
+    echo "  $0 gpu-operator        # 安装GPU Operator"
+    echo "  $0 volcano             # 安装Volcano"
+    echo "  $0 quantanexus-mgr     # 安装Quantanexus管理组件"
+    echo "  $0 quantanexus-cs      # 安装Quantanexus计算服务"
+    echo "  $0 uncordon            # 执行节点 uncordon 操作"
     echo "  $0 all                 # 执行完整流程"
     echo "  $0 show                # 显示当前配置"
     echo "  $0 generate            # 生成hosts文件"
@@ -527,6 +538,24 @@ cmd_quantanexus_cs() {
     print_success "Quantanexus计算服务安装完成"
 }
 
+# 执行节点 uncordon 命令
+cmd_uncordon() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! run_uncordon_masters "$cluster_name"; then
+        print_error "节点 uncordon 操作失败"
+        return 1
+    fi
+    
+    print_success "节点 uncordon 操作完成"
+}
+
 # 主函数
 main() {
     print_banner
@@ -631,6 +660,11 @@ main() {
             load_config
             cmd_quantanexus_cs "${2:-k8s-qn-01}"
             ;;
+        "uncordon")
+            check_config_file || exit 1
+            load_config
+            cmd_uncordon "${2:-k8s-qn-01}"
+            ;;
         "all")
             load_config
             cmd_collect
@@ -666,6 +700,11 @@ main() {
             # 检查run_kubeasz_setup是否成功执行（用户未取消）
             if ! cmd_setup; then
                 print_error "kubeasz分步安装失败或被用户取消"
+                exit 1
+            fi
+            # 在这里添加 uncordon 操作
+            if ! cmd_uncordon; then
+                print_error "节点 uncordon 操作失败"
                 exit 1
             fi
             if ! install_helm; then
@@ -709,6 +748,13 @@ main() {
                 exit 1
             fi
             print_success "所有配置完成！"
+            # all动作完成后显示集群信息
+            print_info "显示集群配置信息..."
+            show_config_summary
+            if ! show_cluster_info "k8s-qn-01"; then
+                print_error "集群信息显示失败"
+                exit 1
+            fi
             ;;
         "show")
             check_config_file || exit 1
