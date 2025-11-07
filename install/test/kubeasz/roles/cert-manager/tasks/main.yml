@@ -33,7 +33,7 @@
 
 - name: 等待 Cert-Manager Pods 就绪
   shell: |
-    /opt/kube/bin/kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=300s
+    /opt/kube/bin/kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=3600s
   changed_when: false
 
 - name: 创建证书和 ClusterIssuer 资源文件

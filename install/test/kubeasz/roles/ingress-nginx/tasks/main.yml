@@ -32,5 +32,5 @@
 
 - name: 等待 Ingress-Nginx Pods 就绪
   shell: |
-    /opt/kube/bin/kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=ingress-nginx -n ingress-nginx --timeout=300s
+    /opt/kube/bin/kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=ingress-nginx -n ingress-nginx --timeout=3600s
   changed_when: false

@@ -31,5 +31,5 @@
 
 - name: 等待 Prometheus Pods 就绪
   shell: |
-    /opt/kube/bin/kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=prometheus -n prom --timeout=300s
+    /opt/kube/bin/kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=prometheus -n prom --timeout=3600s
   changed_when: false
