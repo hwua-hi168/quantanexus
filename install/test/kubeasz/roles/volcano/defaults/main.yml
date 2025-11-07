@@ -1,6 +1,6 @@
 ---
 # Volcano 配置默认值
-volcano_version: "1.8.0"
+volcano_version: "1.13.0"
 volcano_work_dir: "{{ CLUSTER_DIR }}/helm/volcano"
 kube_config_file: "{{ CLUSTER_DIR }}/config"
 
