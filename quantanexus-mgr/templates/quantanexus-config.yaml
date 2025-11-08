@@ -76,4 +76,6 @@ data:
 
   pre-start.sh: |
     echo "quantanexus pre-start.sh called"
+    sed -i 's/demo\.hi168\.com/{{ .Values.global.domainName }}/g' "${QUANTANEXUS_HOME}/quantanexus-addons/hw_experiment/data/zone.xml"
+    echo "quantanexus pre-start.sh finished"    
 {{- end }}
