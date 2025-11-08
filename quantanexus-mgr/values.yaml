@@ -118,7 +118,7 @@ quantanexus:
   # Quantanexus manager (init container)
   manager:
     repository: "quantanexus-mgr"
-    tag: "v8.3.7.12"
+    tag: "v8.3.7.14"
 
   # Nginx reverse proxy
   nginx:
@@ -129,7 +129,7 @@ quantanexus:
     # Frontend (Vue) init container
     frontend:
       repository: "hi168-vue"
-      tag: "v8.3.7.qn11"
+      tag: "v8.3.7.qn14"
       env:
         type: "hi168slot"
         moduleList: "basic"
