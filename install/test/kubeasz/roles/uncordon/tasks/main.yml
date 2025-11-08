@@ -1,0 +1,41 @@
+# file: roles/uncordon/tasks/main.yml
+---
+- name: 获取所有节点信息
+  shell: /opt/kube/bin/kubectl get nodes --no-headers -o custom-columns=NAME:.metadata.name
+  register: nodes_info
+  changed_when: false
+
+- name: 显示当前节点状态
+  debug:
+    msg: "{{ nodes_info.stdout_lines }}"
+
+- name: 获取节点详细状态
+  shell: /opt/kube/bin/kubectl get nodes -o wide
+  register: nodes_detailed
+  changed_when: false
+
+- name: 显示节点详细状态
+  debug:
+    msg: "{{ nodes_detailed.stdout }}"
+
+- name: Uncordon 所有节点（使用节点名称）
+  shell: |
+    /opt/kube/bin/kubectl uncordon "{{ item }}"
+  with_items: "{{ nodes_info.stdout_lines }}"
+
+  ignore_errors: yes
+  register: uncordon_results
+
+- name: 显示 uncordon 结果
+  debug:
+    msg: "Uncordon {{ item.item }}: {{ '成功' if item.rc == 0 else '失败 - ' + item.stderr }}"
+  with_items: "{{ uncordon_results.results }}"
+
+- name: 验证最终节点状态
+  shell: /opt/kube/bin/kubectl get nodes
+  register: final_nodes_status
+  changed_when: false
+
+- name: 显示最终节点状态
+  debug:
+    msg: "{{ final_nodes_status.stdout }}"
