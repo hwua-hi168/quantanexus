@@ -92,14 +92,22 @@ QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平
 
 适用于全新环境，一键安装完整的 Kubernetes 集群和 QuantaNexus 平台：
 
-- 自动部署 Kubernetes 1.28+ 集群，可以使用./install/test/kubeeasz开源项目用来部署。
+- 自动部署 Kubernetes 1.28+ 集群，可以使用./install/test/kubeasz开源项目用来部署。
 - 预配置网络插件可选 flannel、calico、cilium、kube-ovn，建议使用calico。
 - 安装 kube-virt 虚拟化组件
 - 集成 Ceph 存储系统（支持 Ceph 17+ 版本）或者Longhorn 存储系统（支持 Longhorn 1.5.x ）
 - 预装 Prometheus 监控系统
 - 自动配置 QuantaNexus-mgr 和 QuantaNexus-cs 核心服务
 
-可以参考install/test/README.md(./install/test/README.md) 进行安装。
+```
+  curl 
+```
+
+也可以参考install/test/README.md(./install/test/README.md) 进行手工安装。
+
+
+
+
 
 ### 1.2 现有 Kubernetes 集群安装
 
