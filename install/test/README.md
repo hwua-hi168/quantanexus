@@ -190,7 +190,7 @@ cd test/helm/harbor
 helm upgrade --install harbor hi168/harbor \
   --namespace harbor \
   --create-namespace \
-  -f values.yaml
+  -f ./helm/harbor/values.yaml
 
 # 安装完毕后检查所有 Pod 是否正常
 kubectl get pods -n harbor
