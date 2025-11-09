@@ -5,7 +5,7 @@
 run_uncordon_masters() {
     local cluster_name="${1:-k8s-qn-01}"
     
-    print_info "开始执行节点 uncordon 操作..."
+    print_info "执行节点 uncordon 操作..."
     
     # 检查kubeasz是否已安装
     if [[ ! -d "/etc/kubeasz" ]]; then
@@ -35,35 +35,16 @@ run_uncordon_masters() {
     local original_dir=$(pwd)
     cd /etc/kubeasz || return 1
     
-    # 从load_config函数获取master节点名称
-    local master_nodes=()
+    # 执行ansible playbook进行uncordon操作
+    print_info "执行uncordon: ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/uncordon.yml"
     
-    # 使用load_config函数加载的master_ips和node_names变量
-    for ip in "${master_ips[@]}"; do
-        if [[ -n "${node_names[$ip]}" ]]; then
-            master_nodes+=("${node_names[$ip]}")
-        fi
-    done
-    
-    if [[ ${#master_nodes[@]} -eq 0 ]]; then
-        print_warning "未找到master节点信息"
+    if execute_with_privileges ansible-playbook -i "clusters/$cluster_name/hosts" -e "@clusters/$cluster_name/config.yml" playbooks/uncordon.yml; then
+        print_success "节点 uncordon 操作完成"
         cd "$original_dir"
         return 0
+    else
+        print_error "节点 uncordon 操作失败"
+        cd "$original_dir"
+        return 1
     fi
-    
-    # 对每个master节点执行uncordon操作
-    for node in "${master_nodes[@]}"; do
-        print_info "执行节点 uncordon: $node"
-        if execute_with_privileges /opt/kube/bin/kubectl uncordon "$node"; then
-            print_success "节点 $node uncordon 成功"
-        else
-            print_error "节点 $node uncordon 失败"
-            cd "$original_dir"
-            return 1
-        fi
-    done
-    
-    print_success "所有master节点 uncordon 操作完成"
-    cd "$original_dir"
-    return 0
 }
