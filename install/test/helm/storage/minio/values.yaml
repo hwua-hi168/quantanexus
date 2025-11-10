@@ -1,25 +1,18 @@
-mode: standalone
-replicas: 2
-
+mode: distributed #分布式
 auth:
   rootUser: admin
-  rootPassword: "admin"
-
-persistence:
-  enabled: true
-  storageClass: ""
-  size: 50Gi
-
-service:
-  type: NodePort
-  nodePorts:
-    api: 31000
-    console: 31001
-
+  rootPassword: "admin"  
+replicas: 4 #4个pod
+statefulset:
+  replicaCount: 4
 resources:
   requests:
-    cpu: 500m
-    memory: 512Mi
+    memory: 20Gi
   limits:
-    cpu: 2000m
-    memory: 2Gi
+    memory: 40Gi
+persistence:
+  size: 100Gi
+service:
+  type: NodePort
+consoleService:
+  type: NodePort
