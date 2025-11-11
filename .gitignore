@@ -4,3 +4,6 @@
 # all crt files .
 *.crt
 install/quantanexus-mgr/values-qn003.yaml
+
+# python3-env
+python3-env/
