@@ -1,0 +1,13 @@
+apiVersion: v1
+entries:
+  quantanexus-cs:
+  - apiVersion: v2
+    appVersion: v0.06
+    created: "2025-11-11T14:46:30.24935749Z"
+    description: A Helm chart for deploying quantanexus cluster service on Kubernetes
+    digest: 9228b6169dbff596b893c17d52c777185389f31f89d2506a41b99656ed145d8a
+    name: quantanexus-cs
+    urls:
+    - https://hwua-hi168.github.io/quantanexus/quantanexus-cs-v0.06.tgz
+    version: v0.06
+generated: "2025-11-11T14:46:30.248231076Z"
