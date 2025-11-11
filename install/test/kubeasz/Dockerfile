@@ -8,7 +8,7 @@ FROM easzlab/ansible:2.14.4-lite
 ARG QNI_VER=
 
 ENV TZ="Asia/Shanghai"
-COPY kubeasz /etc/kubeasz
+COPY install/test/kubeasz/kubeasz /etc/kubeasz
 RUN set -x \
     && ln -s -f /etc/kubeasz/ezctl /usr/bin/ezctl \
     && ln -s -f /etc/kubeasz/ezdown /usr/bin/ezdown \
