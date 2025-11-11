@@ -59,5 +59,3 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             QNI_VER=${{ github.ref_name }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
