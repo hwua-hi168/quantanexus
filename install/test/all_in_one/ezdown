@@ -15,6 +15,7 @@ set -o pipefail
 
 # default settings, can be overridden by cmd line options, see usage
 DOCKER_VER=28.0.4
+QUANTANEXUS_INSTALLER_VER=v0.03
 KUBEASZ_VER=3.6.8
 K8S_BIN_VER=v1.34.1
 # https://github.com/easzlab/dockerfile-kubeasz-ext-bin
@@ -275,22 +276,23 @@ EOF
   systemctl daemon-reload && systemctl restart docker && sleep 3
 }
 
-function get_kubeasz() {
+#它是从docker拉下来并且复制的，所以需要docker打包镜像
+function get_quantanexus_installer() {
   # check if kubeasz already existed
   [[ -d "$BASE/roles/kube-node" ]] && { logger warn "kubeasz already existed"; return 0; }
 
-  if [[ ! -f "$imageDir/kubeasz_$KUBEASZ_VER.tar" ]];then
-    logger info "downloading kubeasz: $KUBEASZ_VER"
-    docker pull "easzlab/kubeasz:$KUBEASZ_VER" && \
-    docker save -o "$imageDir/kubeasz_$KUBEASZ_VER.tar" "easzlab/kubeasz:$KUBEASZ_VER" || \
+  if [[ ! -f "$imageDir/quantanexus_installer_$QUANTANEXUS_INSTALLER_VER.tar" ]];then
+    logger info "downloading QuantaNexus Installer: $QUANTANEXUS_INSTALLER_VER"
+    docker pull "hwua/quantanexus_installer:$QUANTANEXUS_INSTALLER_VER" && \
+    docker save -o "$imageDir/quantanexus_installer_$QUANTANEXUS_INSTALLER_VER.tar" "hwua/quantanexus_installer:$QUANTANEXUS_INSTALLER_VER" || \
     { logger error "download failed!"; return 1; }
   else
-    docker load -i "$imageDir/kubeasz_$KUBEASZ_VER.tar"
+    docker load -i "$imageDir/quantanexus_installer_$KUBEASZ_VER.tar"
   fi
 
-  docker ps -a |grep -q temp_easz && { logger debug "remove existing container"; docker rm -f temp_easz; }
+  docker ps -a |grep -q temp_qni && { logger debug "remove existing container"; docker rm -f temp_easz; }
   logger debug " run a temporary container"
-  docker run -d --name temp_easz easzlab/kubeasz:${KUBEASZ_VER} || { logger error "failed."; exit 1; }
+  docker run -d --name temp_qni hwua/quantanexus_installer:${QUANTANEXUS_INSTALLER_VER} || { logger error "failed."; exit 1; }
 
   [[ -d "$BASE/down" ]] && /bin/mv -f "$BASE/down" /tmp
   [[ -d "$BASE/bin" ]] && /bin/mv -f "$BASE/bin" /tmp
