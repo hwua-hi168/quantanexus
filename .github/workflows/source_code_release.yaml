@@ -1,15 +1,15 @@
-# name: Release
-# on:
-#   push:
-#     tags:
-#       - 'v*'
-
 name: Release
 on:
   push:
-    branches: [ main, master ]   # 每次 push 到主分支就触发
-    tags: [ 'v*' ]               # 也保留 tag 触发
-  workflow_dispatch:             # 手动运行按钮
+    tags:
+      - 'v*'
+
+# name: Release
+# on:
+#   push:
+#     branches: [ main, master ]   # 每次 push 到主分支就触发
+#     tags: [ 'v*' ]               # 也保留 tag 触发
+#   workflow_dispatch:             # 手动运行按钮
 
 env:
   REGISTRY: registry.cn-hangzhou.aliyuncs.com
