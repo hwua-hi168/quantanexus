@@ -60,10 +60,13 @@ jobs:
       # 3. 构建产物（源码包 + 校验文件）
       - name: Build artifacts
         run: |
-          zip -r quantanexus-${GITHUB_REF_NAME}.zip . \
-            -x '.git/*' -x '*.zip' -x '.github/*' -x '*.gz'
+          mkdir -p /tmp/artifacts
+          zip -r /tmp/artifacts/quantanexus-${GITHUB_REF_NAME}.zip . \
+            -x '.git/*' -x '*.zip' -x '.github/*' -x '*.gz' \
+            -x 'quantanexus-*.zip' -x 'quantanexus-*.tar.gz'
           tar --exclude='.git' --exclude='*.zip' --exclude='.github' --exclude='*.gz' \
-            -czf quantanexus-${GITHUB_REF_NAME}.tar.gz .
+            -czf /tmp/artifacts/quantanexus-${GITHUB_REF_NAME}.tar.gz .
+          mv /tmp/artifacts/* .
           sha256sum *.zip *.tar.gz *.tgz > quantanexus-checksums.txt
 
       # 4. 创建 GitHub Release 并上传资产
