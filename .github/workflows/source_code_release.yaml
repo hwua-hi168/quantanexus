@@ -2,73 +2,71 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'         
+      - 'v*'
 
 env:
   REGISTRY: registry.cn-hangzhou.aliyuncs.com
 
 permissions:
-  contents: write    # 必须有写权限才能创建 Release
+  contents: write    # 创建 release & 推送到 gh-pages
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      #Helm install
+
+      # 安装 helm
       - uses: azure/setup-helm@v4
         with:
-          version: 'latest'
-      
+          version: latest
+
+      # 1. 打包 Helm Chart
       - name: Package Helm Chart
         run: |
           helm package quantanexus \
             --version ${{ github.ref_name }} \
             --app-version ${{ github.ref_name }}
-          # 生成文件形如: quantanexus-1.2.3.tgz
           echo "CHART_TGZ=quantanexus-${{ github.ref_name }}.tgz" >> $GITHUB_ENV
-      # generate the github page 
+
+      # 2. 更新 Helm Repo（gh-pages）
       - name: Update index.yaml
         run: |
           git clone --depth 1 --branch gh-pages \
             https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gh-pages
           mv *.tgz gh-pages/
           cd gh-pages
-          helm repo index . --merge index.yaml
+          helm repo index . --merge index.yaml \
+            --url https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
           git add .
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git commit -m "Add chart ${{ github.ref_name }}"
           git push
 
-      # 1. 构建你的产物（示例）
+      # 3. 构建产物（源码包 + 校验文件）
       - name: Build artifacts
         run: |
-          # 把整棵工作区打成 zip，文件名带版本号
           zip -r quantanexus-${GITHUB_REF_NAME}.zip . \
-            -x '.git/*' -x '*.zip' -x '.github/*'  -x '*.gz'
+            -x '.git/*' -x '*.zip' -x '.github/*' -x '*.gz'
           tar --exclude='.git' --exclude='*.zip' --exclude='.github' --exclude='*.gz' \
             -czf quantanexus-${GITHUB_REF_NAME}.tar.gz .
-          #生成all_in_one用来打包docker镜像
-          zip -r quantanexus-all_in_one-${GITHUB_REF_NAME}.zip . \
-            -x '.git/*' -x '*.zip' -x '.github/*'  -x '*.gz'
-          tar --exclude='.git' --exclude='*.zip' --exclude='*.gz'  --exclude='.github' \
-            -czf quantanexus-all_in_one-${GITHUB_REF_NAME}.tar.gz .
-          sha256sum quantanexus-${GITHUB_REF_NAME}.zip quantanexus-${GITHUB_REF_NAME}.tar.gz > quantanexus-checksums.txt
-          sha256sum quantanexus-all_in_one-${GITHUB_REF_NAME}.zip quantanexus-all_in_one-${GITHUB_REF_NAME}.tar.gz > quantanexus-all_in_one-checksums.txt
-      
-      # 2. 自动创建 Release 并上传资产
+          sha256sum *.zip *.tar.gz *.tgz > quantanexus-checksums.txt
+
+      # 4. 创建 GitHub Release 并上传资产
       - name: Create Release & Upload assets
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
-          body_path: CHANGELOG.md   # 也可以自动生成
+          body: |
+            Quantanexus Helm Chart ${{ github.ref_name }}
+            - Chart: quantanexus-${{ github.ref_name }}.tgz
+            - Full source archives attached below.
           files: |
             *.zip
             *.tar.gz
             quantanexus-checksums.txt
+            quantanexus-${{ github.ref_name }}.tgz
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
