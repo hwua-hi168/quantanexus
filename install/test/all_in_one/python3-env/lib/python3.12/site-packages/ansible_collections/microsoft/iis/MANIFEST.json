@@ -1,0 +1,31 @@
+{
+ "collection_info": {
+  "namespace": "microsoft",
+  "name": "iis",
+  "version": "1.0.3",
+  "authors": [
+   "Jordan Borean @jborean93"
+  ],
+  "readme": "README.md",
+  "tags": [
+   "iis",
+   "windows"
+  ],
+  "description": "Ansible collection for Microsoft Internet Information Services (IIS)\n",
+  "license": [],
+  "license_file": "COPYING",
+  "dependencies": {},
+  "repository": "https://github.com/ansible-collections/microsoft.iis",
+  "documentation": "https://docs.ansible.com/ansible/devel/collections/microsoft/iis",
+  "homepage": "https://github.com/ansible-collections/microsoft.iis",
+  "issues": "https://github.com/ansible-collections/microsoft.iis/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc"
+ },
+ "file_manifest_file": {
+  "name": "FILES.json",
+  "ftype": "file",
+  "chksum_type": "sha256",
+  "chksum_sha256": "6a807ad819a5925f23099e45068894c2b5e10ddd4fda9f9c1cb0b0bc099d052b",
+  "format": 1
+ },
+ "format": 1
+}

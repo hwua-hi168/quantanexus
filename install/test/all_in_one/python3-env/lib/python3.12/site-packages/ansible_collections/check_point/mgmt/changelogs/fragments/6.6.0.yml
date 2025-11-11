@@ -1,0 +1,5 @@
+release_summary: This is release 6.6.0 of ``check_point.mgmt``, released on 2025-10-30.
+
+minor_changes:
+- Support check mode (--check)
+- Support async-response for cp_mgmt_access_rule_facts.py with customized HF.

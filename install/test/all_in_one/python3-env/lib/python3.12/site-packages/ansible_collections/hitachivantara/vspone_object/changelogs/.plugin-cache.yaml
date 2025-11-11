@@ -1,0 +1,159 @@
+objects:
+  role: {}
+plugins:
+  become: {}
+  cache: {}
+  callback: {}
+  cliconf: {}
+  connection: {}
+  filter: {}
+  httpapi: {}
+  inventory: {}
+  lookup: {}
+  module:
+    hv_certificates:
+      description: Manage certificates in Hitachi VSP One Object
+      name: hv_certificates
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_certificates_facts:
+      description: Get all the certificates of VSP One Object
+      name: hv_certificates_facts
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_csrf:
+      description: Fetch CSRF tokens from Hitachi VSP One Object
+      name: hv_csrf
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_events_facts:
+      description: Get events from VSP One Object
+      name: hv_events_facts
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_galaxy_facts:
+      description: Get the galaxy information of VSP One Object
+      name: hv_galaxy_facts
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_job:
+      description: Manage jobs in Hitachi VSP One Object.
+      name: hv_job
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_jobs_facts:
+      description: Get job information from VSP One Object
+      name: hv_jobs_facts
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_kmip:
+      description: Manage KMIP servers on VSP One Object
+      name: hv_kmip
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_kmip_server_facts:
+      description: Get a list of KMIP servers
+      name: hv_kmip_server_facts
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_license:
+      description: Manage License in Hitachi VSP One Object
+      name: hv_license
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_licenses_facts:
+      description: Get all the licenses of VSP One Object
+      name: hv_licenses_facts
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_region_facts:
+      description: Get the region info of VSP One Object
+      name: hv_region_facts
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_s3_encryption:
+      description: Set S3 Encryption
+      name: hv_s3_encryption
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_s3_encryption_facts:
+      description: Get the S3 encryption of VSP One Object
+      name: hv_s3_encryption_facts
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_s3_user_credentials:
+      description: Generate S3 user credentials
+      name: hv_s3_user_credentials
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_serial_number:
+      description: Set serial number for VSP One Object
+      name: hv_serial_number
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_serial_number_facts:
+      description: Get the serialnumber of VSP One Object
+      name: hv_serial_number_facts
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_storage_class:
+      description: Create or update a storage class
+      name: hv_storage_class
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_storage_class_facts:
+      description: Get storage classes from VSP One Object
+      name: hv_storage_class_facts
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_storage_component:
+      description: Create or update a storage component
+      name: hv_storage_component
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_storage_component_state_update:
+      description: Update state of a storage component
+      name: hv_storage_component_state_update
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_storage_components_facts:
+      description: Get storage components from VSP One Object
+      name: hv_storage_components_facts
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_storage_fault_domain:
+      description: Create or update a storage fault domain
+      name: hv_storage_fault_domain
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_storage_fault_domain_facts:
+      description: Get storage fault domains from VSP One Object
+      name: hv_storage_fault_domain_facts
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_troubleshooting_facts:
+      description: Create a log bundle for troubleshooting
+      name: hv_troubleshooting_facts
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_user_buckets_facts:
+      description: Get a list of user buckets
+      name: hv_user_buckets_facts
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_user_id_facts:
+      description: Get all the users's ids of VSP One Object
+      name: hv_user_id_facts
+      namespace: oneobject_node
+      version_added: 1.0.0
+    hv_users_facts:
+      description: Get all the users of VSP One Object
+      name: hv_users_facts
+      namespace: oneobject_node
+      version_added: 1.0.0
+  netconf: {}
+  shell: {}
+  strategy: {}
+  test: {}
+  vars: {}
+version: 1.0.0
