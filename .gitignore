@@ -4,3 +4,7 @@
 # all crt files .
 *.crt
 install/quantanexus-mgr/values-qn003.yaml
+
+# python vent
+__pycache__
+_internal
