@@ -27,7 +27,7 @@ jobs:
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             VERSION="${GITHUB_REF_NAME#v}"   # v1.2.3 → 1.2.3
           else
-            VERSION="1.0.0+sha.${GITHUB_SHA::7}"
+            VERSION="0.0.0+sha.${GITHUB_SHA::7}"
           fi
           helm package quantanexus-mgr --version "$VERSION" --app-version "$VERSION"
           echo "QUANTANEXUS_MGR_TGZ=quantanexus-mgr-${VERSION}.tgz" >> $GITHUB_ENV
