@@ -31,15 +31,16 @@ jobs:
       # 1. 打包 Helm Chart
       - name: Package Helm Chart
         run: |
-          pwd && ls -la \
-          helm package quantanexus-mgr \
-            --version ${{ github.ref_name }} \
-            --app-version ${{ github.ref_name }}
-          echo "QUANTANEXUS_MGR_TGZ=quantanexus-mgr-${{ github.ref_name }}.tgz" >> $GITHUB_ENV
-          helm package quantanexus-cs \
-            --version ${{ github.ref_name }} \
-            --app-version ${{ github.ref_name }}
-            echo "QUANTANEXUS_CS_TGZ=quantanexus-cs-${{ github.ref_name }}.tgz" >> $GITHUB_ENV
+          # 如果是 tag，用 tag 名；否则用 1.0.0+sha.*****
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"   # v1.2.3 → 1.2.3
+          else
+            VERSION="1.0.0+sha.${GITHUB_SHA::7}"
+          fi
+          helm package quantanexus-mgr --version "$VERSION" --app-version "$VERSION"
+          echo "QUANTANEXUS_MGR_TGZ=quantanexus-mgr-${VERSION}.tgz" >> $GITHUB_ENV
+          helm package quantanexus-cs --version "$VERSION" --app-version "$VERSION"
+          echo "QUANTANEXUS_CS_TGZ=quantanexus-cs-${VERSION}.tgz" >> $GITHUB_ENV
 
       # 2. 更新 Helm Repo（gh-pages）
       - name: Update index.yaml
