@@ -4,3 +4,18 @@
 # all crt files .
 *.crt
 install/quantanexus-mgr/values-qn003.yaml
+
+# python venv
+python3-env
+
+# clusters files
+clusters/
+
+#helm
+helm.xlsx
+helm_template.sh
+install/quantanexus/
+install/sftp-config.json.bak
+install/test/kubeasz/.gitignore
+tian-assets/
+tmp/
