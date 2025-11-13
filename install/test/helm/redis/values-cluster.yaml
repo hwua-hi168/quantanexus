@@ -1,7 +1,8 @@
 # values-redis-no-auth.yaml
 cluster:
   enabled: true
-  nodes: 6                    # 3
+  nodes: 3                    # 3
+  replicas: 0
   persistence:
     enabled: true
     size: 10Gi

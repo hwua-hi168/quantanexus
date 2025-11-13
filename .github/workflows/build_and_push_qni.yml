@@ -1,9 +1,9 @@
+# build and push qni ( QuantaNexus Installer)
 name: Create and publish Docker image
 on:
-  workflow_run:
-    workflows: ["Release"] # build after relase
-    types:
-      - completed      
+  push:
+    tags:
+      - 'v*'         
 
 env:
   REGISTRY: registry.cn-hangzhou.aliyuncs.com
@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      # packages: write          # 仅 GitHub Container Registry 需要，可保留或删除
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -24,12 +24,14 @@ jobs:
         with:
           images: |
             hwua/quantanexus-installer
-            registry.cn-hangzhou.aliyuncs.com/quantanexus/quantaxus-installer
+            registry.cn-hangzhou.aliyuncs.com/quantanexus/quantanexus-installer
           tags: |
-            type=ref,event=tag   # 把 git tag 直接映射成镜像 tag
+            type=ref,event=tag
+            type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
+
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -51,9 +53,9 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          file: ./install/test/all_in_one/Dockerfile
+          file: ./install/test/kubeasz/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            QUANTANEXUS_INSATLLER_VER=${{ github.ref_name }}  # 这里注入版本
+            QNI_VER=${{ github.ref_name }}

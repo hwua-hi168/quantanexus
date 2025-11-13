@@ -1,9 +1,0 @@
-- hosts: localhost
-  roles:
-  - helm
-
-# prepare tasks for all nodes
-- hosts:
-  - kube_master
-  roles:
-  - helm

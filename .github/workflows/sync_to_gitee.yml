@@ -1,10 +1,8 @@
 name: Sync to Gitee via SSH
 
 on:
-  push:
-    branches: [ main, master ]
   schedule:
-    - cron: '0 */4 * * *'  # 每4小时一次
+    - cron: '0 4 * * *'   # 每天 04:00 UTC（北京时间 12:00）
 
 jobs:
   sync:
@@ -13,23 +11,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0          # 完整历史，保证标签也拿到
 
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          
-          # 写入私钥并验证
+
+          # 写入私钥
           echo "${{ secrets.GITEE_SSH_PRIVATE_KEY }}" > ~/.ssh/gitee_key
           chmod 600 ~/.ssh/gitee_key
-          
+
           # 验证密钥格式
-          echo "=== Verifying SSH key ==="
-          ls -la ~/.ssh/gitee_key
-          file ~/.ssh/gitee_key
           ssh-keygen -l -f ~/.ssh/gitee_key
-          
+
           # 配置 known_hosts
           ssh-keyscan gitee.com >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
@@ -41,11 +36,11 @@ jobs:
 
       - name: Test SSH connection
         run: |
-          echo "=== Testing SSH connection ==="
-          ssh -T -o ConnectTimeout=10 -i ~/.ssh/gitee_key git@gitee.com 2>&1 | head -10
+          ssh -T -o ConnectTimeout=10 -i ~/.ssh/gitee_key -o IdentitiesOnly=yes git@gitee.com 2>&1 | head -10
 
-      - name: Sync to Gitee
+      - name: Sync all branches & tags to Gitee
         run: |
           git remote remove gitee || true
           git remote add gitee git@gitee.com:hwua/quantanexus.git
-          GIT_SSH_COMMAND="ssh -i ~/.ssh/gitee_key -o IdentitiesOnly=yes" git push gitee HEAD:main --force --verbose
+          GIT_SSH_COMMAND="ssh -i ~/.ssh/gitee_key -o IdentitiesOnly=yes" \
+            git push gitee --all --tags --force --verbose

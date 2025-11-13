@@ -15,6 +15,8 @@ set -o pipefail
 
 # default settings, can be overridden by cmd line options, see usage
 DOCKER_VER=28.0.4
+#Quantanexus_intaller_version
+QNI_VER=v0.03 
 KUBEASZ_VER=3.6.8
 K8S_BIN_VER=v1.34.1
 # https://github.com/easzlab/dockerfile-kubeasz-ext-bin
@@ -275,31 +277,32 @@ EOF
   systemctl daemon-reload && systemctl restart docker && sleep 3
 }
 
-function get_kubeasz() {
+#它是从docker拉下来并且复制的，所以需要docker打包镜像
+function get_quantanexus_installer() {
   # check if kubeasz already existed
   [[ -d "$BASE/roles/kube-node" ]] && { logger warn "kubeasz already existed"; return 0; }
 
-  if [[ ! -f "$imageDir/kubeasz_$KUBEASZ_VER.tar" ]];then
-    logger info "downloading kubeasz: $KUBEASZ_VER"
-    docker pull "easzlab/kubeasz:$KUBEASZ_VER" && \
-    docker save -o "$imageDir/kubeasz_$KUBEASZ_VER.tar" "easzlab/kubeasz:$KUBEASZ_VER" || \
+  if [[ ! -f "$imageDir/quantanexus_installer_$QNI_VER.tar" ]];then
+    logger info "downloading QuantaNexus Installer: $QNI_VER"
+    docker pull "hwua/quantanexus_installer:$QNI_VER" && \
+    docker save -o "$imageDir/quantanexus_installer_$QNI_VER.tar" "hwua/quantanexus_installer:$QNI_VER" || \
     { logger error "download failed!"; return 1; }
   else
-    docker load -i "$imageDir/kubeasz_$KUBEASZ_VER.tar"
+    docker load -i "$imageDir/quantanexus_installer_$QNI_VER.tar"
   fi
 
-  docker ps -a |grep -q temp_easz && { logger debug "remove existing container"; docker rm -f temp_easz; }
+  docker ps -a |grep -q temp_qni && { logger debug "remove existing container"; docker rm -f temp_qni; }
   logger debug " run a temporary container"
-  docker run -d --name temp_easz easzlab/kubeasz:${KUBEASZ_VER} || { logger error "failed."; exit 1; }
+  docker run -d --name temp_qni hwua/quantanexus_installer:${QNI_VER} || { logger error "failed."; exit 1; }
 
   [[ -d "$BASE/down" ]] && /bin/mv -f "$BASE/down" /tmp
   [[ -d "$BASE/bin" ]] && /bin/mv -f "$BASE/bin" /tmp
 
   rm -rf "$BASE" && \
   logger debug "cp kubeasz code from the temporary container" && \
-  docker cp "temp_easz:$BASE" "$BASE" && \
+  docker cp "temp_qni:$BASE" "$BASE" && \
   logger debug "stop&remove temporary container" && \
-  docker rm -f temp_easz
+  docker rm -f temp_qni
 
   mkdir -p "$BASE/bin" "$BASE/down"
   [[ -d "/tmp/down" ]] && /bin/mv -f /tmp/down/* "$BASE/down"
@@ -713,7 +716,7 @@ function start_kubeasz_docker() {
       --volume /root/.kube:/root/.kube \
       --volume /root/.ssh:/root/.ssh \
       --volume /etc/docker:/etc/docker \
-      easzlab/kubeasz:${KUBEASZ_VER}
+      hwua/quantanexus_installer:${QNI_VER}
 }
 
 function clean_container() {

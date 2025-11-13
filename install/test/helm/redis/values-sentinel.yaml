@@ -1,0 +1,64 @@
+# 整体架构：replication + sentinel
+architecture: replication
+
+# 密码统一
+auth:
+  enabled: true
+  sentinel: true
+  password: "Redis@pass123"   # 自定义
+persistence:
+  enabled: true
+# 主节点
+master:
+  count: 1
+  persistence:
+    enabled: true
+    storageClass: "longhorn"  # 集群实际 SC
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+
+# 从节点
+replica:
+  replicaCount: 2              # 1 主 2 从
+  persistence:
+    enabled: true
+    storageClass: "longhorn"
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+  podAntiAffinityPreset: hard  # 必须打散到不同节点
+
+# 哨兵
+sentinel:
+  enabled: true
+  replicaCount: 3              # 3 哨兵
+  quorum: 2                    # 故障转移票数
+  service:
+    type: NodePort             # 如只对内访问可改成 ClusterIP
+    nodePorts:
+      redis: "32700"             # Redis 主从对外端口
+      sentinel: "32710"          # Sentinel 对外端口
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# 监控（可选）
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false             # 如已有 Prometheus Operator 可开

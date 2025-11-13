@@ -1,0 +1,1 @@
+# 禁止Jekyll 渲染，所有 .yaml.j2、.tgz、.zip 等文件原样发布，不会再报 Liquid 错误。
