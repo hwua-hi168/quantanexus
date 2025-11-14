@@ -43,26 +43,18 @@ download_source_code() {
     
     # 解压文件
     print_info "解压源码文件..."
-    if tar -xzf "quantanexus-${quantanexus_version}.tar.gz"; then
-        # 修改解压后的目录名确保为quantanexus-main
-        if [[ -d "quantanexus-main" ]]; then
-            print_success "源码解压成功"
-        else
-             # 如果目录名不是quantanexus-main，则重命名
-            dir_name=$(ls -d quantanexus-* | head -n 1)
-            if [[ -n "$dir_name" && -d "$dir_name" ]]; then
-                mv "$dir_name" quantanexus-main
-                print_success "源码解压并重命名为quantanexus-main"
-            else
-                print_error "无法找到解压后的目录"
-                return 1
-            fi
-        fi
+    # 直接解压到quantanexus-main目录
+    mkdir -p quantanexus-main
+    if tar -xzf "quantanexus-${quantanexus_version}.tar.gz" -C quantanexus-main --strip-components=1; then
+        print_success "源码解压成功"
         # 清理下载的tar.gz文件
         rm -f "quantanexus-${quantanexus_version}.tar.gz"
         return 0
     else
         print_error "源码解压失败"
+        # 清理创建的目录
+        rm -rf quantanexus-main
+        rm -f "quantanexus-${quantanexus_version}.tar.gz"
         return 1
     fi
 }
