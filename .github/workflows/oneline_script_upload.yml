@@ -3,7 +3,10 @@ name: Build and Upload Oneline Script Tool(kct.sh)
 
 on:
   workflow_dispatch:
-
+  push:
+    tags:
+      - 'v*'
+      
 jobs:
   build-upload:
     runs-on: ubuntu-latest
