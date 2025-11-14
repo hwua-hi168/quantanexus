@@ -1,0 +1,29 @@
+# ==========================
+# MinIO 分布式集群配置
+# ==========================
+
+minio_chart_repo: "https://charts.min.io"
+minio_namespace: minio     
+# 运行模式
+minio_mode: distributed
+
+# 认证
+minio_root_user: admin
+minio_root_password: "admin"
+
+# 副本数（Pod 数量）
+minio_replicas: 4
+
+# StatefulSet 级副本数（与上保持一致即可）
+minio_statefulset_replica_count: 4
+
+# 资源请求/限制
+minio_resources_requests_memory: "20Gi"
+minio_resources_limits_memory: "40Gi"
+
+# 持久化
+minio_persistence_size: "20Gi"
+
+# Service 类型
+minio_service_type: NodePort
+minio_console_service_type: NodePort

@@ -1,0 +1,4 @@
+seaweedfs_chart_repo: "https://helm.hi168.com/charts"
+seaweedfs_namespace: "seaweedfs"  
+seaweedfs_chart_name: "seaweedfs"
+seaweedfs_release: "hi168/seaweedfs"

@@ -1,0 +1,94 @@
+---
+- name: 创建 minio 命名空间
+  kubernetes.core.k8s:
+    name: "{{ minio_namespace }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: Add/Update MinIO Helm repository
+  kubernetes.core.helm_repository:
+    name: minio
+    repo_url: "{{ minio_chart_repo | default('https://charts.min.io/') }}"
+
+- name: 渲染 MinIO values 文件
+  ansible.builtin.template:
+    src: values.yaml.j2
+    dest: /tmp/minio-values-{{ minio_release | default('minio') }}.yaml
+    mode: '0600'
+
+- name: 安装/升级 MinIO 分布式集群
+  kubernetes.core.helm:
+    name: "{{ minio_release | default('minio') }}"
+    chart_ref: "{{ minio_chart_name | default('minio/minio') }}"
+    chart_version: "{{ minio_chart_version | default(omit) }}"
+    release_namespace: "{{ minio_namespace | default('default') }}"
+    create_namespace: true
+    values_files:
+      - /tmp/minio-values-{{ minio_release | default('minio') }}.yaml
+    wait: true
+    timeout: 15m
+
+- name: 等待所有 MinIO Pod 就绪
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: "{{ minio_namespace | default('default') }}"
+    label_selectors:
+      - app=minio
+  register: minio_pods
+  until: >
+    minio_pods.resources | selectattr('status.phase', 'equalto', 'Running') | list | length ==
+    minio_pods.resources | length
+  retries: 60
+  delay: 10
+- name: 调试显示所有主机组
+  debug:
+    var: groups
+- name: 获取任意可用的master节点
+  set_fact:
+    minio_access_host: "{{ groups['kube_master'][0]  }}"
+
+# - name: 等待MinIO服务创建完成
+#   kubernetes.core.k8s_info:
+#     api_version: v1
+#     kind: Service
+#     namespace: "{{ minio_namespace | default('minio') }}"
+#     label_selectors:
+#       - app=minio
+#   register: minio_services
+#   until: minio_services.resources | length > 0
+#   retries: 10
+#   delay: 5
+
+# - name: 获取MinIO S3服务NodePort
+#   kubernetes.core.k8s_info:
+#     api_version: v1
+#     kind: Service
+#     name: minio
+#     namespace: "{{ minio_namespace | default('minio') }}"
+#   register: minio_s3_service
+#   when: minio_services.resources | selectattr('metadata.name', 'equalto', 'minio') | list | length > 0
+
+# - name: 获取MinIO Console服务NodePort
+#   kubernetes.core.k8s_info:
+#     api_version: v1
+#     kind: Service
+#     name: minio-console
+#     namespace: "{{ minio_namespace | default('minio') }}"
+#   register: minio_console_service
+#   when: minio_services.resources | selectattr('metadata.name', 'equalto', 'minio-console') | list | length > 0
+
+# - name: 设置NodePort变量（带默认值）
+#   set_fact:
+#     minio_s3_node_port: "{{ (minio_s3_service.resources[0].spec.ports[0].nodePort | default(32000)) if minio_s3_service.resources is defined else 32000 }}"
+#     minio_console_node_port: "{{ (minio_console_service.resources[0].spec.ports[0].nodePort | default(32001)) if minio_console_service.resources is defined else 32001 }}"
+
+
+# - name: 显示访问信息
+#   ansible.builtin.debug:
+#     msg:
+#       - "MinIO Console : http://{{  minio_access_host }}:{{ minio_console_node_port }}"
+#       - "MinIO S3 API  : http://{{ minio_access_host }}:{{ minio_s3_node_port }}"
+#       - "Root User     : {{ minio_root_user }}"
+#       - "Root Password : {{ minio_root_password }}"

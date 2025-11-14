@@ -1,0 +1,18 @@
+mode: distributed #分布式
+auth:
+  rootUser: admin
+  rootPassword: "admin"  
+replicas: 3 #3个pod
+statefulset:
+  replicaCount: 3
+resources:
+  requests:
+    memory: 20Gi
+  limits:
+    memory: 40Gi
+persistence:
+  size: "{{ minio_persistence_size }}"
+service:
+  type: NodePort
+consoleService:
+  type: NodePort
