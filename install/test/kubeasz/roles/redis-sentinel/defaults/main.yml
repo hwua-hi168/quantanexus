@@ -1,0 +1,37 @@
+# 基础参数
+redis_namespace: "redis"
+redis_release:   "redis-sentinel"
+redis_chart_repo: "https://charts.bitnami.com/bitnami"
+redis_chart_name: "bitnami/redis"
+redis_chart_version: ""   # 空=latest
+
+# 镜像与仓库
+redis_image_registry: "docker.io"
+#redis_image_tag: "7.2.4-debian-11-r3"   # 可留空使用 Chart 默认
+
+# 存储
+redis_storage_class: "longhorn"
+redis_storage_size: "10Gi"
+
+# 网络
+redis_node_port_redis: "32700"
+redis_node_port_sentinel: "32710"
+
+# 认证
+redis_password: "Redis@pass123"
+
+# 资源
+redis_master_cpu_req: "500m"
+redis_master_mem_req: "1Gi"
+redis_master_cpu_lim: "2000m"
+redis_master_mem_lim: "4Gi"
+
+redis_replica_cpu_req: "500m"
+redis_replica_mem_req: "1Gi"
+redis_replica_cpu_lim: "2000m"
+redis_replica_mem_lim: "4Gi"
+
+redis_sentinel_cpu_req: "100m"
+redis_sentinel_mem_req: "128Mi"
+redis_sentinel_cpu_lim: "500m"
+redis_sentinel_mem_lim: "512Mi"

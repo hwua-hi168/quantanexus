@@ -1,0 +1,39 @@
+---
+- name: Add/Update Bitnami Helm repo
+  kubernetes.core.helm_repository:
+    name: bitnami
+    repo_url: "{{ redis_chart_repo }}"
+    force_update: true 
+- name: 渲染 values 文件到本地
+  ansible.builtin.template:
+    src: values-sentinel.yaml.j2
+    dest: /tmp/values-sentinel-{{ redis_release }}.yaml
+    mode: '0600'
+
+- name: 安装/升级 Redis Sentinel Helm Chart
+  kubernetes.core.helm:
+    name: "{{ redis_release }}"
+    chart_ref: "{{ redis_chart_name }}"
+    # chart_version: "{{ redis_chart_version | default(omit) }}"
+    release_namespace: "{{ redis_namespace }}"
+    create_namespace: true
+    values_files:
+      - /tmp/values-sentinel-{{ redis_release }}.yaml
+    wait: true
+    timeout: 10m
+
+- name: 等待所有 Pod Ready
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: "{{ redis_namespace }}"
+    label_selectors:
+      - app.kubernetes.io/name=redis
+  
+
+- name: 显示访问方式
+  ansible.builtin.debug:
+    msg:
+      - "Redis 主从 NodePort : {{ redis_node_port_redis }}"
+      - "Sentinel NodePort     : {{ redis_node_port_sentinel }}"
+      - "密码                  : {{ redis_password }}"
