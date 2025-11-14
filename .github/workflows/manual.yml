@@ -1,0 +1,20 @@
+# .github/workflows/manual.yml
+name: Manual Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  manual-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Run manual task
+        run: |
+          echo "🎯 手工触发任务执行中..."
+          echo "仓库: ${{ github.repository }}"
+          echo "触发者: ${{ github.actor }}"
+          echo "分支: ${{ github.ref }}"
+          date
