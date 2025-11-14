@@ -1,0 +1,24 @@
+---
+- name: Add/Update Seaweedfs Helm repository
+  kubernetes.core.helm_repository:
+    name: hi168
+    repo_url: "{{ seaweedfs_chart_repo }}"
+    state: present  
+
+
+- name: 渲染 SeaweedFS values 文件
+  ansible.builtin.template:
+    src: values.yaml.j2
+    dest: /tmp/seaweedfs-values.yaml
+    mode: '0600'
+
+- name: 安装/升级 SeaweedFS 分布式集群
+  kubernetes.core.helm:
+    name: "seaweedfs"
+    chart_ref: "hi168/seaweedfs"
+    release_namespace: "{{ seaweedfs_namespace }}"
+    create_namespace: true
+    values_files:
+      - /tmp/seaweedfs-values.yaml
+    wait: true
+    timeout: 10m  # 增加超时时间
