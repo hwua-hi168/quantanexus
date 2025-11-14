@@ -1,0 +1,56 @@
+architecture: replication
+global:
+  imageRegistry: "{{ redis_image_registry }}"
+auth:
+  enabled: true
+  sentinel: true
+  password: "{{ redis_password }}"
+persistence:
+  enabled: true
+master:
+  count: 1
+  persistence:
+    enabled: true
+    storageClass: "{{ redis_storage_class }}"
+    size: "{{ redis_storage_size }}"
+  resources:
+    requests:
+      cpu: {{ redis_master_cpu_req }}
+      memory: {{ redis_master_mem_req }}
+    limits:
+      cpu: {{ redis_master_cpu_lim }}
+      memory: {{ redis_master_mem_lim }}
+replica:
+  replicaCount: 3
+  persistence:
+    enabled: true
+    storageClass: "{{ redis_storage_class }}"
+    size: "{{ redis_storage_size }}"
+  resources:
+    requests:
+      cpu: {{ redis_replica_cpu_req }}
+      memory: {{ redis_replica_mem_req }}
+    limits:
+      cpu: {{ redis_replica_cpu_lim }}
+      memory: {{ redis_replica_mem_lim }}
+  podAntiAffinityPreset: soft
+sentinel:
+  enabled: true
+  replicaCount: 3
+  quorum: 2
+  service:
+    type: NodePort
+    nodePorts:
+      redis: "{{ redis_node_port_redis }}"
+      sentinel: "{{ redis_node_port_sentinel }}"
+  resources:
+    requests:
+      cpu: {{ redis_sentinel_cpu_req }}
+      memory: {{ redis_sentinel_mem_req }}
+    limits:
+      cpu: {{ redis_sentinel_cpu_lim }}
+      memory: {{ redis_sentinel_mem_lim }}
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false

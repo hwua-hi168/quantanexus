@@ -1,7 +1,7 @@
 # 整体架构：replication + sentinel
 architecture: replication
-
-# 密码统一
+global:
+  imageRegistry: "docker.io"
 auth:
   enabled: true
   sentinel: true
@@ -25,7 +25,7 @@ master:
 
 # 从节点
 replica:
-  replicaCount: 2              # 1 主 2 从
+  replicaCount: 3              # 1 主 2 从 至少3个点才可以选举
   persistence:
     enabled: true
     storageClass: "longhorn"
@@ -37,10 +37,12 @@ replica:
     limits:
       cpu: 2000m
       memory: 4Gi
-  podAntiAffinityPreset: hard  # 必须打散到不同节点
+  podAntiAffinityPreset: soft  # 必须打散到不同节点
 
 # 哨兵
 sentinel:
+  image:
+    registry: docker.io
   enabled: true
   replicaCount: 3              # 3 哨兵
   quorum: 2                    # 故障转移票数
@@ -59,6 +61,8 @@ sentinel:
 
 # 监控（可选）
 metrics:
+  image:
+    registry: docker.io
   enabled: true
   serviceMonitor:
     enabled: false             # 如已有 Prometheus Operator 可开
