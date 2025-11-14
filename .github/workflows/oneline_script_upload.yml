@@ -25,7 +25,7 @@ jobs:
         USERNAME="tianbao"
         PASSWORD="${{ secrets.DOWNLOAD_CENTER_PASSWORD }}"
         LOCAL_FILE=kct.sh
-        REMOTE_PATH="backups"
+        #REMOTE_PATH="backups"
         
         # 1. 登录获取 Token
         echo "正在登录..."
@@ -41,9 +41,9 @@ jobs:
         echo "API_TOKEN: $API_TOKEN"
         
         # 2. 上传文件
-        echo "正在上传文件 $SERVER/api/resources/$REMOTE_PATH/$LOCAL_FILE ..."
+        echo "正在上传文件 $SERVER/api/resources/$LOCAL_FILE ..."
         UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
-          "$SERVER/api/resources/$REMOTE_PATH/$LOCAL_FILE?override=true" \
+          "$SERVER/api/resources/$LOCAL_FILE?override=true" \
           -H "X-Auth: $API_TOKEN" \
           -F "file=@./$LOCAL_FILE")
         
