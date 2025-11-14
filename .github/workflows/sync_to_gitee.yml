@@ -43,4 +43,5 @@ jobs:
           git remote remove gitee || true
           git remote add gitee git@gitee.com:hwua/quantanexus.git
           GIT_SSH_COMMAND="ssh -i ~/.ssh/gitee_key -o IdentitiesOnly=yes" \
-            git push gitee --all --tags --force --verbose
+          git push gitee --all --force --verbose \
+          git push gitee --tags --force --verbose
