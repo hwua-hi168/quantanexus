@@ -1,0 +1,62 @@
+# .github/workflows/build-upload.yml
+name: Build and Upload
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-upload:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Build and upload
+      run: |
+        cd install/test/kubeasz/qn/
+        
+        bash pack.sh
+        
+        ls -lhs kct.sh
+        
+        # upload.sh 脚本
+        SERVER="https://d.hi168.com/filebrowser"
+        USERNAME="tianbao"
+        PASSWORD="${{ secrets.DOWNLOAD_CENTER_PASSWORD }}"
+        LOCAL_FILE=kct.sh
+        REMOTE_PATH="backups"
+        
+        # 1. 登录获取 Token
+        echo "正在登录..."
+        API_TOKEN=$(curl -s -X POST \
+          $SERVER/api/login \
+          -H 'Content-Type: application/json' \
+          -d "{\"username\":\"$USERNAME\",\"password\":\"$PASSWORD\"}" )
+        
+        if [ -z "$API_TOKEN" ]; then
+            echo "错误：登录失败，请检查用户名和密码"
+            exit 1
+        fi
+        echo "API_TOKEN: $API_TOKEN"
+        
+        # 2. 上传文件
+        echo "正在上传文件 $SERVER/api/resources/$REMOTE_PATH/$LOCAL_FILE ..."
+        UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+          "$SERVER/api/resources/$REMOTE_PATH/$LOCAL_FILE?override=true" \
+          -H "X-Auth: $API_TOKEN" \
+          -F "file=@./$LOCAL_FILE")
+        
+        # 分离响应体和状态码
+        HTTP_STATUS=$(echo "$UPLOAD_RESPONSE" | tail -n1)
+        RESPONSE_BODY=$(echo "$UPLOAD_RESPONSE" | head -n -1)
+        
+        echo "HTTP状态码: $HTTP_STATUS"
+        echo "服务器响应: $RESPONSE_BODY"
+        
+        if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "上传成功！"
+        else
+            echo "上传失败！"
+            exit 1
+        fi
