@@ -5,6 +5,7 @@
     repo_url: "{{ redis_chart_repo }}"
     force_update: true 
 - name: 渲染 values 文件到本地
+
   ansible.builtin.template:
     src: values-sentinel.yaml.j2
     dest: /tmp/values-sentinel-{{ redis_release }}.yaml
@@ -37,3 +38,7 @@
       - "Redis 主从 NodePort : {{ redis_node_port_redis }}"
       - "Sentinel NodePort     : {{ redis_node_port_sentinel }}"
       - "密码                  : {{ redis_password }}"
+
+- name: 标记 Redis Sentinel 已就绪
+  set_fact:
+    redis_sentinel_ready: true

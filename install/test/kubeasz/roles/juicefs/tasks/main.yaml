@@ -1,0 +1,41 @@
+
+- name: Add/Update JuiceFS Helm repository
+  kubernetes.core.helm_repository:
+    name: juicedata
+    repo_url: "{{ juicefs_chart_repo }}"
+
+- name: 渲染 JuiceFS values 文件
+  ansible.builtin.template:
+    src: values.yaml.j2
+    dest: /tmp/values-juicefs-{{ juicefs_csi_release }}.yaml
+    mode: '0600'
+
+- name: 安装/升级 JuiceFS CSI Driver
+  kubernetes.core.helm:
+    name: "{{ juicefs_csi_release }}"
+    chart_ref: "{{ juicefs_csi_chart_name }}"
+    # chart_version: "{{ juicefs_chart_version | default(omit) }}"
+    release_namespace: "{{ juicefs_namespace }}"
+    create_namespace: true
+    values_files:
+      - /tmp/values-juicefs-{{ juicefs_csi_release }}.yaml
+    wait: true
+    timeout: 3m
+
+- name: 渲染 JuiceFS S3 values 文件
+  ansible.builtin.template:
+    src: values-s3.yaml.j2
+    dest: /tmp/values-juicefs-s3-{{ juicefs_release }}.yaml
+    mode: '0600'
+
+- name: 安装/升级 JuiceFS S3 
+  kubernetes.core.helm:
+    name: "{{ juicefs_s3_release }}"
+    chart_ref: "{{ juicefs_s3_chart_name }}"
+    # chart_version: "{{ juicefs_chart_version | default(omit) }}"
+    release_namespace: "{{ juicefs_namespace }}"
+    create_namespace: true
+    values_files:
+      - /tmp/values-juicefs-s3-{{ juicefs_s3_release }}.yaml
+    wait: true
+    timeout: 3m

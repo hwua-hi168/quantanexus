@@ -1,0 +1,91 @@
+# 基础信息
+juicefs_namespace: "juicefs"
+juicefs_chart_repo: "https://juicedata.github.io/charts"
+juicefs_csi_chart_name: "juicedata/juicefs-csi-driver"
+juicefs_csi_chart_version: ""          # 空=latest
+juicefs_csi_release: "juicefs-csi"
+
+
+juicefs_secret_metaurl: "redis://redis.default.svc.cluster.local:6379/2"
+juicefs_secret_storage: "s3"
+juicefs_secret_access_key: "admin"
+juicefs_secret_secret_key: "admin"
+juicefs_secret_bucket: "http://seaweedfs-s3.seaweedfs:8333/juicefs-s3-public"
+
+
+# kubelet 根目录（与集群保持一致）
+juicefs_kubelet_dir: "/var/lib/kubelet"
+
+# 镜像仓库（国内加速可改）
+juicefs_image_registry: ""
+juicefs_image_tag: ""              # 空=Chart 默认
+
+juicefs_dashboard_image: "juicedata/csi-dashboard"
+
+# sidecar 国内镜像
+juicefs_sidecar_registry: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s"
+
+# ====== CSI 专用 ======
+juicefs_csi_metaurl: "{{ juicefs_secret_metaurl }}"   # 默认引用，可覆盖
+juicefs_csi_storage: "{{ juicefs_secret_storage }}"
+juicefs_csi_access_key: "{{ juicefs_secret_access_key }}"
+juicefs_csi_secret_key: "{{ juicefs_secret_secret_key }}"
+juicefs_csi_bucket: "{{ juicefs_secret_bucket }}"
+
+# 控制台账号（MinIO 兼容）
+juicefs_env_root_user: "admin"
+juicefs_env_root_password: "hwua123456"
+
+# 服务暴露
+juicefs_service_type: "NodePort"
+juicefs_ingress_enabled: false
+juicefs_ingress_class: "nginx"
+
+# NodePort 端口（可选）
+juicefs_node_port: 32092
+
+# 资源限制/请求
+juicefs_driver_cpu_req: "100m"
+juicefs_driver_mem_req: "128Mi"
+juicefs_driver_cpu_lim: "500m"
+juicefs_driver_mem_lim: "512Mi"
+
+# S3 网关
+# 基础信息
+juicefs_s3_namespace: "{{ juicefs_namespace }}"
+juicefs_s3_release: "juicefs-s3"
+juicefs_s3_chart_name: "juicefsdata/juicefs-s3-gateway"
+juicefs_s3_chart_repo: "{{ juicefs_chart_repo }}"
+juicefs_s3_chart_version: ""          # 空=latest
+
+# 镜像（国内加速可改）
+juicefs_s3_image_registry: "juicedata"
+juicefs_s3_image_tag: ""              # 空=Chart 默认
+
+# 服务暴露
+juicefs_s3_service_type: "NodePort"
+juicefs_s3_node_port: 32093           # 自定义对外端口
+
+# Ingress（默认关闭）
+juicefs_s3_ingress_enabled: false
+juicefs_s3_ingress_class: "nginx"
+
+# ====== S3-Gateway 专用 ======
+juicefs_s3_metaurl: "{{ juicefs_secret_metaurl }}"   # 默认引用，可覆盖
+juicefs_s3_storage: "{{ juicefs_secret_storage }}"
+juicefs_s3_access_key: "{{ juicefs_secret_access_key }}"
+juicefs_s3_secret_key: "{{ juicefs_secret_secret_key }}"
+juicefs_s3_bucket: "{{ juicefs_secret_bucket }}"
+
+# 控制台账号（需要重新查询)
+juicefs_s3_env_root_user: "admin"
+juicefs_s3_env_root_password: "hwua123456"
+
+# 资源限制
+juicefs_s3_cpu_req: "100m"
+juicefs_s3_mem_req: "128Mi"
+juicefs_s3_cpu_lim: "500m"
+juicefs_s3_mem_lim: "512Mi"
+
+# 探测 Redis 超时
+juicefs_s3_redis_probe_timeout: 300
