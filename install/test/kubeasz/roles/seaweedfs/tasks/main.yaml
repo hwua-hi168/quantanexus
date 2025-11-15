@@ -22,3 +22,19 @@
       - /tmp/seaweedfs-values.yaml
     wait: true
     timeout: 10m  # 增加超时时间
+
+- name: 等待 SeaweedFS S3 端口可达
+  wait_for:
+    host: "{{ seaweedfs_s3_host | default(groups['kube_node'][0]) }}"
+    port: "{{ seaweedfs_s3_node_port }}"
+    timeout: 300
+  delegate_to: localhost
+
+- name: 自动创建 JuiceFS 用桶 juicefs-s3-public
+  command: |
+    kubectl run s3-mb --rm -i --restart=Never --image=minio/mc -- \
+      mc alias add local http://{{ seaweedfs_s3_host }}:{{ seaweedfs_s3_node_port }} {{ seaweedfs_root_user }} {{ seaweedfs_root_password }} && \
+      mc mb --ignore-existing local/juicefs-s3-public
+  delegate_to: localhost
+  register: mb_out
+  failed_when: '"Created" not in mb_out.stdout'
