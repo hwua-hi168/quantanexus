@@ -1,0 +1,6 @@
+---
+- name: 配置 containerd 镜像仓库
+  hosts: all
+  gather_facts: false
+  roles:
+    - { role: custom-component/containerd-registry-config, tags: ["containerd-registry-config"] }

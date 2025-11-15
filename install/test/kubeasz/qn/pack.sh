@@ -196,6 +196,11 @@ EOF
     echo "# ==================== run_uncordon.sh ====================" >> "$output_file"
     extract_file_content "run_uncordon.sh" >> "$output_file"
     
+    print_info "添加containerd配置模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== run_containerd_config.sh ====================" >> "$output_file"
+    extract_file_content "run_containerd_config.sh" >> "$output_file"
+    
     print_info "添加主程序..."
     echo "" >> "$output_file"
     echo "# ==================== main.sh ====================" >> "$output_file"
@@ -286,45 +291,49 @@ show_usage() {
     echo "  此脚本将所有的.sh文件打包成一个独立的可执行文件"
 }
 
+# 主函数
 main() {
-    local output_file="${1:-kct.sh}"
+    # 创建头部
+    create_header
     
-    # 检查帮助选项
-    if [[ "$1" == "-h" || "$1" == "--help" ]]; then
-        show_usage
-        exit 0
-    fi
+    # 添加各个模块文件
+    local modules=(
+        "common.sh"
+        "collect_info.sh"
+        "remote_config.sh"
+        "install_tools.sh"
+        "download_source.sh"
+        "install_kubeasz.sh"
+        "configure_kubeasz.sh"
+        "run_kubeasz_setup.sh"
+        "run_longhorn.sh"
+        "run_cert_manager.sh"
+        "run_prometheus.sh"
+        "run_ingress_nginx.sh"
+        "run_harbor.sh"
+        "run_gpu_operator.sh"
+        "run_volcano.sh"
+        "run_quantanexus_mgr.sh"
+        "run_quantanexus_cs.sh"
+        "run_uncordon.sh"
+        "run_containerd_config.sh"  # 添加新的模块文件
+        "main.sh"
+    )
     
-    print_banner() {
-        echo "================================================"
-        echo "      K8s集群工具打包脚本"
-        echo "================================================"
-        echo ""
-    }
-    
-    print_banner
-    
-    # 检查所有文件是否存在
-    if ! check_files_exist; then
-        print_error "文件检查失败，请确保所有脚本文件都在当前目录"
-        exit 1
-    fi
-    
-    # 创建打包文件
-    if create_packed_file "$output_file"; then
-        # 验证打包文件
-        if validate_packed_file "$output_file"; then
-            print_info "打包成功！"
-            echo ""
-            print_info "使用方法:"
-            echo "  ./$output_file --help       # 查看完整帮助"
-        else
-            print_warning "打包文件验证发现一些问题，但文件已生成"
+    for module in "${modules[@]}"; do
+        if ! add_file "$module" "true"; then
+            print_error "添加模块 $module 失败"
+            exit 1
         fi
-    else
-        print_error "打包失败"
-        exit 1
-    fi
+    done
+    
+    # 移动临时文件到输出文件
+    mv "$TEMP_FILE" "$OUTPUT_FILE"
+    
+    # 添加执行权限
+    chmod +x "$OUTPUT_FILE"
+    
+    print_success "编译完成: $OUTPUT_FILE"
 }
 
 # 执行主函数
