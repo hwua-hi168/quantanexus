@@ -49,46 +49,82 @@
   set_fact:
     minio_access_host: "{{ groups['kube_master'][0]  }}"
 
-# - name: 等待MinIO服务创建完成
-#   kubernetes.core.k8s_info:
-#     api_version: v1
-#     kind: Service
-#     namespace: "{{ minio_namespace | default('minio') }}"
-#     label_selectors:
-#       - app=minio
-#   register: minio_services
-#   until: minio_services.resources | length > 0
-#   retries: 10
-#   delay: 5
 
-# - name: 获取MinIO S3服务NodePort
-#   kubernetes.core.k8s_info:
-#     api_version: v1
-#     kind: Service
-#     name: minio
-#     namespace: "{{ minio_namespace | default('minio') }}"
-#   register: minio_s3_service
-#   when: minio_services.resources | selectattr('metadata.name', 'equalto', 'minio') | list | length > 0
+# 0. 等待 MinIO Pod Ready
+- name: 等待 MinIO StatefulSet Ready
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: "{{ minio_namespace }}"
+    label_selectors:
+      - app=minio
+  register: minio_pods
+  until: >
+    minio_pods.resources | selectattr('status.phase', 'equalto', 'Running') | list | length ==
+    minio_pods.resources | length
+  retries: 60
+  delay: 10
 
-# - name: 获取MinIO Console服务NodePort
-#   kubernetes.core.k8s_info:
-#     api_version: v1
-#     kind: Service
-#     name: minio-console
-#     namespace: "{{ minio_namespace | default('minio') }}"
-#   register: minio_console_service
-#   when: minio_services.resources | selectattr('metadata.name', 'equalto', 'minio-console') | list | length > 0
+# 1. 获取 MinIO NodePort（控制台 9001）
+- name: 获取 MinIO 控制台 NodePort
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Service
+    name: minio
+    namespace: "{{ minio_namespace }}"
+  register: minio_svc
 
-# - name: 设置NodePort变量（带默认值）
-#   set_fact:
-#     minio_s3_node_port: "{{ (minio_s3_service.resources[0].spec.ports[0].nodePort | default(32000)) if minio_s3_service.resources is defined else 32000 }}"
-#     minio_console_node_port: "{{ (minio_console_service.resources[0].spec.ports[0].nodePort | default(32001)) if minio_console_service.resources is defined else 32001 }}"
+- name: 获取 MinIO root 凭据（来自 Secret）
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    name: minio
+    namespace: "{{ minio_namespace }}"
+  register: minio_secret
+
+- name: 解析 root 账号
+  set_fact:
+    minio_root_user: "{{ minio_secret.resources[0].data.rootUser | b64decode }}"
+    minio_root_password: "{{ minio_secret.resources[0].data.rootPassword | b64decode }}"
 
 
-# - name: 显示访问信息
-#   ansible.builtin.debug:
-#     msg:
-#       - "MinIO Console : http://{{  minio_access_host }}:{{ minio_console_node_port }}"
-#       - "MinIO S3 API  : http://{{ minio_access_host }}:{{ minio_s3_node_port }}"
-#       - "Root User     : {{ minio_root_user }}"
-#       - "Root Password : {{ minio_root_password }}"
+- name: 用 mc 创建 juicefs-s3-public 桶（真实凭据）
+  kubernetes.core.k8s_exec:
+    namespace: "{{ minio_namespace }}"
+    pod: "{{ minio_pods.resources[0].metadata.name }}"
+    command: |
+      /bin/sh -c "
+      until curl -f http://localhost:9000/minio/health/live; do sleep 2; done;
+      mc alias set local http://localhost:9000 {{ minio_root_user }} {{ minio_root_password }};
+      mc mb --ignore-existing local/{{ minio_juicefs_bucket_name | default('juicefs-s3-public') }};
+      mc anonymous set {{ minio_juicefs_bucket_policy | default('download') }} local/{{ minio_juicefs_bucket_name | default('juicefs-s3-public') }} || true
+      "
+  register: mc_result
+  failed_when: >
+    "created successfully" not in mc_result.stdout | lower and
+    "already exists" not in mc_result.stdout | lower
+
+- name: 检查桶是否存在（mc ls）
+  kubernetes.core.k8s_exec:
+    namespace: "{{ minio_namespace }}"
+    pod: "{{ minio_pods.resources[0].metadata.name }}"
+    command: |
+      /bin/sh -c "
+      mc alias set local http://localhost:9000 {{ minio_root_user }} {{ minio_root_password }};
+      mc ls local/ | grep -q '{{ minio_juicefs_bucket_name | default('juicefs-s3-public') }}' && echo 'EXISTS' || echo 'NOT_FOUND'
+      "
+  register: bucket_check
+  failed_when: false
+
+- name: 设置 JuiceFS 桶访问信息（ClusterIP 域名）
+  set_fact:
+    juicefs_s3_bucket: "http://minio.{{ minio_namespace }}.svc.cluster.local:9000/{{ minio_juicefs_bucket_name | default('juicefs-s3-public') }}"
+    juicefs_s3_access_key: "{{ minio_root_user }}"
+    juicefs_s3_secret_key: "{{ minio_root_password }}"
+    
+- name: 打印 JuiceFS 桶访问信息（ClusterIP）
+  ansible.builtin.debug:
+    msg:
+      - "JuiceFS S3 地址 : {{ juicefs_s3_bucket }}"
+      - "Access Key     : {{ juicefs_s3_access_key }}"
+      - "Secret Key     : {{ juicefs_s3_secret_key }}"

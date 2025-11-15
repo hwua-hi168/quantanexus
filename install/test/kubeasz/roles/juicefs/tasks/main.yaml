@@ -28,6 +28,12 @@
     dest: /tmp/values-juicefs-s3-{{ juicefs_s3_release }}.yaml
     mode: '0600'
 
+- name: Add/Update JuiceFS Helm repository
+  kubernetes.core.helm_repository:
+    name: juicefs-s3
+    repo_url: "{{ juicefs_chart_repo }}"
+
+
 - name: 安装/升级 JuiceFS S3 
   kubernetes.core.helm:
     name: "{{ juicefs_s3_release }}"

@@ -18,7 +18,7 @@ redis_node_port_redis: "32700"
 redis_node_port_sentinel: "32710"
 
 # 认证
-redis_password: "Redis@pass123"
+redis_password: "RedisPass123"
 
 # 资源
 redis_master_cpu_req: "500m"
