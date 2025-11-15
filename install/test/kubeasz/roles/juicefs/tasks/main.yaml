@@ -25,7 +25,7 @@
 - name: 渲染 JuiceFS S3 values 文件
   ansible.builtin.template:
     src: values-s3.yaml.j2
-    dest: /tmp/values-juicefs-s3-{{ juicefs_release }}.yaml
+    dest: /tmp/values-juicefs-s3-{{ juicefs_s3_release }}.yaml
     mode: '0600'
 
 - name: 安装/升级 JuiceFS S3 
