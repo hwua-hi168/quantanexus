@@ -1,0 +1,10 @@
+- name: 1. 安装 Redis Sentinel
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - redis-sentinel
+- name: 2. 安装 JuiceFS CSI（依赖 Redis）
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - juicefs

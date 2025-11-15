@@ -1,0 +1,25 @@
+# 全局
+kubeletDir: "{{ juicefs_kubelet_dir }}"
+
+# 镜像
+{% if juicefs_image_registry %}
+image:
+  registry: "{{ juicefs_image_registry }}"
+  {% endif %}
+  {% if juicefs_image_tag %}
+  tag: "{{ juicefs_image_tag }}"
+  {% endif %}
+
+dashboardImage:
+  repository: "{{ juicefs_dashboard_image }}"
+
+# sidecar 镜像
+sidecars:
+  livenessProbeImage:
+    repository: "{{ juicefs_sidecar_registry }}/registry.k8s.io/sig-storage/livenessprobe"
+  nodeDriverRegistrarImage:
+    repository: "{{ juicefs_sidecar_registry }}/registry.k8s.io/sig-storage/csi-node-driver-registrar"
+  csiProvisionerImage:
+    repository: "{{ juicefs_sidecar_registry }}/registry.k8s.io/sig-storage/csi-provisioner"
+  csiResizerImage:
+    repository: "{{ juicefs_sidecar_registry }}/registry.k8s.io/sig-storage/csi-resizer"
