@@ -29,6 +29,7 @@ source "$SCRIPT_DIR/run_volcano.sh"
 source "$SCRIPT_DIR/run_quantanexus_mgr.sh"
 source "$SCRIPT_DIR/run_quantanexus_cs.sh"
 source "$SCRIPT_DIR/run_uncordon.sh"
+source "$SCRIPT_DIR/run_containerd_config.sh"
 
 # 显示使用说明
 show_usage() {
@@ -43,6 +44,7 @@ show_usage() {
     echo "  configure    配置kubeasz（hosts文件和自定义代码）"
     echo "  setup        分步执行kubeasz安装"
     echo "  setup-step   执行指定的kubeasz安装步骤"
+    echo "  containerd-config   配置containerd镜像仓库"
     echo "  status       检查集群状态"
     echo "  info         显示集群信息"
     echo "  helm         安装Helm"
@@ -556,6 +558,27 @@ cmd_uncordon() {
     print_success "节点 uncordon 操作完成"
 }
 
+# 配置containerd镜像仓库命令
+cmd_containerd_config() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    # 导入containerd配置模块
+    source "$SCRIPT_DIR/run_containerd_config.sh"
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! configure_containerd_registry "$cluster_name"; then
+        print_error "containerd镜像仓库配置失败"
+        return 1
+    fi
+    
+    print_success "containerd镜像仓库配置完成"
+}
+
 # 主函数
 main() {
     print_banner
@@ -664,6 +687,11 @@ main() {
             check_config_file || exit 1
             load_config
             cmd_uncordon "${2:-k8s-qn-01}"
+            ;;
+        "containerd-config")
+            check_config_file || exit 1
+            load_config
+            cmd_containerd_config "${2:-k8s-qn-01}"
             ;;
         "all")
             load_config
