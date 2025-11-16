@@ -19,5 +19,6 @@ install/sftp-config.json.bak
 install/test/kubeasz/.gitignore
 tian-assets/
 tmp/
-# ignore the bin dir
+# ignore the bin down dir
 bin/
+down/
