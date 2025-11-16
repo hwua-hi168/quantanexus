@@ -5,16 +5,11 @@
     repo_url: https://helm.hi168.com/charts
     state: present
 
-- name: 确保工作目录存在
-  file:
-    path: "{{ ingress_nginx_work_dir }}"
-    state: directory
-    mode: '0755'
 
 - name: 渲染 values.yaml
   template:
     src: values.yaml.j2
-    dest: "{{ ingress_nginx_work_dir }}/values.yaml"
+    dest: "/tmp/ingress-nginx-values.yaml"
 
 - name: 创建 ingress-nginx 命名空间
   kubernetes.core.k8s:
@@ -36,7 +31,7 @@
     release_namespace: "{{ ingress_nginx_namespace }}"
     chart_version: "{{ ingress_nginx_version }}"
     values_files:
-      - "{{ ingress_nginx_work_dir }}/values.yaml"
+      - "/tmp/ingress-nginx-values.yaml"
     state: present
     wait: true
     wait_timeout: 300

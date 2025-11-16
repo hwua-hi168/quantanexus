@@ -1,9 +1,9 @@
 ---
 - name: 添加 Longhorn Helm 仓库
-  shell: |
-    helm repo add hi168 https://helm.hi168.com/charts 2>/dev/null || true
-    helm repo update hi168
-  changed_when: false
+  kubernetes.core.helm_repository:
+    name: hi168
+    repo_url: https://helm.hi168.com/charts
+    state: present
 
 - name: 创建 longhorn 命名空间
   kubernetes.core.k8s:
@@ -12,52 +12,33 @@
     kind: Namespace
     state: present
 
-
-- name: 确保 Longhorn 配置目录存在
-  file:
-    path: "{{ longhorn_work_dir }}"
-    state: directory
-    mode: '0755'
-
-- name: 创建 values.yaml 配置文件
+- name: 渲染 values.yaml
   template:
     src: values.yaml.j2
-    dest: "{{ longhorn_work_dir }}/values.yaml"
+    dest: "/tmp/longhorn-values.yaml"
+    mode: '0644'
 
+- name: 部署Longhorn
+  kubernetes.core.helm:
+    name: longhorn
+    chart_ref: hi168/longhorn
+    release_namespace: "{{ longhorn_namespace }}"
+    chart_version: "{{ longhorn_version }}"
+    values_files:
+      - "/tmp/longhorn-values.yaml"
+    state: present
+    wait: true          # Helm 原生等待
+    wait_timeout: "5m" # 带单位字符
 
-- name: 部署 Longhorn
-  shell: |
-    cd {{ longhorn_work_dir }}
-    helm upgrade --install longhorn hi168/longhorn \
-      --namespace longhorn-system \
-      --version {{ longhorn_version }} \
-      -f {{ longhorn_work_dir }}/values.yaml
-
-- name: 等待 Longhorn 所有 Pod 就绪（原生 Ansible 方式）
-  block:
-    # 1. 先拿到 Longhorn 命名空间下标签匹配的 Pod 列表
-    - name: 查询 Longhorn Pods
-      kubernetes.core.k8s_info:
-        api_version: v1
-        kind: Pod
-        namespace: "{{ longhorn_namespace }}"
-        label_selectors:
-          - app.kubernetes.io/instance=longhorn
-      register: longhorn_pods
-      until: longhorn_pods.resources | length > 0
-      retries: 30
-      delay: 10
-
-    # 2. 等待每个 Pod 的 Ready 条件全部为 True
-    - name: 等待所有 Longhorn Pod 达到 Ready 状态
-      kubernetes.core.k8s_info:
-        api_version: v1
-        kind: Pod
-        namespace:  "{{ longhorn_namespace }}"
-        name: "{{ item.metadata.name }}"
-      loop: "{{ longhorn_pods.resources }}"
-      register: pod_ready_result
-      until:
-        - pod_ready_result.resources[0].status.conditions | selectattr('type', 'equalto', 'Ready') | map(attribute='status') | list | first == 'True'
-      retries: 120   # 约 10 min，可按需调整
-      delay: 5
+- name: 等待 Longhorn Pods 就绪（原生模块）
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: "{{ longhorn_namespace }}"
+    label_selectors:
+      - app.kubernetes.io/instance=longhorn
+    wait: true
+    wait_condition:
+      type: Ready
+      status: "True"
+    wait_timeout: "300"

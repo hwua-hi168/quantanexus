@@ -1,41 +1,63 @@
-# file: roles/uncordon/tasks/main.yml
 ---
 - name: 获取所有节点信息
-  shell: /opt/kube/bin/kubectl get nodes --no-headers -o custom-columns=NAME:.metadata.name
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Node
   register: nodes_info
-  changed_when: false
 
-- name: 显示当前节点状态
+- name: 显示当前节点名称列表
   debug:
-    msg: "{{ nodes_info.stdout_lines }}"
+    msg: "{{ nodes_info.resources | map(attribute='metadata.name') | list }}"
 
-- name: 获取节点详细状态
-  shell: /opt/kube/bin/kubectl get nodes -o wide
+- name: 获取节点详细状态（宽格式）
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Node
   register: nodes_detailed
-  changed_when: false
 
 - name: 显示节点详细状态
   debug:
-    msg: "{{ nodes_detailed.stdout }}"
+    msg: |
+      {% for node in nodes_detailed.resources %}
+      {{ "%-20s %-10s %-10s %-20s %-10s %-10s" | format(
+           node.metadata.name,
+           node.status.conditions | selectattr('type', 'equalto', 'Ready') | map(attribute='status') | first,
+           node.status.nodeInfo.kubeletVersion,
+           (node.status.addresses | selectattr('type', 'equalto', 'InternalIP') | map(attribute='address') | first),
+           (node.status.allocatable.cpu),
+           (node.status.allocatable.memory)) }}
+      {% endfor %}
 
-- name: Uncordon 所有节点（使用节点名称）
-  shell: |
-    /opt/kube/bin/kubectl uncordon "{{ item }}"
-  with_items: "{{ nodes_info.stdout_lines }}"
-
-  ignore_errors: yes
+- name: Uncordon 所有节点（原生模块，幂等）
+  kubernetes.core.k8s:
+    state: present
+    api_version: v1
+    kind: Node
+    name: "{{ item }}"
+    definition:
+      spec:
+        unschedulable: false
+  loop: "{{ nodes_info.resources | map(attribute='metadata.name') | list }}"
   register: uncordon_results
 
 - name: 显示 uncordon 结果
   debug:
-    msg: "Uncordon {{ item.item }}: {{ '成功' if item.rc == 0 else '失败 - ' + item.stderr }}"
-  with_items: "{{ uncordon_results.results }}"
+    msg: >
+      Uncordon {{ item.item }}:
+      {{ '成功' if item.changed else '节点已可调度' }}
+  loop: "{{ uncordon_results.results }}"
 
 - name: 验证最终节点状态
-  shell: /opt/kube/bin/kubectl get nodes
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Node
   register: final_nodes_status
-  changed_when: false
 
 - name: 显示最终节点状态
   debug:
-    msg: "{{ final_nodes_status.stdout }}"
+    msg: |
+      {% for node in final_nodes_status.resources %}
+      {{ "%-20s %-10s" | format(
+           node.metadata.name,
+           node.spec.unschedulable | default(false) | ternary('SchedulingDisabled', 'Ready')) }}
+      {% endfor %}

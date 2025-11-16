@@ -1,7 +1,6 @@
 ---
 # Ingress-Nginx 配置默认值
 ingress_nginx_version: "4.0.18"
-ingress_nginx_work_dir: "{{ CLUSTER_DIR }}/helm/ingress-nginx"
 kube_config_file: "{{ CLUSTER_DIR }}/config"
 
 # 镜像仓库配置

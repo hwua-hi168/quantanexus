@@ -12,17 +12,17 @@ minio_root_user: admin
 minio_root_password: "admin123"
 
 # 副本数（Pod 数量）
-minio_replicas: 4
+minio_replicas: 3
 
 # StatefulSet 级副本数（与上保持一致即可）
-minio_statefulset_replica_count: 4
+minio_statefulset_replica_count: 3
 
 # 资源请求/限制
-minio_resources_requests_memory: "20Gi"
-minio_resources_limits_memory: "40Gi"
+minio_resources_requests_memory: "1Gi"
+minio_resources_limits_memory: "2Gi"
 
 # 持久化
-minio_persistence_size: "20Gi"
+minio_persistence_size: "3Gi"
 
 # Service 类型
 minio_service_type: NodePort

@@ -1,8 +1,7 @@
 ---
 # GPU Operator 配置默认值
 gpu_operator_version: "v25.3.4"
-gpu_operator_work_dir: "{{ inventory_file | dirname }}/helm/gpu-operator"
-
+gpu_operator_helm_repository: "https://helm.hi168.com/charts"
 # 镜像仓库配置
 gpu_operator_image_registry: "{{ IMAGE_REGISTRY }}"
 

@@ -27,7 +27,7 @@
     values_files:
       - /tmp/minio-values-{{ minio_release | default('minio') }}.yaml
     wait: true
-    timeout: 15m
+    timeout: "3m"
 
 - name: 等待所有 MinIO Pod 就绪
   kubernetes.core.k8s_info:
@@ -104,7 +104,7 @@
     "created successfully" not in mc_result.stdout | lower and
     "already exists" not in mc_result.stdout | lower
 
-- name: 检查桶是否存在（mc ls）
+- name: 检查桶是否存在（
   kubernetes.core.k8s_exec:
     namespace: "{{ minio_namespace }}"
     pod: "{{ minio_pods.resources[0].metadata.name }}"

@@ -1,7 +1,6 @@
 ---
 # Volcano 配置默认值
 volcano_version: "1.13.0"
-volcano_work_dir: ""
 
 # 镜像仓库配置
 volcano_image_registry: "{{ IMAGE_REGISTRY }}"

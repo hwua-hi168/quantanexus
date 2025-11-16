@@ -12,16 +12,10 @@
     kind: Namespace
     state: present
 
-- name: 确保工作目录存在
-  file:
-    path: "{{ cert_manager_work_dir }}"
-    state: directory
-    mode: '0755'
-
 - name: 渲染 values.yaml
   template:
     src: values.yaml.j2
-    dest: "{{ cert_manager_work_dir }}/values.yaml"
+    dest: "/tmp/cert-manager-values.yaml"
 
 - name: 部署(或者升级)cert-manager
   kubernetes.core.helm:
@@ -30,7 +24,7 @@
     release_namespace: cert-manager
     chart_version: "{{ cert_manager_version }}"
     values_files:
-      - "{{ cert_manager_work_dir }}/values.yaml"
+      - "/tmp/cert-manager-values.yaml"
     # 等同于 --set installCRDs=true
     values:
       installCRDs: true
@@ -41,11 +35,11 @@
 - name: 生成证书与 ClusterIssuer 清单
   template:
     src: certificates.yaml.j2
-    dest: "{{ cert_manager_work_dir }}/certificates.yaml"
+    dest: "/tmp/cert-manager-certificates.yaml"
 
 - name: 应用证书与 ClusterIssuer 资源
   kubernetes.core.k8s:
-    src: "{{ cert_manager_work_dir }}/certificates.yaml"
+    src: "/tmp/cert-manager-certificates.yaml"
     state: present
     wait: true          # 可选：等待 CSR/Issuer 就绪
     wait_timeout: 300

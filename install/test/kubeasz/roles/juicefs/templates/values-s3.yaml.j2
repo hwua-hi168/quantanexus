@@ -8,16 +8,10 @@ secret:
   name: "{{ juicefs_s3_secret_name }}"
   metaurl: "{{ juicefs_s3_metaurl }}"
   storage: "{{ juicefs_s3_storage }}"
-  accessKey: "{{ juicefs_s3_access_key }}"
+  accessKey: "{{ juicefs_s3_access_key }}" 
   secretKey: "{{ juicefs_s3_secret_key }}"
   bucket: "{{ juicefs_s3_bucket }}"
 
-# 环境变量（控制台账号）
-envs:
-  - name: MINIO_ROOT_USER
-    value: "{{ juicefs_s3_env_root_user }}"
-  - name: MINIO_ROOT_PASSWORD
-    value: "{{ juicefs_s3_env_root_password }}"
 
 # 服务暴露
 service:

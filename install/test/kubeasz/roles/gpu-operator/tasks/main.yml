@@ -2,19 +2,13 @@
 - name: 添加 GPU Operator Helm 仓库
   kubernetes.core.helm_repository:
     name: hi168
-    repo_url: https://helm.hi168.com/charts
+    repo_url: "{{ gpu_operator_helm_repository }}"
     state: present
-
-- name: 确保 GPU Operator 配置目录存在
-  file:
-    path: "{{ gpu_operator_work_dir }}"
-    state: directory
-    mode: '0755'
 
 - name: 创建 values.yaml 配置文件
   template:
     src: values.yaml.j2
-    dest: "{{ gpu_operator_work_dir }}/values.yaml"
+    dest: "/tmp/gpu-operator-values.yaml"
 
 - name: 创建 gpu-operator 命名空间
   kubernetes.core.k8s:
@@ -32,7 +26,7 @@
     values:
       driver.enabled: false
     values_files:
-      - "{{ gpu_operator_work_dir }}/values.yaml"
+      - "/tmp/gpu-operator-values.yaml"
     state: present
     wait: true          
     wait_timeout: "5m"  # 5分钟，可按需调整

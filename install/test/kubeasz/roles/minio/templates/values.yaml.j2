@@ -1,18 +1,26 @@
-mode: distributed #分布式
+# values.yaml.j2  —— MinIO 分布式模式
+mode: "{{ minio_mode }}"
 auth:
-  rootUser: admin
-  rootPassword: "admin"  
-replicas: 3 #3个pod
+  rootUser: "{{ minio_root_user }}"
+  rootPassword: "{{ minio_root_password }}"
+replicas: {{ minio_replicas }}
 statefulset:
-  replicaCount: 3
+  replicaCount: {{ minio_statefulset_replica_count }}
 resources:
   requests:
-    memory: 20Gi
+    memory: "{{ minio_resources_requests_memory }}"
   limits:
-    memory: 40Gi
+    memory: "{{ minio_resources_limits_memory }}"
 persistence:
   size: "{{ minio_persistence_size }}"
 service:
-  type: NodePort
+  type: "{{ minio_service_type }}"
 consoleService:
-  type: NodePort
+  type: "{{ minio_console_service_type }}"
+
+{# 可选：自动创建第一个桶 #}
+{% if minio_create_juicefs_bucket | default(false) %}
+buckets:
+  - name: "{{ minio_juicefs_bucket_name }}"
+    policy: "{{ minio_juicefs_bucket_policy }}"
+{% endif %}
