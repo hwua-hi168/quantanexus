@@ -1,12 +1,9 @@
----
 # Quantanexus 配置默认值
 quantanexus_version: "1.0.0"
-quantanexus_work_dir: "{{ CLUSTER_DIR }}/helm/quantanexus-mgr"
-kube_config_file: "{{ CLUSTER_DIR }}/config"
-
+quantanexus_mgr_namespace: "quantanexus-mgr"
+quantanexus_helm_repository: "https://helm.hi168.com/charts"
 # 镜像仓库配置
 quantanexus_image_registry: "{{ IMAGE_REGISTRY }}"
 
 # Quantanexus 组件配置
-quantanexus_service_namespace: "quantanexus-cs"
-quantanexus_domain_name: "{{ QN_DOMAIN }}"
+quantanexus_domain_name: "{{ QN_DOMAIN | default('test-mgr.hi168.com') }}"

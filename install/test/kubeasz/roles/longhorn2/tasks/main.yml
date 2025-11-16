@@ -5,6 +5,14 @@
     helm repo update hi168
   changed_when: false
 
+- name: 创建 longhorn 命名空间
+  kubernetes.core.k8s:
+    name: "{{ longhorn_namespace }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+
+
 - name: 确保 Longhorn 配置目录存在
   file:
     path: "{{ longhorn_work_dir }}"
@@ -16,10 +24,6 @@
     src: values.yaml.j2
     dest: "{{ longhorn_work_dir }}/values.yaml"
 
-- name: 创建 Longhorn 命名空间
-  shell: |
-    /opt/kube/bin/kubectl create namespace longhorn-system 2>/dev/null || true
-  changed_when: false
 
 - name: 部署 Longhorn
   shell: |
@@ -29,6 +33,31 @@
       --version {{ longhorn_version }} \
       -f {{ longhorn_work_dir }}/values.yaml
 
-- name: 等待 Longhorn Pods 就绪
-  shell: |
-    /opt/kube/bin/kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=longhorn -n longhorn-system --timeout=3600s
+- name: 等待 Longhorn 所有 Pod 就绪（原生 Ansible 方式）
+  block:
+    # 1. 先拿到 Longhorn 命名空间下标签匹配的 Pod 列表
+    - name: 查询 Longhorn Pods
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Pod
+        namespace: "{{ longhorn_namespace }}"
+        label_selectors:
+          - app.kubernetes.io/instance=longhorn
+      register: longhorn_pods
+      until: longhorn_pods.resources | length > 0
+      retries: 30
+      delay: 10
+
+    # 2. 等待每个 Pod 的 Ready 条件全部为 True
+    - name: 等待所有 Longhorn Pod 达到 Ready 状态
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Pod
+        namespace:  "{{ longhorn_namespace }}"
+        name: "{{ item.metadata.name }}"
+      loop: "{{ longhorn_pods.resources }}"
+      register: pod_ready_result
+      until:
+        - pod_ready_result.resources[0].status.conditions | selectattr('type', 'equalto', 'Ready') | map(attribute='status') | list | first == 'True'
+      retries: 120   # 约 10 min，可按需调整
+      delay: 5

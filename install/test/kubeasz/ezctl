@@ -229,7 +229,7 @@ function setup() {
           ;;
     esac
 
-    COMMAND="ansible-playbook -i clusters/$1/hosts -e @clusters/$1/config.yml $EXTRA_ARGS playbooks/$PLAY_BOOK"
+    COMMAND="ansible-playbook  -i clusters/$1/hosts -e @clusters/$1/config.yml $EXTRA_ARGS playbooks/$PLAY_BOOK"
     echo "$COMMAND"
 
     k8s_ver=$(bin/kube-apiserver --version|cut -d' ' -f2)

@@ -1,35 +1,31 @@
+---
 - name: 添加 Harbor Helm 仓库
-  shell: |
-    helm repo list | grep -q "hi168" || helm repo add hi168 https://helm.hi168.com/charts 2>/dev/null
-    helm repo update hi168
-  changed_when: false
+  kubernetes.core.helm_repository:
+    name: hi168
+    repo_url: https://helm.hi168.com/charts
+    state: present
 
-- name: 确保 Harbor 配置目录存在
-  file:
-    path: "{{ harbor_work_dir }}"
-    state: directory
-    mode: '0755'
 
 - name: 创建 values.yaml 配置文件
   template:
     src: values.yaml.j2
-    dest: "{{ harbor_work_dir }}/values.yaml"
+    dest: "/tmp/harbor-values.yaml"
 
 - name: 创建 Harbor 命名空间
-  shell: |
-    /opt/kube/bin/kubectl create namespace harbor 2>/dev/null || true
-  changed_when: false
+  kubernetes.core.k8s:
+    name: harbor
+    api_version: v1
+    kind: Namespace
+    state: present
 
-- name: 部署 Harbor
-  shell: |
-    cd {{ harbor_work_dir }}
-    helm upgrade --install harbor hi168/harbor \
-      --namespace harbor \
-      --version {{ harbor_version }} \
-      --create-namespace \
-      -f values.yaml
-
-- name: 等待 Harbor Pods 就绪
-  shell: |
-    /opt/kube/bin/kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=harbor -n harbor --timeout=3600s
-  changed_when: false
+- name: 部署Harbor
+  kubernetes.core.helm:
+    name: harbor
+    chart_ref: hi168/harbor
+    release_namespace: harbor
+    chart_version: "{{ harbor_version }}"
+    values_files:
+      - "/tmp/harbor-values.yaml"
+    state: present
+    wait: true          # Helm 原生等待资源就绪
+    wait_timeout: 1200  # 20 分钟，可按需调整

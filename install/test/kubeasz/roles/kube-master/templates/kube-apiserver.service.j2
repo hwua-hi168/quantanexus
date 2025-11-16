@@ -13,6 +13,7 @@ ExecStart={{ bin_dir }}/kube-apiserver \
   --audit-log-maxsize=100 \
 {% endif %}
   --allow-privileged=true \
+  --kubelet-preferred-address-types=InternalIP,Hostname,InternalDNS,ExternalDNS  \
   --anonymous-auth=false \
   --api-audiences=api,istio-ca \
   --authorization-mode=Node,RBAC \

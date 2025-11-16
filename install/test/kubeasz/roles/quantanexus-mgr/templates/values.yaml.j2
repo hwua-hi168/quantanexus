@@ -1,7 +1,20 @@
 # Global configuration
 global:
-  service_namespace: {{ quantanexus_service_namespace }}
+  service_namespace: {{ quantanexus_mgr_namespace }}
   domainName: {{ quantanexus_domain_name }}
   # registry: harbor.hi168.com/quantanexus
   # In China, please use aliyuncs
   registry: {{ quantanexus_image_registry }}
+postgresql:
+  enabled: true
+  # 主数据库镜像配置
+  image:
+    registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
+    repository: postgresql
+    tag: 14.4.0-debian-11-r23
+    pullPolicy: IfNotPresent
+  primary:
+    persistence:
+      enabled: true
+      storageClass: ""
+      size: 10Gi

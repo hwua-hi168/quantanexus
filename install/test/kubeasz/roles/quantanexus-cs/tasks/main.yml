@@ -1,37 +1,30 @@
 ---
 - name: 添加 Quantanexus Helm 仓库
-  shell: |
-    helm repo list | grep -q "hi168" || helm repo add hi168 https://helm.hi168.com/charts 2>/dev/null
-    helm repo update hi168
-  changed_when: false
-
-- name: 确保 Quantanexus 配置目录存在
-  file:
-    path: "{{ quantanexus_cs_work_dir }}"
-    state: directory
-    mode: '0755'
+  kubernetes.core.helm_repository:
+    name: hi168
+    repo_url: "{{ quantanexus_helm_repository }}"
+    state: present
 
 - name: 创建 values.yaml 配置文件
   template:
     src: values.yaml.j2
-    dest: "{{ quantanexus_cs_work_dir }}/values.yaml"
+    dest: "/tmp/quantanexus-cs-values.yaml"
 
-- name: 创建 Quantanexus 命名空间
-  shell: |
-    /opt/kube/bin/kubectl create namespace quantanexus-cs 2>/dev/null || true
-  changed_when: false
+- name: 创建 quantanexus-cs 命名空间
+  kubernetes.core.k8s:
+    name: "{{ quantanexus_cs_namespace }}"
+    api_version: v1
+    kind: Namespace
+    state: present
 
-- name: 部署 Quantanexus
-  shell: |
-    cd {{ quantanexus_cs_work_dir }}
-    helm upgrade --install quantanexus-cs hi168/quantanexus-cs \
-      --namespace quantanexus-cs \
-      --version {{ quantanexus_cs_version }} \
-      --create-namespace \
-      -f values.yaml
-
-- name: 等待 Quantanexus Pods 就绪
-  shell: |
-    /opt/kube/bin/kubectl wait --for=condition=Ready pod -n quantanexus-cs --all --timeout=3600s
-
-  changed_when: false
+- name: 部署Quantanexus
+  kubernetes.core.helm:
+    name: quantanexus-cs
+    chart_ref: hi168/quantanexus-cs
+    release_namespace: "{{ quantanexus_cs_namespace }}"
+    chart_version: "{{ quantanexus_cs_version }}"
+    values_files:
+      - "/tmp/quantanexus-cs-values.yaml"
+    state: present
+    wait: true
+    wait_timeout: "300s"   # Helm 要求带单位

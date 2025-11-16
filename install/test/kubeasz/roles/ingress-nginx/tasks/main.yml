@@ -1,36 +1,45 @@
 ---
 - name: 添加 Ingress-Nginx Helm 仓库
-  shell: |
-    helm repo list | grep -q "hi168" || helm repo add hi168 https://helm.hi168.com/charts 2>/dev/null
-    helm repo update hi168
-  changed_when: false
+  kubernetes.core.helm_repository:
+    name: hi168
+    repo_url: https://helm.hi168.com/charts
+    state: present
 
-- name: 确保 Ingress-Nginx 配置目录存在
+- name: 确保工作目录存在
   file:
     path: "{{ ingress_nginx_work_dir }}"
     state: directory
     mode: '0755'
 
-- name: 创建 values.yaml 配置文件
+- name: 渲染 values.yaml
   template:
     src: values.yaml.j2
     dest: "{{ ingress_nginx_work_dir }}/values.yaml"
 
-- name: 创建 Ingress-Nginx 命名空间
-  shell: |
-    /opt/kube/bin/kubectl create namespace ingress-nginx 2>/dev/null || true
-  changed_when: false
+- name: 创建 ingress-nginx 命名空间
+  kubernetes.core.k8s:
+    name: "{{ ingress_nginx_namespace }}"
+    api_version: v1
+    kind: Namespace
+    state: present
 
-- name: 部署 Ingress-Nginx
-  shell: |
-    cd {{ ingress_nginx_work_dir }}
-    helm upgrade --install ingress-nginx hi168/ingress-nginx \
-      --namespace ingress-nginx \
-      --version {{ ingress_nginx_version }} \
-      --create-namespace \
-      -f values.yaml
+- name: 查询 release 当前状态
+  kubernetes.core.helm_info:
+    name: ingress-nginx
+    release_namespace: "{{ ingress_nginx_namespace }}"
+  register: ing_status
 
-- name: 等待 Ingress-Nginx Pods 就绪
-  shell: |
-    /opt/kube/bin/kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=ingress-nginx -n ingress-nginx --timeout=3600s
-  changed_when: false
+- name: Deply Ingress-Nginx（仅在未部署或非 deployed 时执行）
+  kubernetes.core.helm:
+    name: ingress-nginx
+    chart_ref: hi168/ingress-nginx
+    release_namespace: "{{ ingress_nginx_namespace }}"
+    chart_version: "{{ ingress_nginx_version }}"
+    values_files:
+      - "{{ ingress_nginx_work_dir }}/values.yaml"
+    state: present
+    wait: true
+    wait_timeout: 300
+  when:
+    - ing_status.status is not defined or
+      ing_status.status.status != "deployed"

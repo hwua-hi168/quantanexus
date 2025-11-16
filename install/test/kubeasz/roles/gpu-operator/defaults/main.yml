@@ -1,8 +1,7 @@
 ---
 # GPU Operator 配置默认值
 gpu_operator_version: "v25.3.4"
-gpu_operator_work_dir: "{{ CLUSTER_DIR }}/helm/gpu-operator"
-kube_config_file: "{{ CLUSTER_DIR }}/config"
+gpu_operator_work_dir: "{{ inventory_file | dirname }}/helm/gpu-operator"
 
 # 镜像仓库配置
 gpu_operator_image_registry: "{{ IMAGE_REGISTRY }}"

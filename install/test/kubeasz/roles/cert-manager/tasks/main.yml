@@ -1,46 +1,51 @@
 ---
-- name: 添加 Helm 仓库
-  shell: |
-    helm repo list | grep -q "hi168" || helm repo add hi168 https://helm.hi168.com/charts 2>/dev/null
-    helm repo update hi168
-  changed_when: false
+- name: 添加 Jetstack Helm 仓库
+  kubernetes.core.helm_repository:
+    name: hi168
+    repo_url: https://helm.hi168.com/charts
+    state: present
 
-- name: 确保 Cert-Manager 配置目录存在
+- name: 创建 cert-manager 命名空间
+  kubernetes.core.k8s:
+    name: cert-manager
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: 确保工作目录存在
   file:
     path: "{{ cert_manager_work_dir }}"
     state: directory
     mode: '0755'
 
-- name: 创建 values.yaml 配置文件
+- name: 渲染 values.yaml
   template:
     src: values.yaml.j2
     dest: "{{ cert_manager_work_dir }}/values.yaml"
-  when: not ansible_check_mode and not (cert_manager_work_dir + "/values.yaml") is file
 
-- name: 创建 Cert-Manager 命名空间
-  shell: |
-    /opt/kube/bin/kubectl create namespace cert-manager 2>/dev/null || true
-  changed_when: false
+- name: 部署(或者升级)cert-manager
+  kubernetes.core.helm:
+    name: cert-manager
+    chart_ref: hi168/cert-manager
+    release_namespace: cert-manager
+    chart_version: "{{ cert_manager_version }}"
+    values_files:
+      - "{{ cert_manager_work_dir }}/values.yaml"
+    # 等同于 --set installCRDs=true
+    values:
+      installCRDs: true
+    state: present
+    wait: true          # 等待资源就绪（Helm 原生 wait）
+    wait_timeout: 20m   # 可根据需要调整
 
-- name: 部署 Cert-Manager
-  shell: |
-    cd {{ cert_manager_work_dir }}
-    helm upgrade --install cert-manager hi168/cert-manager \
-      --namespace cert-manager \
-      --version {{ cert_manager_version }} \
-      --set installCRDs=true \
-      -f values.yaml
-
-- name: 等待 Cert-Manager Pods 就绪
-  shell: |
-    /opt/kube/bin/kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=3600s
-  changed_when: false
-
-- name: 创建证书和 ClusterIssuer 资源文件
+- name: 生成证书与 ClusterIssuer 清单
   template:
     src: certificates.yaml.j2
     dest: "{{ cert_manager_work_dir }}/certificates.yaml"
 
-- name: 应用证书和 ClusterIssuer 资源
-  shell: |
-    /opt/kube/bin/kubectl apply -f {{ cert_manager_work_dir }}/certificates.yaml
+- name: 应用证书与 ClusterIssuer 资源
+  kubernetes.core.k8s:
+    src: "{{ cert_manager_work_dir }}/certificates.yaml"
+    state: present
+    wait: true          # 可选：等待 CSR/Issuer 就绪
+    wait_timeout: 300

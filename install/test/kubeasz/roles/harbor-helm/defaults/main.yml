@@ -1,8 +1,7 @@
 ---
 # Harbor 配置默认值
 harbor_version: "1.18.0"
-harbor_work_dir: "{{ CLUSTER_DIR }}/helm/harbor"
-kube_config_file: "{{ CLUSTER_DIR }}/config"
+
 
 # 镜像仓库配置
 harbor_image_registry: "{{ IMAGE_REGISTRY }}"

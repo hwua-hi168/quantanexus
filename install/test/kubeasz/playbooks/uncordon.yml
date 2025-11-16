@@ -1,6 +1,6 @@
 ---
 - name: 执行节点 uncordon 操作
-  hosts: kube_master[0]  # 在第一个 master 节点上执行
+  hosts: localhost  # 在第一个 master 节点上执行
   gather_facts: no
   roles:
     - uncordon

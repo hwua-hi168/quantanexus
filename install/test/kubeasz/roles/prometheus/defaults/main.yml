@@ -1,9 +1,6 @@
 ---
 # Prometheus 配置默认值
 prometheus_version: "78.3.1"
-prometheus_work_dir: "{{ CLUSTER_DIR }}/helm/prometheus"
-kube_config_file: "{{ CLUSTER_DIR }}/config"
-
 # 镜像仓库配置
 prometheus_image_registry: "{{ IMAGE_REGISTRY }}"
 

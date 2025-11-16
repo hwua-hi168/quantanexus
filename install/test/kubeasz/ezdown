@@ -163,6 +163,8 @@ function logger() {
 }
 
 function download_docker() {
+  systemctl status docker|grep Active|grep -q running && { logger warn "docker is already running."; return 0; }
+
   if [[ "$REGISTRY_MIRROR" == CN ]];then
     # DOCKER_URL="https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/static/stable/${ARCH}/docker-${DOCKER_VER}.tgz"
     # https://mirrors.huaweicloud.com/docker-ce/linux/static/stable/x86_64/docker-28.0.4.tgz
@@ -278,7 +280,7 @@ EOF
 }
 
 #它是从docker拉下来并且复制的，所以需要docker打包镜像
-function get_quantanexus_installer() {
+function get_kubeasz() {
   # check if kubeasz already existed
   [[ -d "$BASE/roles/kube-node" ]] && { logger warn "kubeasz already existed"; return 0; }
 

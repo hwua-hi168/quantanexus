@@ -12,6 +12,7 @@ juicefs_secret_storage: "s3"
 # 优先级不会太高，minio task底部设置
 juicefs_bucket_vendor: "minio" # seaweedfs rookceph 
 juicefs_bucket_namespace: "minio"
+# depends on the minio task
 juicefs_secret_bucket: "http://seaweedfs-s3.seaweedfs:8333/juicefs-s3-public"
 
 

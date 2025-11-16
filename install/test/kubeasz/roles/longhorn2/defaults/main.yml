@@ -1,5 +1,6 @@
 ---
 # Longhorn 配置默认值
+longhorn_namespace: longhorn-system
 longhorn_version: "1.10.0"
 longhorn_work_dir: "{{ CLUSTER_DIR }}/helm/longhorn"
 kube_config_file: "{{ CLUSTER_DIR }}/config"  # 使用kubeasz的集群配置路径
