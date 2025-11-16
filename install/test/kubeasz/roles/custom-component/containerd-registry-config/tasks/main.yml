@@ -1,0 +1,190 @@
+---
+- name: 设置环境变量
+  set_fact:
+    proxy_domain: box.hi168.com
+
+- name: 创建 docker.io 镜像加速配置目录
+  file:
+    path: /etc/containerd/certs.d/docker.io
+    state: directory
+    mode: '0755'
+
+- name: 配置 docker.io 镜像加速
+  copy:
+    content: |
+      server = "https://docker.io"
+      [host."https://docker.{{ proxy_domain }}"]
+        capabilities = ["pull", "resolve"]
+    dest: /etc/containerd/certs.d/docker.io/hosts.toml
+    mode: '0644'
+
+- name: 创建 registry.k8s.io 镜像加速配置目录
+  file:
+    path: /etc/containerd/certs.d/registry.k8s.io
+    state: directory
+    mode: '0755'
+
+- name: 配置 registry.k8s.io 镜像加速
+  copy:
+    content: |
+      server = "https://registry.k8s.io"
+
+      [host."https://k8s.{{ proxy_domain }}"]
+        capabilities = ["pull", "resolve", "push"]
+    dest: /etc/containerd/certs.d/registry.k8s.io/hosts.toml
+    mode: '0644'
+
+- name: 创建 docker.elastic.co 镜像加速配置目录
+  file:
+    path: /etc/containerd/certs.d/docker.elastic.co
+    state: directory
+    mode: '0755'
+
+- name: 配置 docker.elastic.co 镜像加速
+  copy:
+    content: |
+      server = "https://docker.elastic.co"
+
+      [host."https://elastic.{{ proxy_domain }}"]
+        capabilities = ["pull", "resolve", "push"]
+    dest: /etc/containerd/certs.d/docker.elastic.co/hosts.toml
+    mode: '0644'
+
+- name: 创建 gcr.io 镜像加速配置目录
+  file:
+    path: /etc/containerd/certs.d/gcr.io
+    state: directory
+    mode: '0755'
+
+- name: 配置 gcr.io 镜像加速
+  copy:
+    content: |
+      server = "https://gcr.io"
+
+      [host."https://gcr.{{ proxy_domain }}"]
+        capabilities = ["pull", "resolve", "push"]
+    dest: /etc/containerd/certs.d/gcr.io/hosts.toml
+    mode: '0644'
+
+- name: 创建 ghcr.io 镜像加速配置目录
+  file:
+    path: /etc/containerd/certs.d/ghcr.io
+    state: directory
+    mode: '0755'
+
+- name: 配置 ghcr.io 镜像加速
+  copy:
+    content: |
+      server = "https://ghcr.io"
+
+      [host."https://ghcr.{{ proxy_domain }}"]
+        capabilities = ["pull", "resolve", "push"]
+    dest: /etc/containerd/certs.d/ghcr.io/hosts.toml
+    mode: '0644'
+
+- name: 创建 k8s.gcr.io 镜像加速配置目录
+  file:
+    path: /etc/containerd/certs.d/k8s.gcr.io
+    state: directory
+    mode: '0755'
+
+- name: 配置 k8s.gcr.io 镜像加速
+  copy:
+    content: |
+      server = "https://k8s.gcr.io"
+
+      [host."https://k8s-gcr.{{ proxy_domain }}"]
+        capabilities = ["pull", "resolve", "push"]
+    dest: /etc/containerd/certs.d/k8s.gcr.io/hosts.toml
+    mode: '0644'
+
+- name: 创建 mcr.microsoft.com 镜像加速配置目录
+  file:
+    path: /etc/containerd/certs.d/mcr.microsoft.com
+    state: directory
+    mode: '0755'
+
+- name: 配置 mcr.microsoft.com 镜像加速
+  copy:
+    content: |
+      server = "https://mcr.microsoft.com"
+
+      [host."https://mcr.{{ proxy_domain }}"]
+        capabilities = ["pull", "resolve", "push"]
+    dest: /etc/containerd/certs.d/mcr.microsoft.com/hosts.toml
+    mode: '0644'
+
+- name: 创建 nvcr.io 镜像加速配置目录
+  file:
+    path: /etc/containerd/certs.d/nvcr.io
+    state: directory
+    mode: '0755'
+
+- name: 配置 nvcr.io 镜像加速
+  copy:
+    content: |
+      server = "https://nvcr.io"
+
+      [host."https://nvcr.{{ proxy_domain }}"]
+        capabilities = ["pull", "resolve", "push"]
+    dest: /etc/containerd/certs.d/nvcr.io/hosts.toml
+    mode: '0644'
+
+- name: 创建 quay.io 镜像加速配置目录
+  file:
+    path: /etc/containerd/certs.d/quay.io
+    state: directory
+    mode: '0755'
+
+- name: 配置 quay.io 镜像加速
+  copy:
+    content: |
+      server = "https://quay.io"
+
+      [host."https://quay.{{ proxy_domain }}"]
+        capabilities = ["pull", "resolve", "push"]
+    dest: /etc/containerd/certs.d/quay.io/hosts.toml
+    mode: '0644'
+
+- name: 创建 registry.jujucharms.com 镜像加速配置目录
+  file:
+    path: /etc/containerd/certs.d/registry.jujucharms.com
+    state: directory
+    mode: '0755'
+
+- name: 配置 registry.jujucharms.com 镜像加速
+  copy:
+    content: |
+      server = "https://registry.jujucharms.com"
+
+      [host."https://jujucharms.{{ proxy_domain }}"]
+        capabilities = ["pull", "resolve", "push"]
+    dest: /etc/containerd/certs.d/registry.jujucharms.com/hosts.toml
+    mode: '0644'
+
+- name: 创建 easzlab.io.local:5000 镜像仓库配置目录
+  file:
+    path: /etc/containerd/certs.d/easzlab.io.local:5000
+    state: directory
+    mode: '0755'
+
+- name: 配置 easzlab.io.local:5000 镜像仓库
+  copy:
+    content: |
+      server = "http://easzlab.io.local:5000"
+
+      [host."http://easzlab.io.local:5000"]
+        capabilities = ["pull", "resolve", "push"]
+        skip_verify = true
+    dest: /etc/containerd/certs.d/easzlab.io.local:5000/hosts.toml
+    mode: '0644'
+
+- name: 重新加载 systemd 配置
+  systemd:
+    daemon_reload: yes
+
+- name: 重启 containerd 服务
+  systemd:
+    name: containerd
+    state: restarted
+    enabled: yes

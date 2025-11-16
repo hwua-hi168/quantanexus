@@ -1,0 +1,30 @@
+---
+- name: 检查 cloud-init 配置文件是否存在
+  stat:
+    path: /etc/cloud/cloud.cfg
+  register: cloud_cfg
+
+- name: 禁用 cloud-init 管理 /etc/hosts
+  block:
+    - name: 备份原始 cloud.cfg 配置文件
+      copy:
+        src: /etc/cloud/cloud.cfg
+        dest: /etc/cloud/cloud.cfg.backup
+        remote_src: yes
+        mode: '0644'
+
+    - name: 移除 cloud-init 中的 update_etc_hosts 模块
+      lineinfile:
+        path: /etc/cloud/cloud.cfg
+        regexp: '^\s*- update_etc_hosts\s*$'
+        state: absent
+
+    - name: 验证 update_etc_hosts 是否已移除
+      shell: grep -c "update_etc_hosts" /etc/cloud/cloud.cfg || exit 0
+      register: check_result
+
+    - name: 确认 cloud-init 配置修改成功
+      debug:
+        msg: "已成功禁用 cloud-init 管理 /etc/hosts"
+      when: check_result.stdout == "0"
+  when: cloud_cfg.stat.exists
