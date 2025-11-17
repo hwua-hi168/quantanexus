@@ -26,5 +26,6 @@ RUN set -x \
     && ln -s -f /usr/local/bin/python3.11 /usr/bin/python3 \
     && pip install --upgrade pip \
     && pip3 install kubernetes \
+    && ansible-galaxy collection install kubernetes.core \
     && mkdir -p /usr/libexec \
     && ln -s /usr/bin/python3 /usr/libexec/platform-python 

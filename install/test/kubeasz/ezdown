@@ -16,7 +16,9 @@ set -o pipefail
 # default settings, can be overridden by cmd line options, see usage
 DOCKER_VER=28.0.4
 #Quantanexus_intaller_version
-QNI_VER=v0.03 
+QNI_VER=v0.0.11 
+REGISTRY=registry.cn-hangzhou.aliyuncs.com/quantanexus
+# REGISTRY=docker.io/hwua
 KUBEASZ_VER=3.6.8
 K8S_BIN_VER=v1.34.1
 # https://github.com/easzlab/dockerfile-kubeasz-ext-bin
@@ -286,8 +288,8 @@ function get_kubeasz() {
 
   if [[ ! -f "$imageDir/quantanexus_installer_$QNI_VER.tar" ]];then
     logger info "downloading QuantaNexus Installer: $QNI_VER"
-    docker pull "hwua/quantanexus_installer:$QNI_VER" && \
-    docker save -o "$imageDir/quantanexus_installer_$QNI_VER.tar" "hwua/quantanexus_installer:$QNI_VER" || \
+    docker pull "${REGISTRY}/quantanexus-installer:$QNI_VER" && \
+    docker save -o "$imageDir/quantanexus_installer_$QNI_VER.tar" "${REGISTRY}/quantanexus-installer:$QNI_VER" || \
     { logger error "download failed!"; return 1; }
   else
     docker load -i "$imageDir/quantanexus_installer_$QNI_VER.tar"
@@ -295,7 +297,7 @@ function get_kubeasz() {
 
   docker ps -a |grep -q temp_qni && { logger debug "remove existing container"; docker rm -f temp_qni; }
   logger debug " run a temporary container"
-  docker run -d --name temp_qni hwua/quantanexus_installer:${QNI_VER} || { logger error "failed."; exit 1; }
+  docker run -d --name temp_qni ${REGISTRY}/quantanexus-installer:${QNI_VER} || { logger error "failed."; exit 1; }
 
   [[ -d "$BASE/down" ]] && /bin/mv -f "$BASE/down" /tmp
   [[ -d "$BASE/bin" ]] && /bin/mv -f "$BASE/bin" /tmp
@@ -718,7 +720,7 @@ function start_kubeasz_docker() {
       --volume /root/.kube:/root/.kube \
       --volume /root/.ssh:/root/.ssh \
       --volume /etc/docker:/etc/docker \
-      hwua/quantanexus_installer:${QNI_VER}
+      ${REGISTRY}/quantanexus-installer:${QNI_VER}
 }
 
 function clean_container() {
