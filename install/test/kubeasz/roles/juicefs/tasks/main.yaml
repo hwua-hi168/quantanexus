@@ -4,6 +4,37 @@
     name: juicedata
     repo_url: "{{ juicefs_chart_repo }}"
 
+# 0. 获取 MinIO 访问信息（与 minio role 解耦）
+- name: 查询 minio release 是否存在
+  kubernetes.core.helm_info:
+    name: "{{ minio_release | default('minio') }}"
+    release_namespace: "{{ minio_namespace }}"
+  register: minio_helm_info
+
+- block:
+    - name: 获取 MinIO root 凭据（来自集群真实 Secret）
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Secret
+        name: "{{ minio_release | default('minio') }}"
+        namespace: "{{ minio_namespace }}"
+      register: minio_secret
+
+    - name: 确保 Secret 存在
+      assert:
+        that:
+          - minio_secret.resources is defined
+          - minio_secret.resources | length > 0
+        fail_msg: "Secret {{ minio_release | default('minio') }}-minio 未找到，请先安装 MinIO！"
+
+    - name: 解析 root 账号
+      set_fact:
+        juicefs_secret_access_key: "{{ minio_secret.resources[0].data.rootUser     | b64decode }}"
+        juicesfs_s3_bucket: "http://minio.{{ minio_namespace }}.svc.cluster.local:9000/{{ minio_juicefs_bucket_name | default('juicefs-s3-public') }}"
+        juicefs_secret_secret_key: "{{ minio_secret.resources[0].data.rootPassword | b64decode }}"
+
+  when: minio_helm_info.status is defined        # 只要装过就允许读
+
 - name: 渲染 JuiceFS values 文件
   ansible.builtin.template:
     src: values.yaml.j2
@@ -27,6 +58,17 @@
     src: values-s3.yaml.j2
     dest: /tmp/values-juicefs-s3-{{ juicefs_s3_release }}.yaml
     mode: '0600'
+
+# s3 deploy
+- name: 获取 MinIO root 凭据（来自 Secret）
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    name: minio
+    namespace: "{{ minio_namespace }}"
+  register: minio_secret
+
+
 
 - name: Add/Update JuiceFS Helm repository
   kubernetes.core.helm_repository:

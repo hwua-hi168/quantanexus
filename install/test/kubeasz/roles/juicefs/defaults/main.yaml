@@ -13,7 +13,7 @@ juicefs_secret_storage: "s3"
 juicefs_bucket_vendor: "minio" # seaweedfs rookceph 
 juicefs_bucket_namespace: "minio"
 # depends on the minio task
-juicefs_secret_bucket: "http://seaweedfs-s3.seaweedfs:8333/juicefs-s3-public"
+juicefs_secret_bucket: "http://minio.{{ minio_namespace }}.svc.cluster.local:9000/{{ minio_juicefs_bucket_name | default('juicefs-s3-public') }}"
 
 
 # kubelet 根目录（与集群保持一致）
@@ -74,6 +74,9 @@ juicefs_s3_ingress_enabled: false
 juicefs_s3_ingress_class: "nginx"
 
 # ====== S3-Gateway 专用 ======
+minio_namespace: "minio"
+minio_release: "minio"
+minio_juicefs_bucket_name: "juicefs-s3-public"
 juicefs_s3_metaurl: "{{ juicefs_secret_metaurl }}"   # 默认引用，可覆盖
 juicefs_s3_storage: "{{ juicefs_secret_storage }}"
 juicefs_s3_secret_name: "juicefs-s3-secret"

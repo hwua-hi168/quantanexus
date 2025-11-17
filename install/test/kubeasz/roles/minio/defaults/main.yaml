@@ -3,13 +3,10 @@
 # ==========================
 
 minio_chart_repo: "https://charts.min.io"
+minio_release: minio
 minio_namespace: minio     
 # 运行模式
 minio_mode: distributed
-
-# 认证
-minio_root_user: admin
-minio_root_password: "admin123"
 
 # 副本数（Pod 数量）
 minio_replicas: 3
