@@ -1,23 +1,55 @@
-# values.yaml.j2  —— MinIO 分布式模式
-mode: "{{ minio_mode }}"
-replicas: {{ minio_replicas }}
+# ==========================
+# MinIO 分布式集群配置
+# ==========================
+mode: "{{ minio_mode | default('distributed') }}"
+replicas: "{{ minio_replicas | default(3) }}"
 statefulset:
-  replicaCount: {{ minio_statefulset_replica_count }}
+  replicaCount: "{{ minio_statefulset_replica_count | default(3) }}"
+
+# 资源
 resources:
   requests:
-    memory: "{{ minio_resources_requests_memory }}"
+    memory: "{{ minio_resources_requests_memory | default('1Gi') }}"
   limits:
-    memory: "{{ minio_resources_limits_memory }}"
-persistence:
-  size: "{{ minio_persistence_size }}"
-service:
-  type: "{{ minio_service_type }}"
-consoleService:
-  type: "{{ minio_console_service_type }}"
+    memory: "{{ minio_resources_limits_memory | default('2Gi') }}"
 
-{# 可选：自动创建第一个桶 #}
-{% if minio_create_juicefs_bucket | default(false) %}
+# 持久化
+persistence:
+  enabled: true
+  storageClass: "{{ minio_storage_class | default('longhorn') }}"
+  size: "{{ minio_persistence_size | default('3Gi') }}"
+
+# Service 类型 + 具体 NodePort（32600 起，避免冲突）
+service:
+  type: "{{ minio_service_type | default('NodePort') }}"
+  port: 9000
+consoleService:
+  type: "{{ minio_console_service_type | default('NodePort') }}"
+  port: 9001
+
+# 固定账号（后续给 JuiceFS 用）
+auth:
+  rootUser: "{{ minio_root_user | default('minioadmin') }}"
+  rootPassword: "{{ minio_root_password | default('minioadmin') }}"
+
+# 自动创建第一个桶（给 JuiceFS）
 buckets:
-  - name: "{{ minio_juicefs_bucket_name }}"
-    policy: "{{ minio_juicefs_bucket_policy }}"
-{% endif %}
+  - name: "{{ minio_juicefs_bucket_name | default('juicefs-s3-public') }}"
+    policy: "{{ minio_juicefs_bucket_policy | default('download') }}"
+    purge: false
+
+# --------- 自动 HTTPS ---------
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: {{ cert_manager_cluster_issuer | default('quantanexus-ca-issuer') }}
+  host: "{{ minio_s3_domain }}"
+  tls:
+    - hosts:
+        - "{{ minio_s3_domain }}"
+      secretName: "minio-s3-secret-tls"

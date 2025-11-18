@@ -1,0 +1,48 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: {{ cert_manager_cluster_issuer }}
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/hsts: "false"
+    ingress.kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/client-body-buffer-size: 200M
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      if ($request_uri ~* \.(js|css|gif|jpe?g|png)) {
+        expires 1d;
+        add_header Cache-Control "public, max-age=86400";
+      }
+    nginx.ingress.kubernetes.io/cors-allow-headers: DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization
+    nginx.ingress.kubernetes.io/cors-allow-methods: PUT, GET, POST, OPTIONS
+    nginx.ingress.kubernetes.io/cors-allow-origin: '*'
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/enable-gzip: "true"
+    nginx.ingress.kubernetes.io/gzip-compress: "true"
+    nginx.ingress.kubernetes.io/gzip-proxied: any
+    nginx.ingress.kubernetes.io/gzip-types: application/json application/xml application/javascript
+      text/css text/plain
+    nginx.ingress.kubernetes.io/proxy-body-size: 20000M
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "6000"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "6000"
+    nginx.ingress.kubernetes.io/service-weight: ""
+    nginx.org/client-max-body-size: 20000M
+  name: minio-ingress
+  namespace: minio
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: {{ s3_domain_name }}
+    http:
+      paths:
+      - backend:
+          service:
+            name: minio-svc
+            port:
+              number: 9000
+        pathType: ImplementationSpecific
+  tls:
+  - hosts:
+    - s3.qntest001.hi168.com
+    secretName: s3-mino-secret
+status:
+  loadBalancer: {}

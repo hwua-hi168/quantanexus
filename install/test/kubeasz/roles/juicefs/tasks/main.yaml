@@ -29,11 +29,15 @@
 
     - name: 解析 root 账号
       set_fact:
-        juicefs_secret_access_key: "{{ minio_secret.resources[0].data.rootUser     | b64decode }}"
-        juicesfs_s3_bucket: "http://minio.{{ minio_namespace }}.svc.cluster.local:9000/{{ minio_juicefs_bucket_name | default('juicefs-s3-public') }}"
+        juicefs_s3_bucket: "http://minio.{{ minio_namespace }}.svc.cluster.local:9000/{{ minio_juicefs_bucket_name | default('juicefs-s3-public') }}"
+        juicefs_secret_access_key: "{{ minio_secret.resources[0].data.rootUser | b64decode }}"
         juicefs_secret_secret_key: "{{ minio_secret.resources[0].data.rootPassword | b64decode }}"
-
-  when: minio_helm_info.status is defined        # 只要装过就允许读
+- name: 打印 JuiceFS 桶访问信息（ClusterIP）
+  ansible.builtin.debug:
+    msg:
+      - "juicefs_secret_access_key : {{ juicefs_secret_access_key }}"
+      - "juicefs_secret_secret_key    : {{ juicefs_secret_secret_key }}"
+      - "juicefs_s3_bucket : {{ juicefs_s3_bucket }}"
 
 - name: 渲染 JuiceFS values 文件
   ansible.builtin.template:

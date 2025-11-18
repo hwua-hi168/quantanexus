@@ -4,8 +4,7 @@ quantanexus_cs_version: "1.0.0"
 quantanexus_helm_repository: "https://helm.hi168.com/charts"
 
 quantanexus_cs_namespace: "quantanexus-cs"
-
-# 镜像仓库配置
+quantanexus_clusster_issuer_name: "{{ QN_CLUSTER_ISSUER | default('hwua-quantanexus') }}" # 镜像仓库配置
 quantanexus_cs_image_registry: "{{ IMAGE_REGISTRY }}"
 
 # Quantanexus CS 组件配置

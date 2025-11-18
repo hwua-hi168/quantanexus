@@ -5,6 +5,28 @@ global:
   # registry: harbor.hi168.com/quantanexus
   # In China, please use aliyuncs
   registry: {{ quantanexus_image_registry }}
+
+# Cert Manager 配置块
+certManager:
+  enabled: true
+  certificateName: 
+  issuerName: {{ quantanexus_cert_manager_issuer_name }} 
+  issuerKind: ClusterIssuer 
+  # issuerSecret:: qn-selfsigned-ca-tls
+  dnsNames:
+    - {{ quantanexus_domain_name }}
+ingress:
+  tlsManual: false
+  tlsSecret:
+    name: quantanexus-tls
+    certificate: certificate-Base64encoded-tLQo=
+    privateKey: privateKey-Base64encoded-tLQo=
+  tlsCommonSecret:
+    name: quantanexus-tls-hwua-common-4
+    certificate: certificate-common-Base64encoded-tLQo=
+    privateKey: privateKey-common-Base64encoded-tLQo=
+
+
 postgresql:
   enabled: true
   # 主数据库镜像配置

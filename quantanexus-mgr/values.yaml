@@ -14,20 +14,20 @@ global:
 certManager:
   enabled: true
   certificateName: 
-  issuerName: quantanexus-ca-issuer  
+  issuerName: hwua-quantanexus  
   issuerKind: ClusterIssuer 
   # issuerSecret:: qn-selfsigned-ca-tls
   dnsNames:
-    - controller.quantanexus.io
-    - controller.qntest002.hi168.com
+    - quantanexus.io  #for example  
+    - controller.qntest002.hi168.com  #for example
 ingress:
   tlsManual: false
   tlsSecret:
-    name: abc-tls
+    name: quantanexus-tls
     certificate: certificate-Base64encoded-tLQo=
     privateKey: privateKey-Base64encoded-tLQo=
   tlsCommonSecret:
-    name: abc-tls-hwua-common-4
+    name: quantanexus-tls-hwua-common-4
     certificate: certificate-common-Base64encoded-tLQo=
     privateKey: privateKey-common-Base64encoded-tLQo=
 
