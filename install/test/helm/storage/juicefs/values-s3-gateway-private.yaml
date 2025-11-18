@@ -1,5 +1,5 @@
 image:
-  repository: registry.cn-hangzhou.aliyuncs.com/quantanexus/juicedata-mount
+  repository: harbor.hi168.com/quantanexus/juicedata-mount
   tag: "ce-v1.2.3"
 secret:
   name: "myjfs"

@@ -5,7 +5,7 @@ global:
   imageRegistry: ""
 
 image:
-  registry: "registry.cn-hangzhou.aliyuncs.com/quantanexus"
+  registry: "harbor.hi168.com/quantanexus"
   repository: "registry-1.docker.io-bitnami-redis"
   tag: "latest"
 
@@ -33,7 +33,7 @@ master:
 # 从节点
 replica:
   image:
-    registry: "registry.cn-hangzhou.aliyuncs.com/quantanexus"
+    registry: "harbor.hi168.com/quantanexus"
     repository: "registry-1.docker.io-bitnami-redis"
     tag: "latest"
   replicaCount: 3              # 1 主 2 从 至少3个点才可以选举
@@ -53,7 +53,7 @@ replica:
 # 哨兵
 sentinel:
   image:
-    registry: "registry.cn-hangzhou.aliyuncs.com/quantanexus"
+    registry: "harbor.hi168.com/quantanexus"
     repository: "registry-1.docker.io-bitnami-redis-sentinel"
     tag: "latest"
   enabled: true
@@ -75,7 +75,7 @@ sentinel:
 # 监控（可选）
 metrics:
   image:
-    registry: "registry.cn-hangzhou.aliyuncs.com/quantanexus"
+    registry: "harbor.hi168.com/quantanexus"
     repository: "registry-1.docker.io-bitnami-redis-exporter"
     tag: "latest"
   enabled: true
@@ -84,18 +84,18 @@ metrics:
 
 volumePermissions:
   image:
-    registry: "registry.cn-hangzhou.aliyuncs.com/quantanexus"
+    registry: "harbor.hi168.com/quantanexus"
     repository: "registry-1.docker.io-bitnami-os-shell"
     tag: "latest"
 
 kubectl:
   image:
-    registry: "registry.cn-hangzhou.aliyuncs.com/quantanexus"
+    registry: "harbor.hi168.com/quantanexus"
     repository: "registry-1.docker.io-bitnami-kubectl"
     tag: "latest"
 
 sysctl:
   image:
-    registry: "registry.cn-hangzhou.aliyuncs.com/quantanexus"
+    registry: "harbor.hi168.com/quantanexus"
     repository: "registry-1.docker.io-bitnami-os-shell"
     tag: "latest"

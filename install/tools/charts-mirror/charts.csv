@@ -1,0 +1,17 @@
+longhorn,1.10.0,https://charts.longhorn.io
+kube-ovn,2.0.0,https://kubeovn.github.io/kube-ovn/
+postgresql,11.7.0,https://helm.hi168.com/charts/
+cert-manager,v1.19.1,https://charts.jetstack.io
+gpu-operator,v25.3.4,https://helm.ngc.nvidia.com/nvidia 
+volcano,1.13.0,https://volcano-sh.github.io/helm-charts
+harbor,1.18.0,https://helm.goharbor.io
+ingress-nginx,4.0.18,https://helm.hi168.com/charts/
+kube-prometheus-stack,78.3.1,https://prometheus-community.github.io/helm-charts
+tigera-operator ,v3.30.4,https://docs.tigera.io/calico/charts
+cilium,1.18.2,https://helm.cilium.io/
+flannel,v0.27.4,https://flannel-io.github.io/flannel/
+seaweedfs,4.0.398,https://seaweedfs.github.io/seaweedfs/helm
+redis,23.2.12,https://charts.bitnami.com/bitnami
+juicefs-csi-driver,0.30.2,https://juicedata.github.io/charts
+juicefs-s3-gateway,0.11.3,https://juicedata.github.io/charts
+minio,5.4.0,https://charts.min.io

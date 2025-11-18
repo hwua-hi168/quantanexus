@@ -1,0 +1,22 @@
+kubeletDir: /var/lib/kubelet
+
+image:
+  repository: registry.cn-hangzhou.aliyuncs.com/quantanexus/juicedata-juicefs-csi-driver
+  tag: "v0.30.1"  
+dashboardImage:
+  repository: registry.cn-hangzhou.aliyuncs.com/quantanexus/juicedata-csi-dashboard
+  tag: "v0.30.1"
+  
+sidecars:
+  livenessProbeImage:
+    repository: registry.cn-hangzhou.aliyuncs.com/quantanexus/registry.k8s.io-sig-storage-livenessprobe
+    tag: "v2.12.0"
+  nodeDriverRegistrarImage:
+    repository: registry.cn-hangzhou.aliyuncs.com/quantanexus/registry.k8s.io-sig-storage-csi-node-driver-registrar
+    tag: "v2.9.0"
+  csiProvisionerImage:
+    repository: registry.cn-hangzhou.aliyuncs.com/quantanexus/registry.k8s.io-sig-storage-csi-provisioner
+    tag: "v2.2.2"
+  csiResizerImage:
+    repository: registry.cn-hangzhou.aliyuncs.com/quantanexus/registry.k8s.io-sig-storage-csi-resizer
+    tag: "v1.9.0"

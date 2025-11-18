@@ -1,13 +1,20 @@
 # 基础参数
 redis_namespace: "redis"
 redis_release:   "redis-sentinel"
-redis_chart_repo: "https://charts.bitnami.com/bitnami"
-redis_chart_name: "bitnami/redis"
+redis_chart_repo: "https://helm.hi168.com/charts"
+redis_chart_name: "hi168/redis"
 redis_chart_version: ""   # 空=latest
 
-# 镜像与仓库
-redis_image_registry: "docker.io"
-#redis_image_tag: "7.2.4-debian-11-r3"   # 可留空使用 Chart 默认
+global_security_allow_insecure_images: true
+
+# 镜像与仓库 - 修改为你的自定义镜像仓库
+redis_image_registry: "registry.cn-hangzhou.aliyuncs.com/quantanexus"
+redis_image_repository: "registry-1.docker.io-bitnami-redis"
+redis_image_tag: "latest"
+redis_sentinel_image_repository: "registry-1.docker.io-bitnami-redis-sentinel"
+redis_exporter_image_repository: "registry-1.docker.io-bitnami-redis-exporter"
+redis_os_shell_image_repository: "registry-1.docker.io-bitnami-os-shell"
+redis_kubectl_image_repository: "registry-1.docker.io-bitnami-kubectl"
 
 # 存储
 redis_storage_class: "longhorn"
