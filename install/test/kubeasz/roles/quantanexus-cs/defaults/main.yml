@@ -1,5 +1,4 @@
 ---
-# Quantanexus CS 配置默认值
 quantanexus_cs_version: "1.0.0"
 quantanexus_helm_repository: "https://helm.hi168.com/charts"
 
@@ -9,6 +8,6 @@ quantanexus_cs_image_registry: "{{ IMAGE_REGISTRY }}"
 
 # Quantanexus CS 组件配置
 quantanexus_cs_service_namespace: "quantanexus-cs"
-quantanexus_cs_domain_name: "{{ QN_DOMAIN | default('test-cs.example.com') }}"
+quantanexus_cs_domain_name:  "{{ QN_CS_DOMAIN | default('cs1.quantanexus.com') }}"
 source_secret_ca_name: "quantanexus-tls"
 target_secret_ca_name: "quantanexus-tls"
