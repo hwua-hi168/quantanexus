@@ -28,4 +28,4 @@
       - "/tmp/harbor-values.yaml"
     state: present
     wait: true          # Helm 原生等待资源就绪
-    wait_timeout: 1200  # 20 分钟，可按需调整
+    wait_timeout: "3m"  # 3分钟，可按需调整

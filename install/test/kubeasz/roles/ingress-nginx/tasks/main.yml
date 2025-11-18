@@ -24,7 +24,7 @@
     release_namespace: "{{ ingress_nginx_namespace }}"
   register: ing_status
 
-- name: Deply Ingress-Nginx（仅在未部署或非 deployed 时执行）
+- name: Deply Ingress-Nginx
   kubernetes.core.helm:
     name: ingress-nginx
     chart_ref: hi168/ingress-nginx
@@ -33,8 +33,3 @@
     values_files:
       - "/tmp/ingress-nginx-values.yaml"
     state: present
-    wait: true
-    wait_timeout: 300
-  when:
-    - ing_status.status is not defined or
-      ing_status.status.status != "deployed"

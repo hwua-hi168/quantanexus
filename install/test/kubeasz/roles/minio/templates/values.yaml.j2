@@ -1,8 +1,5 @@
 # values.yaml.j2  —— MinIO 分布式模式
 mode: "{{ minio_mode }}"
-auth:
-  rootUser: "{{ minio_root_user }}"
-  rootPassword: "{{ minio_root_password }}"
 replicas: {{ minio_replicas }}
 statefulset:
   replicaCount: {{ minio_statefulset_replica_count }}

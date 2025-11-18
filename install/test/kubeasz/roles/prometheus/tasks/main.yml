@@ -33,7 +33,7 @@
       - "/tmp/prometheus-values.yaml"
     state: present
     wait: true
-    wait_timeout: 300
+    wait_timeout: "5m"
   when: >
     prom_status.status is not defined or
     prom_status.status.status != "deployed"
