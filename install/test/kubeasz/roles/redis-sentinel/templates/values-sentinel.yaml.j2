@@ -1,6 +1,13 @@
+---
 architecture: replication
 global:
-  imageRegistry: "{{ redis_image_registry }}"
+  imageRegistry: ""
+  security:
+    allowInsecureImages: {{ global_security_allow_insecure_images | default(false) | lower }}
+image:
+  registry: "{{ IMAGE_REGISTRY }}"
+  repository: "{{ redis_image_repository }}"
+  tag: "{{ redis_image_tag }}"
 auth:
   enabled: true
   sentinel: true
@@ -21,6 +28,9 @@ master:
       cpu: {{ redis_master_cpu_lim }}
       memory: {{ redis_master_mem_lim }}
 replica:
+  registry: "{{ IMAGE_REGISTRY }}"
+  repository: "{{ redis_image_repository }}"
+  tag: "{{ redis_image_tag }}"
   replicaCount: 3
   persistence:
     enabled: true
@@ -38,6 +48,10 @@ sentinel:
   enabled: true
   replicaCount: 3
   quorum: 2
+  image:
+    registry: "{{ IMAGE_REGISTRY }}"
+    repository: "{{ redis_sentinel_image_repository }}"
+    tag: "{{ redis_image_tag }}"
   service:
     type: NodePort
     nodePorts:
@@ -52,5 +66,24 @@ sentinel:
       memory: {{ redis_sentinel_mem_lim }}
 metrics:
   enabled: true
+  image:
+    registry: "{{ IMAGE_REGISTRY }}"
+    repository: "{{ redis_exporter_image_repository }}"
+    tag: "{{ redis_image_tag }}"
   serviceMonitor:
     enabled: false
+volumePermissions:
+  image:
+    registry: "{{ IMAGE_REGISTRY }}"
+    repository: "{{ redis_os_shell_image_repository }}"
+    tag: "{{ redis_image_tag }}"
+kubectl:
+  image:
+    registry: "{{ IMAGE_REGISTRY }}"
+    repository: "{{ redis_kubectl_image_repository }}"
+    tag: "{{ redis_image_tag }}"
+sysctl:
+  image:
+    registry: "{{ IMAGE_REGISTRY }}"
+    repository: "{{ redis_os_shell_image_repository }}"
+    tag: "{{ redis_image_tag }}"

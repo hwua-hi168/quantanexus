@@ -1,7 +1,7 @@
 ---
 - name: Add/Update Bitnami Helm repo
   kubernetes.core.helm_repository:
-    name: bitnami
+    name: hi168
     repo_url: "{{ redis_chart_repo }}"
     force_update: true 
 - name: 渲染 values 文件到本地
