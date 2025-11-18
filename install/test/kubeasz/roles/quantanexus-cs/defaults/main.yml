@@ -10,3 +10,5 @@ quantanexus_cs_image_registry: "{{ IMAGE_REGISTRY }}"
 # Quantanexus CS 组件配置
 quantanexus_cs_service_namespace: "quantanexus-cs"
 quantanexus_cs_domain_name: "{{ QN_DOMAIN | default('test-cs.example.com') }}"
+source_secret_ca_name: "quantanexus-tls"
+target_secret_ca_name: "quantanexus-tls"

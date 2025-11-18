@@ -87,10 +87,28 @@
   shell: systemctl enable kube-apiserver kube-controller-manager kube-scheduler
   ignore_errors: true
 
-- name: 启动 master 服务
-  shell: "systemctl daemon-reload && systemctl restart kube-apiserver && \
-	systemctl restart kube-controller-manager && systemctl restart kube-scheduler"
-  tags: upgrade_k8s, restart_master, force_change_certs
+# - name: 启动 master 服务
+#   shell: "systemctl daemon-reload && systemctl restart kube-apiserver && \
+# 	systemctl restart kube-controller-manager && systemctl restart kube-scheduler"
+#   tags: upgrade_k8s, restart_master, force_change_certs
+- name: 重启 master 服务（异步，避免 D-Bus 中断）
+  systemd:
+    daemon_reload: yes
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - kube-apiserver
+    - kube-controller-manager
+    - kube-scheduler
+  async: 15          # 最多等 15 秒
+  poll: 0            # 不等待结果
+  
+- name: confirm master up
+  wait_for:
+    host: "{{ inventory_hostname }}"
+    port: 6443
+    delay: 5
+    timeout: 60
 
 # 轮询等待kube-apiserver启动完成
 - name: 轮询等待kube-apiserver启动

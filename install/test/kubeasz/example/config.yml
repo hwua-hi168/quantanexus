@@ -1,3 +1,5 @@
+########### init vm when dev mode #################
+INIT_VM: false
 # Quantanexus customized  values
 QN_DOMAIN: "mgr.quantanexus.com"
 QN_CLUSTER_ISSUER: "hwua-quantanexus"

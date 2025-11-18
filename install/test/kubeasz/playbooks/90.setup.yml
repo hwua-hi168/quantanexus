@@ -1,4 +1,6 @@
 # [optional] to synchronize time of nodes with 'chrony'
+- import_playbook: 00.init.yaml
+  when: INIT_VM | default(false) | bool
 - hosts:
   - kube_master
   - kube_node
