@@ -1,0 +1,101 @@
+# 整体架构：replication + sentinel
+architecture: replication
+global:
+  # imageRegistry: "docker.io"
+  imageRegistry: ""
+
+image:
+  registry: "harbor.hi168.com/quantanexus"
+  repository: "registry-1.docker.io-bitnami-redis"
+  tag: "latest"
+
+auth:
+  enabled: true
+  sentinel: true
+  password: "Redis@pass123"   # 自定义
+persistence:
+  enabled: true
+# 主节点
+master:
+  count: 1
+  persistence:
+    enabled: true
+    storageClass: "longhorn"  # 集群实际 SC
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+
+# 从节点
+replica:
+  image:
+    registry: "harbor.hi168.com/quantanexus"
+    repository: "registry-1.docker.io-bitnami-redis"
+    tag: "latest"
+  replicaCount: 3              # 1 主 2 从 至少3个点才可以选举
+  persistence:
+    enabled: true
+    storageClass: "longhorn"
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+  podAntiAffinityPreset: soft  # 必须打散到不同节点
+
+# 哨兵
+sentinel:
+  image:
+    registry: "harbor.hi168.com/quantanexus"
+    repository: "registry-1.docker.io-bitnami-redis-sentinel"
+    tag: "latest"
+  enabled: true
+  replicaCount: 3              # 3 哨兵
+  quorum: 2                    # 故障转移票数
+  service:
+    type: NodePort             # 如只对内访问可改成 ClusterIP
+    nodePorts:
+      redis: "32700"             # Redis 主从对外端口
+      sentinel: "32710"          # Sentinel 对外端口
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# 监控（可选）
+metrics:
+  image:
+    registry: "harbor.hi168.com/quantanexus"
+    repository: "registry-1.docker.io-bitnami-redis-exporter"
+    tag: "latest"
+  enabled: true
+  serviceMonitor:
+    enabled: false             # 如已有 Prometheus Operator 可开
+
+volumePermissions:
+  image:
+    registry: "harbor.hi168.com/quantanexus"
+    repository: "registry-1.docker.io-bitnami-os-shell"
+    tag: "latest"
+
+kubectl:
+  image:
+    registry: "harbor.hi168.com/quantanexus"
+    repository: "registry-1.docker.io-bitnami-kubectl"
+    tag: "latest"
+
+sysctl:
+  image:
+    registry: "harbor.hi168.com/quantanexus"
+    repository: "registry-1.docker.io-bitnami-os-shell"
+    tag: "latest"
