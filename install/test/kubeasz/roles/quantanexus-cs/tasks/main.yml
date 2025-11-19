@@ -18,6 +18,15 @@
     kind: Namespace
     state: present
 
+- name: 清理已存在的 quantanexus-cs job
+  kubernetes.core.k8s:
+    api_version: batch/v1
+    kind: Job
+    name: quantanexus-ca-sync-1
+    namespace: "{{ quantanexus_cs_namespace }}"
+    state: absent
+  ignore_errors: yes
+
 - name: 部署Quantanexus
   kubernetes.core.helm:
     name: quantanexus-cs
