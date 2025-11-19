@@ -7,7 +7,7 @@ set -o errexit
 #set -o xtrace
 
 function usage() {
-    echo -e "\033[33mUsage:\033[0m ezctl COMMAND [args]"
+    echo -e "\033[33mUsage:\033[0m qnctl COMMAND [args]"
     cat <<EOF
 -------------------------------------------------------------------------------------
 Cluster setups:
@@ -15,7 +15,7 @@ Cluster setups:
     checkout    <cluster>            to switch default kubeconfig of the cluster
     new         <cluster>            to start a new k8s deploy with name 'cluster'
     setup       <cluster>  <step>    to setup a cluster, also supporting a step-by-step way
-    start       <cluster>            to start all of the k8s services stopped by 'ezctl stop'
+    start       <cluster>            to start all of the k8s services stopped by 'qnctl stop'
     stop        <cluster>            to stop all of the k8s services temporarily
     upgrade     <cluster>            to upgrade the k8s cluster
     destroy     <cluster>            to destroy the k8s cluster
@@ -35,7 +35,7 @@ Extra operation:
     kca-renew   <cluster>            to force renew CA certs and all the other certs (with caution)
     kcfg-adm    <cluster>  <args>    to manage client kubeconfig of the k8s cluster
 
-Use "ezctl help <command>" for more information about a given command.
+Use "qnctl help <command>" for more information about a given command.
 EOF
 }
 
@@ -98,7 +98,7 @@ function help-info() {
 }
 
 function usage-kcfg-adm(){
-  echo -e "\033[33mUsage:\033[0m ezctl kcfg-adm <cluster> <args>"
+  echo -e "\033[33mUsage:\033[0m qnctl kcfg-adm <cluster> <args>"
   cat <<EOF
 available <args>:
     -A     to add a client kubeconfig with a newly created user
@@ -108,14 +108,14 @@ available <args>:
     -t     to set a user-type (admin or view)
     -u     to set a user-name prefix
 
-examples: ./ezctl kcfg-adm test-k8s -L
-          ./ezctl kcfg-adm default -A -e 240h -t admin -u jack
-          ./ezctl kcfg-adm default -D -u jim-202101162141
+examples: ./qnctl kcfg-adm test-k8s -L
+          ./qnctl kcfg-adm default -A -e 240h -t admin -u jack
+          ./qnctl kcfg-adm default -D -u jim-202101162141
 EOF
 }
 
 function usage-setup(){
-  echo -e "\033[33mUsage:\033[0m ezctl setup <cluster> <step>"
+  echo -e "\033[33mUsage:\033[0m qnctl setup <cluster> <step>"
   cat <<EOF
 available steps:
     01  prepare            to prepare CA/certs & kubeconfig & other system settings
@@ -129,10 +129,10 @@ available steps:
     10  ex-lb              to install external loadbalance for accessing k8s from outside
     11  harbor             to install a new harbor server or to integrate with an existed one
 
-examples: ./ezctl setup test-k8s 01  (or ./ezctl setup test-k8s prepare)
-	  ./ezctl setup test-k8s 02  (or ./ezctl setup test-k8s etcd)
-          ./ezctl setup test-k8s all
-          ./ezctl setup test-k8s 04 -t restart_master
+examples: ./qnctl setup test-k8s 01  (or ./qnctl setup test-k8s prepare)
+	  ./qnctl setup test-k8s 02  (or ./qnctl setup test-k8s etcd)
+          ./qnctl setup test-k8s all
+          ./qnctl setup test-k8s 04 -t restart_master
 EOF
 }
 
@@ -149,8 +149,8 @@ function new() {
     cp example/config.yml "clusters/$1/config.yml"
 
     logger debug "set versions"
-    # these variables were imported with eval and have the same name in ezdown
-    eval $(sed '/V.[rR]=.*\./!d' ezdown)
+    # these variables were imported with eval and have the same name in qndown
+    eval $(sed '/V.[rR]=.*\./!d' qndown)
     k8sVer=$(echo "$K8S_BIN_VER"|sed 's/v//g')
     registryMirror=true
 
@@ -185,8 +185,8 @@ function new() {
 }
 
 function setup() {
-    [[ -d "clusters/$1" ]] || { logger error "invalid config, run 'ezctl new $1' first"; return 1; }
-    [[ -f "bin/kube-apiserver" ]] || { logger error "no binaries founded, run 'ezdown -D' fist"; return 1; }
+    [[ -d "clusters/$1" ]] || { logger error "invalid config, run 'qnctl new $1' first"; return 1; }
+    [[ -f "bin/kube-apiserver" ]] || { logger error "no binaries founded, run 'qndown -D' fist"; return 1; }
 
     # for extending usage
     EXTRA_ARGS=$(echo "$*"|sed "s/$1 $2//g"|sed "s/^ *//g")
@@ -235,7 +235,7 @@ function setup() {
     k8s_ver=$(bin/kube-apiserver --version|cut -d' ' -f2)
     etcd_ver=v$(bin/etcd --version|grep 'etcd Version'|cut -d' ' -f3)
     network_cni=$(grep CLUSTER_NETWORK "clusters/$1/hosts"|cut -d'"' -f2|sed 's/-//g')
-    network_cni_ver=$(grep -i "${network_cni}Ver" ezdown|cut -d'=' -f2|head -n1)
+    network_cni_ver=$(grep -i "${network_cni}Ver" qndown|cut -d'=' -f2|head -n1)
 
     cat <<EOF
 *** Component Version *********************
@@ -243,6 +243,7 @@ function setup() {
 *   kubernetes: ${k8s_ver}
 *   etcd: ${etcd_ver}
 *   ${network_cni}: ${network_cni_ver}
+*   quantanexus-mgr: $
 *******************************************
 EOF
 
@@ -253,7 +254,7 @@ EOF
 }
 
 function cmd() {
-    [[ -d "clusters/$1" ]] || { logger error "invalid config, run 'ezctl new $1' first"; return 1; }
+    [[ -d "clusters/$1" ]] || { logger error "invalid config, run 'qnctl new $1' first"; return 1; }
 
     PLAY_BOOK="dummy.yml"
     case "$2" in
@@ -292,8 +293,8 @@ function cmd() {
 
 
 function list() {
-    [[ -d ./clusters ]] || { logger error "cluster not found, run 'ezctl new' first"; return 1; }
-    [[ -f ~/.kube/config ]] || { logger error "kubeconfig not found, run 'ezctl setup' first"; return 1; }
+    [[ -d ./clusters ]] || { logger error "cluster not found, run 'qnctl new' first"; return 1; }
+    [[ -f ~/.kube/config ]] || { logger error "kubeconfig not found, run 'qnctl setup' first"; return 1; }
     which md5sum > /dev/null 2>&1 || { logger error "md5sum not found"; return 1; }
 
     CLUSTERS=$(cd clusters && echo -- *)
@@ -317,8 +318,8 @@ function list() {
 
 
 function checkout() {
-    [[ -d "clusters/$1" ]] || { logger error "invalid config, run 'ezctl new $1' first"; return 1; }
-    [[ -f "clusters/$1/kubectl.kubeconfig" ]] || { logger error "invalid kubeconfig, run 'ezctl setup $1' first"; return 1; }
+    [[ -d "clusters/$1" ]] || { logger error "invalid config, run 'qnctl new $1' first"; return 1; }
+    [[ -f "clusters/$1/kubectl.kubeconfig" ]] || { logger error "invalid kubeconfig, run 'qnctl setup $1' first"; return 1; }
     logger info "set default kubeconfig: cluster $1 (\033[32mcurrent\033[0m)"
     /bin/cp -f "clusters/$1/kubectl.kubeconfig" ~/.kube/config
 }
@@ -441,9 +442,9 @@ function del-master() {
 
 function start-aio(){
     set +u
-    # Check ENV 'HOST_IP', exists if the CMD 'ezctl' running in a docker container
+    # Check ENV 'HOST_IP', exists if the CMD 'qnctl' running in a docker container
     if [[ -z $HOST_IP ]];then
-        # ezctl runs in a host machine, get host's ip
+        # qnctl runs in a host machine, get host's ip
         HOST_IF=$(ip route|grep default|head -n1|cut -d' ' -f5)
         HOST_IP=$(ip a|grep "$HOST_IF$"|head -n1|awk '{print $2}'|cut -d'/' -f1)
     fi
@@ -468,7 +469,7 @@ function start-aio(){
 
 ### Extra functions #############################################
 function renew-ca() {
-    [[ -d "clusters/$1" ]] || { logger error "invalid cluster, run 'ezctl new $1' first"; return 1; }
+    [[ -d "clusters/$1" ]] || { logger error "invalid cluster, run 'qnctl new $1' first"; return 1; }
 
     logger warn "WARNNING: this script should be used with greate caution"
     logger warn "WARNNING: it will recreate CA certs and all of the others certs used in the cluster"
@@ -577,7 +578,7 @@ function list-kcfg(){
 ### Main Lines ##################################################
 function main() {
   BASE="/etc/kubeasz"
-  [[ -d "$BASE" ]] || { logger error "invalid dir:$BASE, try: 'ezdown -D'"; exit 1; }
+  [[ -d "$BASE" ]] || { logger error "invalid dir:$BASE, try: 'qndown -D'"; exit 1; }
   cd "$BASE"
 
   # check bash shell
