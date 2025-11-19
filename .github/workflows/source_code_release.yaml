@@ -112,14 +112,14 @@ jobs:
         run: |
           mkdir -p /tmp/artifacts
           VERSION="${GITHUB_REF_NAME}"   
-          sed -i "s/{{ QNI_VER }}/$VERSION/" install/kubeasz/ezdown.in > /tmp/artifacts/ezdown
+          sed  "s/{{ QNI_VER }}/$VERSION/" install/kubeasz/ezdown.in > /tmp/artifacts/ezdown
           zip -r /tmp/artifacts/quantanexus-${GITHUB_REF_NAME}.zip . \
             -x '.git/*' -x '*.zip' -x '.github/*' -x '*.gz' \
             -x 'quantanexus-*.zip' -x 'quantanexus-*.tar.gz'
           tar --exclude='.git' --exclude='*.zip' --exclude='.github' --exclude='*.gz' \
             -czf /tmp/artifacts/quantanexus-${GITHUB_REF_NAME}.tar.gz .
           mv /tmp/artifacts/* .                       
-          sha256sum *.zip *.tar.gz > quantanexus-checksums.txt  
+          sha256sum *.zip *.tar.gz ezdown > quantanexus-checksums.txt  
 
       # 4. 创建 GitHub Release 并上传资产
       - name: Create Release & Upload assets
