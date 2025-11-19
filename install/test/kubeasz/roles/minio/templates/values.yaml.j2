@@ -1,15 +1,36 @@
+---
 # values.yaml.j2  —— MinIO 分布式模式
 mode: "{{ minio_mode }}"
 replicas: {{ minio_replicas }}
 statefulset:
   replicaCount: {{ minio_statefulset_replica_count }}
+
+# 认证配置
+# auth:
+#   rootUser: "{{ minio_root_user }}"
+#   rootPassword: "{{ minio_root_password }}"
+
+# 镜像配置
+image:
+  repository: "{{ minio_image_registry }}/{{ minio_image_repository }}"
+  tag: "{{ minio_image_tag }}"
+
+mcImage:
+  repository: "{{ minio_image_registry }}/{{ minio_mc_image_repository }}"
+  tag: "{{ minio_mc_image_tag }}"
+
+# 资源配置
 resources:
   requests:
     memory: "{{ minio_resources_requests_memory }}"
   limits:
     memory: "{{ minio_resources_limits_memory }}"
+
+# 持久化配置
 persistence:
   size: "{{ minio_persistence_size }}"
+
+# 服务配置
 service:
   type: "{{ minio_service_type }}"
 consoleService:

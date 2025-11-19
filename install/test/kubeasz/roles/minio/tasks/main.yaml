@@ -14,7 +14,7 @@
 
 - name: Add/Update MinIO Helm repository
   kubernetes.core.helm_repository:
-    name: minio
+    name: hi168
     repo_url: "{{ minio_chart_repo | default('https://charts.min.io/') }}"
   when: minio_helm_info.status is undefined
 
@@ -52,8 +52,6 @@
   retries: 60
   delay: 10
   when: minio_helm_info.status is undefined
-
-
 
 # 1. 获取 MinIO NodePort（控制台 9001）
 - name: 获取 MinIO 控制台 NodePort

@@ -73,10 +73,10 @@
 - import_playbook: longhorn.yml
 - import_playbook: redis-sentinel.yml
 - import_playbook: cert-manager.yml
+- import_playbook: prometheus.yml 
 - import_playbook: ingress-nginx.yml
 - import_playbook: harbor.yml
 - import_playbook: gpu-operator.yml
-- import_playbook: prometheus.yml 
 - import_playbook: minio.yml
 - import_playbook: juicefs.yml
 - import_playbook: volcano.yml
