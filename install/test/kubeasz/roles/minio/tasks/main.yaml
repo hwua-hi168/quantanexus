@@ -22,7 +22,7 @@
   
 - name: Add/Update MinIO Helm repository
   kubernetes.core.helm_repository:
-    name: minio
+    name: hi168
     repo_url: "{{ minio_chart_repo | default('https://charts.min.io/') }}"
 
 - name: 渲染 MinIO values 文件
@@ -34,7 +34,7 @@
 - name: 安装/升级 MinIO 分布式集群
   kubernetes.core.helm:
     name: "{{ minio_release | default('minio') }}"
-    chart_ref: "{{ minio_chart_name | default('minio/minio') }}"
+    chart_ref: "{{ minio_chart_name | default('hi168/minio') }}"
     chart_version: "{{ minio_chart_version | default(omit) }}"
     release_namespace: "{{ minio_namespace | default('default') }}"
     create_namespace: true
@@ -56,6 +56,7 @@
     minio_pods.resources | length
   retries: 60
   delay: 10
+  when: minio_helm_info.status is undefined
 
 # 1. 获取 MinIO NodePort（控制台 9001）
 - name: 获取 MinIO 控制台 NodePort

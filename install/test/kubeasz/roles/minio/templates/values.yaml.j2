@@ -1,22 +1,35 @@
-# ==========================
-# MinIO 分布式集群配置
-# ==========================
+---
+# values.yaml.j2  —— MinIO 分布式模式
 mode: "{{ minio_mode | default('distributed') }}"
 replicas: "{{ minio_replicas | default(3) }}"
 statefulset:
   replicaCount: "{{ minio_statefulset_replica_count | default(3) }}"
 
-# 资源
+# 认证配置
+# auth:
+#   rootUser: "{{ minio_root_user }}"
+#   rootPassword: "{{ minio_root_password }}"
+
+# 镜像配置
+image:
+  repository: "{{ minio_image_registry }}/{{ minio_image_repository }}"
+  tag: "{{ minio_image_tag }}"
+
+mcImage:
+  repository: "{{ minio_image_registry }}/{{ minio_mc_image_repository }}"
+  tag: "{{ minio_mc_image_tag }}"
+
+# 资源配置
 resources:
   requests:
     memory: "{{ minio_resources_requests_memory | default('1Gi') }}"
   limits:
-    memory: "{{ minio_resources_limits_memory | default('2Gi') }}"
+    memory: "{{ minio_resources_limits_memory }}"
 
 # 持久化
 persistence:
   enabled: true
-  storageClass: "{{ minio_storage_class | default('longhorn') }}"
+  storageClass: "{{ minio_storage_default_class | default('longhorn') }}"
   size: "{{ minio_persistence_size | default('3Gi') }}"
 
 # Service 类型 + 具体 NodePort（32600 起，避免冲突）
