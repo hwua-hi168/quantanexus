@@ -8,7 +8,7 @@ FROM easzlab/ansible:2.14.4-lite
 ARG QNI_VER=
 ARG KUBECTL_VERSION=v1.34.2 
 ENV TZ="Asia/Shanghai"
-COPY install/test/kubeasz /etc/qubeasz
+COPY install/kubeasz /etc/qubeasz
 RUN set -x \
     && apk update && apk add --no-cache curl tar openssl openssh-client sshpass  \
     && curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 \

@@ -16,7 +16,7 @@ helm.xlsx
 helm_template.sh
 install/quantanexus/
 install/sftp-config.json.bak
-install/test/kubeasz/.gitignore
+install/kubeasz/.gitignore
 tian-assets/
 tmp/
 # ignore the bin down dir

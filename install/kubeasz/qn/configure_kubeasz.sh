@@ -199,8 +199,8 @@ configure_kubeasz() {
     # 同步自定义的代码到kubeasz中
     print_info "同步自定义代码到kubeasz..."
     
-    if execute_with_privileges rsync -a quantanexus-main/install/test/kubeasz/playbooks/ /etc/kubeasz/playbooks/ && \
-       execute_with_privileges rsync -a quantanexus-main/install/test/kubeasz/roles/ /etc/kubeasz/roles/; then
+    if execute_with_privileges rsync -a quantanexus-main/install/kubeasz/playbooks/ /etc/kubeasz/playbooks/ && \
+       execute_with_privileges rsync -a quantanexus-main/install/kubeasz/roles/ /etc/kubeasz/roles/; then
         print_success "自定义代码已同步到kubeasz"
     else
         print_error "同步自定义代码失败"

@@ -111,7 +111,7 @@ jobs:
       - name: Build artifacts
         run: |
           mkdir -p /tmp/artifacts
-          cp install/test/kubeasz/ezdown /tmp/artifacts/ezdown
+          cp install/kubeasz/ezdown /tmp/artifacts/ezdown
           zip -r /tmp/artifacts/quantanexus-${GITHUB_REF_NAME}.zip . \
             -x '.git/*' -x '*.zip' -x '.github/*' -x '*.gz' \
             -x 'quantanexus-*.zip' -x 'quantanexus-*.tar.gz'
