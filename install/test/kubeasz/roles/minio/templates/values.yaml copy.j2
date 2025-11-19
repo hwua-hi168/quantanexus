@@ -1,0 +1,27 @@
+# values.yaml.j2  —— MinIO 分布式模式
+
+
+
+mode: "{{ minio_mode }}"
+
+replicas: {{ minio_replicas }}
+statefulset:
+  replicaCount: {{ minio_statefulset_replica_count }}
+resources:
+  requests:
+    memory: "{{ minio_resources_requests_memory }}"
+  limits:
+    memory: "{{ minio_resources_limits_memory }}"
+persistence:
+  size: "{{ minio_persistence_size }}"
+service:
+  type: "{{ minio_service_type }}"
+consoleService:
+  type: "{{ minio_console_service_type }}"
+
+{# 可选：自动创建第一个桶 #}
+{% if minio_create_juicefs_bucket | default(false) %}
+buckets:
+  - name: "{{ minio_juicefs_bucket_name }}"
+    policy: "{{ minio_juicefs_bucket_policy }}"
+{% endif %}

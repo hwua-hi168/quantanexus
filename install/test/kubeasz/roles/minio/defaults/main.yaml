@@ -5,12 +5,13 @@
 minio_chart_repo: "https://helm.hi168.com/charts"
 minio_release: minio
 minio_namespace: minio     
+minio_s3_domain: "{{ QN_S3_DOMAIN | default('s3.qn.com') }}"
 # 运行模式
 minio_mode: distributed
-
+cert_manager_cluster_issuer: "{{ QN_CLUSTER_ISSUER}}"
 # 副本数（Pod 数量）
 minio_replicas: 3
-
+minio_storage_class: "longhorn"
 # StatefulSet 级副本数（与上保持一致即可）
 minio_statefulset_replica_count: 3
 
@@ -36,6 +37,7 @@ minio_mc_image_tag: "RELEASE.2024-11-21T17-21-54Z"
 minio_root_user: "admin"
 minio_root_password: "admin"
 
+minio_ingress_enabled: true
 # first bucket 
 minio_create_juicefs_bucket: true
 minio_juicefs_bucket_name: "juicefs-s3-public"

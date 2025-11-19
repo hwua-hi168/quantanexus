@@ -9,14 +9,11 @@ metadata:
     meta.helm.sh/release-namespace: quantanexus-cs
 spec:
   selfSigned: {}
----
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: root-ca
   namespace: cert-manager
-  labels:
-    app.kubernetes.io/managed-by: Helm
   annotations:
     meta.helm.sh/release-name: quantanexus-cs
     meta.helm.sh/release-namespace: quantanexus-cs
@@ -41,7 +38,7 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: quantanexus-ca-issuer
+  name: {{ cluster_issuer_name }}
   labels:
     app.kubernetes.io/managed-by: Helm
   annotations:
@@ -50,3 +47,4 @@ metadata:
 spec:
   ca:
     secretName: root-ca-secret
+

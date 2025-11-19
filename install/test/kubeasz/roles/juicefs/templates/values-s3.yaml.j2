@@ -5,7 +5,7 @@ image:
 
 # Redis 连接（Secret 会自动创建）
 secret:
-  name: "{{ juicefs_s3_secret_name }}"
+  name: "juicefs-s3-secret"
   metaurl: "{{ juicefs_s3_metaurl }}"
   storage: "{{ juicefs_s3_storage }}"
   accessKey: "{{ juicefs_s3_access_key }}" 

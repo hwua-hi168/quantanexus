@@ -4,3 +4,21 @@ global:
   # registry: harbor.hi168.com/quantanexus
   # In China, please use aliyuncs
   registry: {{ quantanexus_cs_image_registry }}
+certManager:
+  # 是否己安装 Cert Manager
+  enabled: true
+  rootCA:
+    # 是否启用根证书同步
+    enabled: true
+    # 源证书所在的命名空间
+    sourceNamespace: cert-manager
+    # 源 Secret 名称
+    sourceSecretName: "{{ source_secret_ca_name }}"
+    # 目标 Secret 名称
+    targetSecretName: "{{ target_secret_ca_name }}"
+    # 是否创建 RBAC 权限
+    createRBAC: true
+    # Helm hook 权重配置
+    hooks:
+      rbacWeight: "-10"
+      jobWeight: "-5"

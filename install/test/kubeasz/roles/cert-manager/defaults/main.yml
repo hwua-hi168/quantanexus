@@ -6,6 +6,8 @@ kube_config_file: "{{ CLUSTER_DIR }}/config"
 cert_manager_namespace: "cert-manager"
 # 镜像仓库配置
 cert_manager_image_registry: "{{ IMAGE_REGISTRY }}"
+cluster_issuer_name: "{{ QN_CLUSTER_ISSUER }}"
+
 
 # 核心组件镜像
 cert_manager_controller_repository: "quay.io-jetstack-cert-manager-controller"

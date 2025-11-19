@@ -1,0 +1,8 @@
+- name: Rollback Proxmox VMs to ansible-ready snapshot
+  hosts: pve_host
+  gather_facts: no
+  tasks:
+    - name: Rollback each VM to its snapshot
+      command: qm rollback {{ item }} {{ hostvars[item].snapshot }}
+      loop: "{{ groups['vm_ids'] }}"
+      # when: INIT_VM | default(false) | bool 

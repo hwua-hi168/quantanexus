@@ -40,6 +40,7 @@ data:
     module_image_center_enable = {{ .Values.quantanexus.config.moduleImageCenterEnable }}
     module_oss_manage_enable = {{ .Values.quantanexus.config.moduleOssManageEnable }}
     module_cloud_link_enable = {{ .Values.quantanexus.config.moduleCloudLinkEnable }}
+    course_video_dir = /opt/misc/quantanexus/abc_resource_base/videos
 
   test.conf: |
     [options]
@@ -73,6 +74,7 @@ data:
     module_image_center_enable = {{ .Values.quantanexus.config.moduleImageCenterEnable }}
     module_oss_manage_enable = {{ .Values.quantanexus.config.moduleOssManageEnable }}
     module_cloud_link_enable = {{ .Values.quantanexus.config.moduleCloudLinkEnable }}
+    course_video_dir = /opt/misc/quantanexus/abc_resource_base/videos
 
   pre-start.sh: |
     echo "quantanexus pre-start.sh called"

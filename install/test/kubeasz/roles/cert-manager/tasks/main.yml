@@ -34,7 +34,7 @@
 
 - name: 生成证书与 ClusterIssuer 清单
   template:
-    src: certificates.yaml.j2
+    src: cluster-issuer.yaml.j2
     dest: "/tmp/cert-manager-certificates.yaml"
 
 - name: 应用证书与 ClusterIssuer 资源
