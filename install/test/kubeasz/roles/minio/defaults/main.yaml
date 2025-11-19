@@ -27,7 +27,8 @@ minio_service_type: NodePort
 minio_console_service_type: NodePort
 
 # 镜像配置 - 新增部分
-minio_image_registry: "registry.cn-hangzhou.aliyuncs.com/quantanexus"
+minio_image_registry: "{{ IMAGE_REGISTRY }}"
+
 minio_image_repository: "quay.io-minio-minio"
 minio_image_tag: "RELEASE.2024-12-18T13-15-44Z"
 minio_mc_image_repository: "quay.io-minio-mc"
