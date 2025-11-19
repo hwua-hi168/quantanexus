@@ -34,7 +34,7 @@
 - name: 安装/升级 MinIO 分布式集群
   kubernetes.core.helm:
     name: "{{ minio_release | default('minio') }}"
-    chart_ref: "{{ minio_chart_name | default('minio/minio') }}"
+    chart_ref: "{{ minio_chart_name | default('hi168/minio') }}"
     chart_version: "{{ minio_chart_version | default(omit) }}"
     release_namespace: "{{ minio_namespace | default('default') }}"
     create_namespace: true

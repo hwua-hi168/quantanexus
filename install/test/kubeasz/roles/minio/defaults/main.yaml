@@ -11,7 +11,7 @@ minio_mode: distributed
 cert_manager_cluster_issuer: "{{ QN_CLUSTER_ISSUER}}"
 # 副本数（Pod 数量）
 minio_replicas: 3
-minio_storage_class: "longhorn"
+minio_storage_default_class: "longhorn"
 # StatefulSet 级副本数（与上保持一致即可）
 minio_statefulset_replica_count: 3
 

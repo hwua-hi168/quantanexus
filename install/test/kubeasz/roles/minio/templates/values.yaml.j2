@@ -29,7 +29,7 @@ resources:
 # 持久化
 persistence:
   enabled: true
-  storageClass: "{{ minio_storage_class | default('longhorn') }}"
+  storageClass: "{{ minio_storage_default_class | default('longhorn') }}"
   size: "{{ minio_persistence_size | default('3Gi') }}"
 
 # Service 类型 + 具体 NodePort（32600 起，避免冲突）
