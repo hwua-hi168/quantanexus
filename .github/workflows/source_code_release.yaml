@@ -106,12 +106,13 @@ jobs:
           git config user.email "github-actions@github.com"
           git commit -m "Add chart ${{ github.ref_name }}"
           git push
-
+          
       # 3. 构建产物（源码包 + 校验文件）
       - name: Build artifacts
         run: |
           mkdir -p /tmp/artifacts
-          cp install/kubeasz/ezdown /tmp/artifacts/ezdown
+          VERSION="${GITHUB_REF_NAME}"   
+          sed -i "s/{{ QNI_VER }}/$VERSION/" /tmp/artifacts/ezdown
           zip -r /tmp/artifacts/quantanexus-${GITHUB_REF_NAME}.zip . \
             -x '.git/*' -x '*.zip' -x '.github/*' -x '*.gz' \
             -x 'quantanexus-*.zip' -x 'quantanexus-*.tar.gz'
