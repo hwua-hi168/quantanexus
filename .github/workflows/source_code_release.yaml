@@ -112,7 +112,7 @@ jobs:
         run: |
           mkdir -p /tmp/artifacts
           VERSION="${GITHUB_REF_NAME}"   
-          sed -i "s/{{ QNI_VER }}/$VERSION/" /tmp/artifacts/ezdown
+          sed -i "s/{{ QNI_VER }}/$VERSION/" install/kubeasz/ezdown.in > /tmp/artifacts/ezdown
           zip -r /tmp/artifacts/quantanexus-${GITHUB_REF_NAME}.zip . \
             -x '.git/*' -x '*.zip' -x '.github/*' -x '*.gz' \
             -x 'quantanexus-*.zip' -x 'quantanexus-*.tar.gz'
