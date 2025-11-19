@@ -1,8 +1,9 @@
 apiVersion: v2
 name: quantanexus-mgr
 description: A Helm chart for deploying quantanexus mgr on Kubernetes
-version: 1.0.0
-appVersion: "1.0.0"
+version: "1.0.0"
+# 以核心quantanexus-mgr 为核心appVersion
+appVersion: "v8.3.7.14"
 dependencies:
   - name: postgresql
     version: "11.7.0"

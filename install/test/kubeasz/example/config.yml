@@ -6,6 +6,9 @@ QN_CLUSTER_ISSUER: "hwua-quantanexus"
 QN_S3_DOMAIN: "s3.{{ QN_DOMAIN }}"
 
 
+# image registry [default : local network registry harbor.hi168.com]
+IMAGE_REGISTRY: "registry.cn-hangzhou.aliyuncs.com/quantanexus"
+
 
 ############################
 # prepare

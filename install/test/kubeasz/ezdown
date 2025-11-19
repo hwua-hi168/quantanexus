@@ -16,7 +16,7 @@ set -o pipefail
 # default settings, can be overridden by cmd line options, see usage
 DOCKER_VER=28.0.4
 #Quantanexus_intaller_version
-QNI_VER=v0.0.11 
+QNI_VER=v0.0.12
 REGISTRY=registry.cn-hangzhou.aliyuncs.com/quantanexus
 # REGISTRY=docker.io/hwua
 KUBEASZ_VER=3.6.8

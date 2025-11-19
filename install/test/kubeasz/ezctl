@@ -243,6 +243,7 @@ function setup() {
 *   kubernetes: ${k8s_ver}
 *   etcd: ${etcd_ver}
 *   ${network_cni}: ${network_cni_ver}
+*   quantanexus-mgr: $
 *******************************************
 EOF
 
@@ -281,7 +282,7 @@ function cmd() {
           ;;
     esac
 
-    COMMAND="ansible-playbook -i clusters/$1/hosts -e @clusters/$1/config.yml playbooks/$PLAY_BOOK"
+    COMMAND="ansible-playbook -i clusters/$1/hosts -e @clusters/$1/config.yml -k playbooks/$PLAY_BOOK"
     echo "$COMMAND"
 
     logger info "cluster:$1 $2 begins in 5s, press any key to abort:\n"

@@ -2,6 +2,7 @@
   hosts: pve_host
   gather_facts: no
   tasks:
+  
     - name: Rollback each VM to its snapshot
       command: qm rollback {{ item }} {{ hostvars[item].snapshot }}
       loop: "{{ groups['vm_ids'] }}"

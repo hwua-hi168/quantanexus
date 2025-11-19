@@ -30,7 +30,7 @@ jobs:
             local token
             token=$(curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:${repo}:pull" | jq -r .token)
 
-            # 2. 获取 latest 的 digest（若失败则直接返回 v0.0.0）
+            # 2. 获取 latest 的 digest(若失败则直接返回 v0.0.0)
             local digest
             digest=$(curl -s -H "Authorization: Bearer ${token}" \
                         -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
@@ -111,6 +111,7 @@ jobs:
       - name: Build artifacts
         run: |
           mkdir -p /tmp/artifacts
+          cp install/test/kubeasz/ezdown /tmp/artifacts/ezdown
           zip -r /tmp/artifacts/quantanexus-${GITHUB_REF_NAME}.zip . \
             -x '.git/*' -x '*.zip' -x '.github/*' -x '*.gz' \
             -x 'quantanexus-*.zip' -x 'quantanexus-*.tar.gz'
@@ -134,5 +135,6 @@ jobs:
             *.tar.gz
             quantanexus-checksums.txt
             quantanexus-${{ github.ref_name }}.tgz
+            ezdown
           draft: false
           prerelease: false
