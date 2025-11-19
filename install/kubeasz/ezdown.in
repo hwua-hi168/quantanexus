@@ -284,7 +284,7 @@ EOF
 #它是从docker拉下来并且复制的，所以需要docker打包镜像
 function get_kubeasz() {
   # check if kubeasz already existed
-  [[ -d "$BASE/roles/kube-node" ]] && { logger warn "kubeasz already existed"; return 0; }
+  [[ -f "$imageDir/quantanexus_installer_$QNI_VER.tar" ]] && [[ -d "$BASE/roles/kube-node" ]] && { logger warn "kubeasz already existed"; return 0; }
 
   if [[ ! -f "$imageDir/quantanexus_installer_$QNI_VER.tar" ]];then
     logger info "downloading QuantaNexus Installer: $QNI_VER"

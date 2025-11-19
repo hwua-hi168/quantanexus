@@ -100,7 +100,9 @@ QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平
 - 自动配置 QuantaNexus-mgr 和 QuantaNexus-cs 核心服务
 
 ```
-curl -LO https://github.com/hwua-hi168/quantanexus/releases/download/$(curl -s "https://api.github.com/repos/hwua-hi168/quantanexus/releases/latest" | jq -r .tag_name)/ezdown && chmod +x ezdown
+curl -LO https://github.com/hwua-hi168/quantanexus/releases/download/$(curl \
+  -s "https://api.github.com/repos/hwua-hi168/quantanexus/releases/latest" | \
+  jq -r .tag_name)/ezdown && chmod +x ezdown
 
 # 1) 下载所有组件 
 ./ezdown -D 
