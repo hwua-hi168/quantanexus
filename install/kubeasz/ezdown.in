@@ -721,6 +721,9 @@ function start_kubeasz_docker() {
       --volume /root/.ssh:/root/.ssh \
       --volume /etc/docker:/etc/docker \
       ${REGISTRY}/quantanexus-installer:${QNI_VER}
+  docker cp $(dirname "$(readlink -f "$0")")/$0 kubeasz:/etc/kubeasz/ezdown
+  docker exec kubeasz chmod -R +x /etc/kubeasz/ezdown || true
+  
 }
 
 function clean_container() {
