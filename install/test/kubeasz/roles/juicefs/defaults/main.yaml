@@ -1,6 +1,6 @@
 # 基础信息
 juicefs_namespace: "juicefs"
-juicefs_chart_repo: "https://juicedata.github.io/charts"
+juicefs_chart_repo: "https://helm.hi168.com/charts"
 juicefs_chart_repo_name: "juicedata"
 juicefs_csi_chart_name: "juicedata/juicefs-csi-driver"
 juicefs_csi_chart_version: ""          # 空=latest

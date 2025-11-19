@@ -4,6 +4,7 @@
     name: hi168
     repo_url: "{{ quantanexus_helm_repository }}"
     state: present
+    force_update: true
 
 - name: 创建 values.yaml 配置文件
   template:

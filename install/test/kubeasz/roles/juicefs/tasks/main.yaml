@@ -1,8 +1,9 @@
-
 - name: Add/Update JuiceFS Helm repository
   kubernetes.core.helm_repository:
     name: juicedata
     repo_url: "{{ juicefs_chart_repo }}"
+    state: present
+    force_update: true          # <= 关键参数
 
 # 0. 获取 MinIO 访问信息（与 minio role 解耦）
 - name: 查询 minio release 是否存在
@@ -72,12 +73,6 @@
     namespace: "{{ minio_namespace }}"
   register: minio_secret
 
-
-
-- name: Add/Update JuiceFS Helm repository
-  kubernetes.core.helm_repository:
-    name: juicefs-s3
-    repo_url: "{{ juicefs_chart_repo }}"
 
 
 - name: 安装/升级 JuiceFS S3 

@@ -100,7 +100,45 @@ QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平
 - 自动配置 QuantaNexus-mgr 和 QuantaNexus-cs 核心服务
 
 ```
-  curl 
+curl -LO https://github.com/hwua-hi168/quantanexus/releases/download/$(curl -s "https://api.github.com/repos/hwua-hi168/quantanexus/releases/latest" | jq -r .tag_name)/ezdown && chmod +x ezdown
+
+# 1) 下载所有组件 
+./ezdown -D 
+
+
+# 2) 容器化运行kubeasz
+./ezdown -S
+
+# 创建新集群 k8s-01
+docker exec -it kubeasz ezctl new k8s-01
+2021-01-19 10:48:23 DEBUG generate custom cluster files in /etc/kubeasz/clusters/k8s-01
+2021-01-19 10:48:23 DEBUG set version of common plugins
+2021-01-19 10:48:23 DEBUG cluster k8s-01: files successfully created.
+2021-01-19 10:48:23 INFO next steps 1: to config '/etc/kubeasz/clusters/k8s-01/hosts'
+2021-01-19 10:48:23 INFO next steps 2: to config '/etc/kubeasz/clusters/k8s-01/config.yml'
+
+# 3) 将容器运行命令加入alias，方便调试 
+echo "alias dk='docker exec -it kubeasz'" >> ~/.bashrc && source ~/.bashrc
+
+# 4） 创建一个集群
+dk ezctl new k8s-01
+
+# 5）安装一个集群
+dk ezctl install k8s-01 
+
+2025-11-19 13:15:53 [ezctl:188] ERROR invalid config, run 'ezctl new k8s-01' first
+root@qni:~# dk ezctl new k8s-01
+2025-11-19 13:16:31 [ezctl:145] DEBUG generate custom cluster files in /etc/kubeasz/clusters/k8s-01
+2025-11-19 13:16:31 [ezctl:151] DEBUG set versions
+2025-11-19 13:16:31 [ezctl:182] DEBUG cluster k8s-01: files successfully created.
+2025-11-19 13:16:31 [ezctl:183] INFO next steps 1: to config '/etc/kubeasz/clusters/k8s-01/hosts'
+2025-11-19 13:16:31 [ezctl:184] INFO next steps 2: to config '/etc/kubeasz/clusters/k8s-01/config.yml'
+
+
+# 6) 配置集群/etc/kubeasz/clusters/k8s-01/hosts && /etc/kubeasz/clusters/k8s-01/config.yml
+熟悉ansible的自然知道如何去配置集群.
+后期会制作一些视频，供大家参考.
+
 ```
 
 也可以参考install/test/README.md(./install/test/README.md) 进行手工安装。
