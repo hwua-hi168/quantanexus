@@ -218,7 +218,7 @@ jobs:
         echo "=== Step 3: Uploading Archive to Server ==="
         
         SERVER="https://d.hi168.com/filebrowser"
-        USERNAME="tianbao"
+        USERNAME="$DOWNLOAD_CENTER_USERNAME"
         LOCAL_FILE="mirrors.tar.gz"
         
         # 检查密码环境变量
@@ -240,12 +240,29 @@ jobs:
         fi
         echo "Login successful"
         
-        # 2. 上传文件
+        # 2. 上传文件 - 使用更简单的方式
         echo "正在上传文件 $LOCAL_FILE 到 $SERVER ..."
+        
+        # 首先检查本地文件是否存在且有效
+        if [ ! -f "$LOCAL_FILE" ]; then
+            echo "错误：本地文件 $LOCAL_FILE 不存在"
+            exit 1
+        fi
+        
+        # 验证本地文件是否是有效的 tar.gz 文件
+        if ! tar -tzf "$LOCAL_FILE" > /dev/null 2>&1; then
+            echo "错误：本地文件 $LOCAL_FILE 不是有效的 tar.gz 文件"
+            exit 1
+        fi
+        
+        echo "本地文件验证通过，开始上传..."
+        
+        # 使用更简洁的上传方式
         UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
           "$SERVER/api/resources/qn/$LOCAL_FILE?override=true" \
           -H "X-Auth: $API_TOKEN" \
-          -F "file=@./$LOCAL_FILE")
+          -H "Content-Type: application/octet-stream" \
+          --data-binary "@$LOCAL_FILE")
         
         # 分离响应体和状态码
         HTTP_STATUS=$(echo "$UPLOAD_RESPONSE" | tail -n1)
@@ -258,7 +275,23 @@ jobs:
             echo "上传成功！"
         else
             echo "上传失败！"
-            exit 1
+            echo "尝试使用备用上传方法..."
+            
+            # 备用方法：使用 multipart form 但更简洁的方式
+            UPLOAD_RESPONSE2=$(curl -s -w "\n%{http_code}" -X POST \
+              "$SERVER/api/upload/qn/?override=true" \
+              -H "X-Auth: $API_TOKEN" \
+              -F "file=@$LOCAL_FILE")
+            
+            HTTP_STATUS2=$(echo "$UPLOAD_RESPONSE2" | tail -n1)
+            RESPONSE_BODY2=$(echo "$UPLOAD_RESPONSE2" | head -n -1)
+            
+            echo "备用方法 HTTP状态码: $HTTP_STATUS2"
+            echo "备用方法服务器响应: $RESPONSE_BODY2"
+            
+            if [ "$HTTP_STATUS2" -ne 200 ]; then
+                exit 1
+            fi
         fi
         
         echo "=== Step 3 Complete: Archive uploaded to server ==="
