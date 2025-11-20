@@ -3,16 +3,16 @@ entries:
   quantanexus-cs:
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.430551523Z"
+    created: "2025-11-20T15:57:01.836337886Z"
     description: A Helm chart for deploying quantanexus cluster service on Kubernetes
-    digest: 0046f840c5fc12adef7f9c57c4cd60d1f2708e5b6de1a5e9a9542dcef0f99687
+    digest: 84192d4eaf20c095e0df526fa7bde6de4cf942f69c29fdd57ed1b4cef2fe006e
     name: quantanexus-cs
     urls:
     - https://hwua-hi168.github.io/quantanexus/quantanexus-cs-0.0.24.tgz
     version: 0.0.24
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.429749836Z"
+    created: "2025-11-20T15:57:01.835389031Z"
     description: A Helm chart for deploying quantanexus cluster service on Kubernetes
     digest: 58582db36a02f33a09d818777fb857a4c9b2b2621dd4bbdc3bfab784defcc72a
     name: quantanexus-cs
@@ -21,7 +21,7 @@ entries:
     version: 0.0.23
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.428796854Z"
+    created: "2025-11-20T15:57:01.834536797Z"
     description: A Helm chart for deploying quantanexus cluster service on Kubernetes
     digest: 3fdfdca05b43eb5309e920ba21de0f492077cc9b977e5d06e0cb37353b6d5478
     name: quantanexus-cs
@@ -30,7 +30,7 @@ entries:
     version: 0.0.22
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.426758369Z"
+    created: "2025-11-20T15:57:01.833657846Z"
     description: A Helm chart for deploying quantanexus cluster service on Kubernetes
     digest: f87b472e86523dffd7b4ce95366df24f86170818e70111b8009468c4a1be45d1
     name: quantanexus-cs
@@ -39,7 +39,7 @@ entries:
     version: 0.0.21
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.425958327Z"
+    created: "2025-11-20T15:57:01.832769968Z"
     description: A Helm chart for deploying quantanexus cluster service on Kubernetes
     digest: 78dc15b766ca696c10822bf98e1ae086d985d7035d2cc87cfb7d002179125ec1
     name: quantanexus-cs
@@ -48,7 +48,7 @@ entries:
     version: 0.0.20
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.425186747Z"
+    created: "2025-11-20T15:57:01.831941837Z"
     description: A Helm chart for deploying quantanexus cluster service on Kubernetes
     digest: 63382aaf97c2bda165a19bffe375b2a39e73cece8ae6e23bbfb2eac5e325cfba
     name: quantanexus-cs
@@ -57,7 +57,7 @@ entries:
     version: 0.0.19
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.424386972Z"
+    created: "2025-11-20T15:57:01.831087479Z"
     description: A Helm chart for deploying quantanexus cluster service on Kubernetes
     digest: e89dd3128a84caf1009ebea707cd9612d792ffe5ca823737f914e86e4c26061d
     name: quantanexus-cs
@@ -66,7 +66,7 @@ entries:
     version: 0.0.18
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.423589586Z"
+    created: "2025-11-20T15:57:01.830274454Z"
     description: A Helm chart for deploying quantanexus cluster service on Kubernetes
     digest: e0de9f192fc2badf02fd332c29d59bd37d5a6caefe92b32dd10f7506b4f60605
     name: quantanexus-cs
@@ -75,7 +75,7 @@ entries:
     version: 0.0.17
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.422755654Z"
+    created: "2025-11-20T15:57:01.828564684Z"
     description: A Helm chart for deploying quantanexus cluster service on Kubernetes
     digest: 09d8ba5a8fc74e01df61e624c9210179edf06d74e6d38a7285542c795d81acad
     name: quantanexus-cs
@@ -84,7 +84,7 @@ entries:
     version: 0.0.16
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.421925831Z"
+    created: "2025-11-20T15:57:01.827694379Z"
     description: A Helm chart for deploying quantanexus cluster service on Kubernetes
     digest: fae429f602800dc48fcd8a49dbb503f0eac1d3d8199edd0194a5fa2e8443cea9
     name: quantanexus-cs
@@ -93,7 +93,7 @@ entries:
     version: 0.0.15
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.420928129Z"
+    created: "2025-11-20T15:57:01.826841533Z"
     description: A Helm chart for deploying quantanexus cluster service on Kubernetes
     digest: e316d916447ffef907bd34423d5eb5ba20870bb1e92d02ce2a466386772b58f4
     name: quantanexus-cs
@@ -102,7 +102,7 @@ entries:
     version: 0.0.14
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.419221447Z"
+    created: "2025-11-20T15:57:01.82599579Z"
     description: A Helm chart for deploying quantanexus cluster service on Kubernetes
     digest: 03be824eb7b79b16add564cd7e47eafbfe943fc37e10b46c932f10193b8f7abc
     name: quantanexus-cs
@@ -111,7 +111,7 @@ entries:
     version: 0.0.13
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.418156545Z"
+    created: "2025-11-20T15:57:01.825102133Z"
     description: A Helm chart for deploying quantanexus cluster service on Kubernetes
     digest: af046d355f669b1d03351c740c479de99d8ac6f346cdf0857fda7b90a434e76e
     name: quantanexus-cs
@@ -120,7 +120,7 @@ entries:
     version: 0.0.12
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.417331053Z"
+    created: "2025-11-20T15:57:01.82424487Z"
     description: A Helm chart for deploying quantanexus cluster service on Kubernetes
     digest: de2225d01233b700a7bb670827214dad8a77e24bbf3a2dc2dab0fc585f281e19
     name: quantanexus-cs
@@ -129,7 +129,7 @@ entries:
     version: 0.0.11
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.416459483Z"
+    created: "2025-11-20T15:57:01.823351313Z"
     description: A Helm chart for deploying quantanexus cluster service on Kubernetes
     digest: 0556f682f9a8b02da3290c9304437074c318c34fbf39e0fd3fd2c4031de2058f
     name: quantanexus-cs
@@ -138,7 +138,7 @@ entries:
     version: 0.0.10
   - apiVersion: v2
     appVersion: 0.0.9
-    created: "2025-11-20T15:33:48.431381269Z"
+    created: "2025-11-20T15:57:01.837688127Z"
     description: A Helm chart for deploying quantanexus cluster service on Kubernetes
     digest: 8c706bde92537e3e9d8028c92ae4fcc07861f624fb5c4392b54e70b71c64de8f
     name: quantanexus-cs
@@ -148,21 +148,21 @@ entries:
   quantanexus-mgr:
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.496862378Z"
+    created: "2025-11-20T15:57:01.899689172Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
       repository: https://helm.hi168.com/charts/
       version: 11.7.0
     description: A Helm chart for deploying quantanexus mgr on Kubernetes
-    digest: e5855cadf61597bda18ad8f507815b37be5d0b8a2cfa0308f30ce687d8f7fc1a
+    digest: 14445e5f6da14d0994e0fcb86399050e802584da34008b9ee629dc10c13b9856
     name: quantanexus-mgr
     urls:
     - https://hwua-hi168.github.io/quantanexus/quantanexus-mgr-0.0.24.tgz
     version: 0.0.24
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.492195456Z"
+    created: "2025-11-20T15:57:01.895851729Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -176,7 +176,7 @@ entries:
     version: 0.0.23
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.48847287Z"
+    created: "2025-11-20T15:57:01.891548466Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -190,7 +190,7 @@ entries:
     version: 0.0.22
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.483769993Z"
+    created: "2025-11-20T15:57:01.887903463Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -204,7 +204,7 @@ entries:
     version: 0.0.21
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.478983284Z"
+    created: "2025-11-20T15:57:01.883590748Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -218,7 +218,7 @@ entries:
     version: 0.0.20
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.472861266Z"
+    created: "2025-11-20T15:57:01.879987618Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -232,7 +232,7 @@ entries:
     version: 0.0.19
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.469171192Z"
+    created: "2025-11-20T15:57:01.875549879Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -246,7 +246,7 @@ entries:
     version: 0.0.18
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.464686683Z"
+    created: "2025-11-20T15:57:01.871922737Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -260,7 +260,7 @@ entries:
     version: 0.0.17
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.46100527Z"
+    created: "2025-11-20T15:57:01.867462386Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -274,7 +274,7 @@ entries:
     version: 0.0.16
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.456529828Z"
+    created: "2025-11-20T15:57:01.863816551Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -288,7 +288,7 @@ entries:
     version: 0.0.15
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.452831464Z"
+    created: "2025-11-20T15:57:01.858359895Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -302,7 +302,7 @@ entries:
     version: 0.0.14
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.44815537Z"
+    created: "2025-11-20T15:57:01.854667257Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -316,7 +316,7 @@ entries:
     version: 0.0.13
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.444477906Z"
+    created: "2025-11-20T15:57:01.849483263Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -330,7 +330,7 @@ entries:
     version: 0.0.12
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.439808318Z"
+    created: "2025-11-20T15:57:01.845886274Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -344,7 +344,7 @@ entries:
     version: 0.0.11
   - apiVersion: v2
     appVersion: v8.3.7.14
-    created: "2025-11-20T15:33:48.436162448Z"
+    created: "2025-11-20T15:57:01.841430653Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -358,7 +358,7 @@ entries:
     version: 0.0.10
   - apiVersion: v2
     appVersion: 0.0.9
-    created: "2025-11-20T15:33:48.500541014Z"
+    created: "2025-11-20T15:57:01.904630082Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -370,4 +370,4 @@ entries:
     urls:
     - https://hwua-hi168.github.io/quantanexus/quantanexus-mgr-0.0.9.tgz
     version: 0.0.9
-generated: "2025-11-20T15:33:48.415400472Z"
+generated: "2025-11-20T15:57:01.821014009Z"
