@@ -211,6 +211,7 @@ jobs:
     - name: Step 3 - Upload Archive to Server
       env:
         DOWNLOAD_CENTER_PASSWORD: ${{ secrets.DOWNLOAD_CENTER_PASSWORD }}
+        DOWNLOAD_CENTER_USERNAME: ${{ secrets.DOWNLOAD_CENTER_USERNAME }}
       run: |
         cd tools/charts-mirror/
         
@@ -229,10 +230,10 @@ jobs:
         # 1. 登录获取 Token
         echo "正在登录..."
         API_TOKEN=$(curl -s -X POST \
-          "$SERVER/api/login" \
+          $SERVER/api/login \
           -H 'Content-Type: application/json' \
-          -d "{\"username\":\"$USERNAME\",\"password\":\"$DOWNLOAD_CENTER_PASSWORD\"}" | grep -o '"token":"[^"]*' | cut -d'"' -f4)
-        
+          -d "{\"username\":\"$DOWNLOAD_CENTER_USERNAME\",\"password\":\"$DOWNLOAD_CENTER_PASSWORD\"}" )
+
         if [ -z "$API_TOKEN" ]; then
             echo "错误：登录失败，请检查用户名和密码"
             exit 1

@@ -25,7 +25,7 @@ jobs:
         
         # upload.sh 脚本
         SERVER="https://d.hi168.com/filebrowser"
-        USERNAME="tianbao"
+        USERNAME="${{ secrets.DOWNLOAD_CENTER_USERNAME }}"
         PASSWORD="${{ secrets.DOWNLOAD_CENTER_PASSWORD }}"
         LOCAL_FILE=kct.sh
         #REMOTE_PATH="backups"
