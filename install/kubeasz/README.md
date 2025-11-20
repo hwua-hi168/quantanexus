@@ -5,6 +5,14 @@ QNI 是  Quantanexus  Installer 的简称，是基于kubeasz安装将k8s以及�
 本系统分三部分： 
 第一部分：
 
+开发模式： 
+```
+    git clone git@github.com:hwua-hi168/quantanexus.git
+    cd quantanexus
+    bash tools/install-hooks.sh 
+    
+
+```
 
 
 

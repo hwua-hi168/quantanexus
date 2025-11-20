@@ -16,7 +16,7 @@ set -o pipefail
 # default settings, can be overridden by cmd line options, see usage
 DOCKER_VER=28.0.4
 #Quantanexus_intaller_version
-QNI_VER=v0.0.12
+QNI_VER={{ QNI_VER }}
 REGISTRY=registry.cn-hangzhou.aliyuncs.com/quantanexus
 # REGISTRY=docker.io/hwua
 KUBEASZ_VER=3.6.8
@@ -284,7 +284,7 @@ EOF
 #它是从docker拉下来并且复制的，所以需要docker打包镜像
 function get_kubeasz() {
   # check if kubeasz already existed
-  [[ -d "$BASE/roles/kube-node" ]] && { logger warn "kubeasz already existed"; return 0; }
+  [[ -f "$imageDir/quantanexus_installer_$QNI_VER.tar" ]] && [[ -d "$BASE/roles/kube-node" ]] && { logger warn "kubeasz already existed"; return 0; }
 
   if [[ ! -f "$imageDir/quantanexus_installer_$QNI_VER.tar" ]];then
     logger info "downloading QuantaNexus Installer: $QNI_VER"
@@ -721,6 +721,9 @@ function start_kubeasz_docker() {
       --volume /root/.ssh:/root/.ssh \
       --volume /etc/docker:/etc/docker \
       ${REGISTRY}/quantanexus-installer:${QNI_VER}
+  docker cp $(dirname "$(readlink -f "$0")")/$0 kubeasz:/etc/kubeasz/ezdown
+  docker exec kubeasz chmod -R +x /etc/kubeasz/ezdown || true
+  
 }
 
 function clean_container() {

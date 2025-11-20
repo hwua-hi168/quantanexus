@@ -248,8 +248,8 @@ helm install quantanexus-cs hi168/quantanexus-cs --version 1.0.0 \
 
 | 组件 | Helm参数文档 |
 |------|----------|
-| QuantaNexus-Mgr | [Helm参数](./install/test/helm/quantanexus-mgr/README.md) |
-| QuantaNexus-CS  | [Helm参数](./install/test/helm/quantanexus-cs/README.md) |
+| QuantaNexus-Mgr | [Helm参数](./install/helm/quantanexus-mgr/README.md) |
+| QuantaNexus-CS  | [Helm参数](./install/helm/quantanexus-cs/README.md) |
 
 ### 5. 验证与健康检查阶段
 

@@ -85,14 +85,14 @@ QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平
 
 | 组件 | Helm参数文档 |
 |------|----------|
-| QuantaNexus-Mgr | [Helm参数](./install/test/helm/quantanexus-mgr/README.md) |
-| QuantaNexus-CS  | [Helm参数](./install/test/helm/quantanexus-cs/README.md) |
+| QuantaNexus-Mgr | [Helm参数](./install/helm/quantanexus-mgr/README.md) |
+| QuantaNexus-CS  | [Helm参数](./install/helm/quantanexus-cs/README.md) |
 
 ### 1.1 All-in-One 安装（从0开始）
 
 适用于全新环境，一键安装完整的 Kubernetes 集群和 QuantaNexus 平台：
 
-- 自动部署 Kubernetes 1.28+ 集群，可以使用./install/test/kubeasz开源项目用来部署。
+- 自动部署 Kubernetes 1.28+ 集群，可以使用./install/kubeasz开源项目用来部署。
 - 预配置网络插件可选 flannel、calico、cilium、kube-ovn，建议使用calico。
 - 安装 kube-virt 虚拟化组件
 - 集成 Ceph 存储系统（支持 Ceph 17+ 版本）或者Longhorn 存储系统（支持 Longhorn 1.5.x ）
@@ -100,7 +100,9 @@ QuantaNexus分为两个部分，一个是Quantanexus-mgr作为集群的控制平
 - 自动配置 QuantaNexus-mgr 和 QuantaNexus-cs 核心服务
 
 ```
-curl -LO https://github.com/hwua-hi168/quantanexus/releases/download/$(curl -s "https://api.github.com/repos/hwua-hi168/quantanexus/releases/latest" | jq -r .tag_name)/ezdown && chmod +x ezdown
+curl -LO https://github.com/hwua-hi168/quantanexus/releases/download/$(curl \
+  -s "https://api.github.com/repos/hwua-hi168/quantanexus/releases/latest" | \
+  jq -r .tag_name)/ezdown && chmod +x ezdown
 
 # 1) 下载所有组件 
 ./ezdown -D 
@@ -141,7 +143,7 @@ root@qni:~# dk ezctl new k8s-01
 
 ```
 
-也可以参考install/test/README.md(./install/test/README.md) 进行手工安装。
+也可以参考install/README.md(./install/README.md) 进行手工安装。
 
 
 

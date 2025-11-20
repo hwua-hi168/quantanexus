@@ -106,19 +106,20 @@ jobs:
           git config user.email "github-actions@github.com"
           git commit -m "Add chart ${{ github.ref_name }}"
           git push
-
+          
       # 3. 构建产物（源码包 + 校验文件）
       - name: Build artifacts
         run: |
           mkdir -p /tmp/artifacts
-          cp install/test/kubeasz/ezdown /tmp/artifacts/ezdown
+          VERSION="${GITHUB_REF_NAME}"   
+          sed  "s/{{ QNI_VER }}/$VERSION/" install/kubeasz/ezdown.in > /tmp/artifacts/ezdown
           zip -r /tmp/artifacts/quantanexus-${GITHUB_REF_NAME}.zip . \
             -x '.git/*' -x '*.zip' -x '.github/*' -x '*.gz' \
             -x 'quantanexus-*.zip' -x 'quantanexus-*.tar.gz'
           tar --exclude='.git' --exclude='*.zip' --exclude='.github' --exclude='*.gz' \
             -czf /tmp/artifacts/quantanexus-${GITHUB_REF_NAME}.tar.gz .
           mv /tmp/artifacts/* .                       
-          sha256sum *.zip *.tar.gz > quantanexus-checksums.txt  
+          sha256sum *.zip *.tar.gz ezdown > quantanexus-checksums.txt  
 
       # 4. 创建 GitHub Release 并上传资产
       - name: Create Release & Upload assets

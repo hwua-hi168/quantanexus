@@ -13,7 +13,7 @@ install_kubeasz() {
     fi
     
     # 进入quantanexus目录中的kubeasz目录
-    cd quantanexus-main/install/test/kubeasz || return 1
+    cd quantanexus-main/install/kubeasz || return 1
     
     # 给ezdown脚本添加执行权限
     print_info "设置ezdown执行权限..."
