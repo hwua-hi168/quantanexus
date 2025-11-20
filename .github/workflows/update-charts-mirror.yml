@@ -1,0 +1,87 @@
+# .github/workflows/update-charts-mirror.yml
+name: Update Helm Charts Mirror
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+    paths:
+      - 'tools/charts-mirror/**'
+      
+jobs:
+  update-charts:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: '3.12.0'
+        
+    - name: Setup Git
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget
+        
+    - name: Run charts mirror update script
+      env:
+        DOWNLOAD_CENTER_PASSWORD: ${{ secrets.DOWNLOAD_CENTER_PASSWORD }}
+      run: |
+        cd tools/charts-mirror/
+        
+        # 给脚本执行权限
+        chmod +x update-charts.sh
+        
+        # 运行更新脚本
+        if [ -n "${{ github.ref_name }}" ] && [[ "${{ github.ref_name }}" == v* ]]; then
+          # 如果是 tag 触发，使用 tag 作为版本
+          TAG_VERSION="${GITHUB_REF#refs/tags/}"
+          echo "Using tag version: $TAG_VERSION"
+          bash update-charts.sh "$TAG_VERSION"
+        else
+          # 如果是手动触发或文件变更，使用默认版本
+          echo "Using default version"
+          bash update-charts.sh
+        fi
+        
+        # 显示生成的 charts
+        echo "Generated charts:"
+        ls -la charts/
+        
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./tools/charts-mirror
+        push: true
+        tags: |
+          registry.cn-hangzhou.aliyuncs.com/quantanexus/helm:${{ github.sha }}
+          registry.cn-hangzhou.aliyuncs.com/quantanexus/helm:latest
+        secrets: |
+          "registry_password=${{ secrets.ALIYUN_REGISTRY_PASSWORD }}"
+        build-args: |
+          BUILDKIT_INLINE_CACHE=1
+      env:
+        DOCKER_BUILDKIT: 1
+
+    - name: Verify upload
+      run: |
+        # 验证文件是否已上传
+        SERVER="https://d.hi168.com/filebrowser"
+        echo "Verifying upload by checking if mirrors.tar.gz exists..."
+        
+        # 尝试下载刚刚上传的文件来验证
+        if wget -q --spider "https://d.hi168.com/qn/mirrors.tar.gz"; then
+          echo "✅ mirrors.tar.gz is accessible"
+        else
+          echo "❌ mirrors.tar.gz might not be accessible"
+          exit 1
+        fi
