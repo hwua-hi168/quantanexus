@@ -55,7 +55,16 @@ jobs:
         if wget -O "$MIRRORS_ARCHIVE" "$DOWNLOAD_URL"; then
             echo "Successfully downloaded existing charts archive"
             echo "Extracting charts from archive..."
-            tar -xzf "$MIRRORS_ARCHIVE" -C tools/charts-mirror/
+            # 创建临时目录解压，然后只移动 charts 内容
+            mkdir -p temp_extract
+            tar -xzf "$MIRRORS_ARCHIVE" -C temp_extract
+            # 检查解压后的目录结构，找到 charts 目录并移动内容
+            if [ -d "temp_extract/tools/charts-mirror/charts" ]; then
+                mv temp_extract/tools/charts-mirror/charts/* "$CHART_DESTINATION"/ 2>/dev/null || true
+            elif [ -d "temp_extract/charts" ]; then
+                mv temp_extract/charts/* "$CHART_DESTINATION"/ 2>/dev/null || true
+            fi
+            rm -rf temp_extract
             echo "Extracted existing charts to $CHART_DESTINATION/"
         else
             echo "Warning: Could not download existing charts archive, starting fresh"
@@ -117,9 +126,14 @@ jobs:
         echo "Generating new repository index..."
         helm repo index "$CHART_DESTINATION"/ --url https://helm.hi168.com/charts/
         
-        # 打包 charts 目录
+        # 打包 charts 目录 - 修改这里，只打包 charts 目录内容
         echo "=== Packaging charts directory ==="
-        tar -zcvf "$MIRRORS_ARCHIVE" "$CHART_DESTINATION"/
+        # 进入 charts 目录的父目录
+        cd "$(dirname "$CHART_DESTINATION")"
+        # 只打包 charts 目录，不包含完整路径
+        tar -zcvf "$(basename "$MIRRORS_ARCHIVE")" "$(basename "$CHART_DESTINATION")"/
+        # 回到原目录
+        cd -
         echo "Created archive: $MIRRORS_ARCHIVE"
         
         # 显示生成的 charts
