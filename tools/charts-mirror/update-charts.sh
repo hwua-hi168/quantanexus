@@ -16,6 +16,10 @@ CHART_DESTINATION="charts" # 下载 charts 的目标目录
 CHART_FILE="charts.csv"   # 包含 charts 列表的 CSV 文件名
 QUANTANEXUS_REPO="git@github.com:hwua-hi168/quantanexus.git"
 QUANTANEXUS_TAG="${2:-main}"  # 支持从命令行参数获取 tag，默认 main
+MIRRORS_ARCHIVE="mirrors.tar.gz"
+DOWNLOAD_URL="https://d.hi168.com/qn/mirrors.tar.gz"
+UPLOAD_SERVER="https://d.hi168.com/filebrowser"
+UPLOAD_USERNAME="tianbao"
 
 echo "=== Updating Helm Charts ==="
 
@@ -28,9 +32,16 @@ fi
 # 确保 charts 目录存在
 mkdir -p "$CHART_DESTINATION"
 
-# --- 清空 charts 目录以确保只包含最新的版本 ---
-# echo "Clearing old charts from $CHART_DESTINATION/..."
-# rm -rf "$CHART_DESTINATION"/*.tgz
+# --- 下载旧的 charts 包 ---
+echo "=== Downloading existing charts archive ==="
+if wget -O "$MIRRORS_ARCHIVE" "$DOWNLOAD_URL"; then
+    echo "Successfully downloaded existing charts archive"
+    echo "Extracting charts from archive..."
+    tar -xzf "$MIRRORS_ARCHIVE" -C ./
+    echo "Extracted existing charts to $CHART_DESTINATION/"
+else
+    echo "Warning: Could not download existing charts archive, starting fresh"
+fi
 
 # --- 克隆并打包 quantanexus 仓库中的 charts ---
 echo "=== Processing Quantanexus Charts ==="
@@ -117,6 +128,56 @@ docker build -t "$REGISTRY/$REPO_NAME:$TAG" .
 # --- 推送镜像 ---
 # echo "Pushing Docker image..."
 docker push "$REGISTRY/$REPO_NAME:$TAG"
+
+# --- 打包 charts 目录 ---
+echo "=== Packaging charts directory ==="
+tar -zcvf "$MIRRORS_ARCHIVE" "$CHART_DESTINATION"/
+echo "Created archive: $MIRRORS_ARCHIVE"
+
+# --- 上传 charts 包到服务器 ---
+echo "=== Uploading charts archive to server ==="
+
+# 检查密码环境变量
+if [ -z "$DOWNLOAD_CENTER_PASSWORD" ]; then
+    echo "Error: DOWNLOAD_CENTER_PASSWORD environment variable is not set" >&2
+    exit 1
+fi
+
+LOCAL_FILE="$MIRRORS_ARCHIVE"
+
+# 1. 登录获取 Token
+echo "正在登录..."
+API_TOKEN=$(curl -s -X POST \
+  "$UPLOAD_SERVER/api/login" \
+  -H 'Content-Type: application/json' \
+  -d "{\"username\":\"$UPLOAD_USERNAME\",\"password\":\"$DOWNLOAD_CENTER_PASSWORD\"}" | grep -o '"token":"[^"]*' | cut -d'"' -f4)
+
+if [ -z "$API_TOKEN" ]; then
+    echo "错误：登录失败，请检查用户名和密码"
+    exit 1
+fi
+echo "Login successful"
+
+# 2. 上传文件
+echo "正在上传文件 $LOCAL_FILE 到 $UPLOAD_SERVER ..."
+UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+  "$UPLOAD_SERVER/api/resources/$LOCAL_FILE?override=true" \
+  -H "X-Auth: $API_TOKEN" \
+  -F "file=@./$LOCAL_FILE")
+
+# 分离响应体和状态码
+HTTP_STATUS=$(echo "$UPLOAD_RESPONSE" | tail -n1)
+RESPONSE_BODY=$(echo "$UPLOAD_RESPONSE" | head -n -1)
+
+echo "HTTP状态码: $HTTP_STATUS"
+echo "服务器响应: $RESPONSE_BODY"
+
+if [ "$HTTP_STATUS" -eq 200 ]; then
+    echo "上传成功！"
+else
+    echo "上传失败！"
+    exit 1
+fi
 
 # --- 重启 deployment 以使用新镜像 ---
 # echo "Restarting deployment..."
