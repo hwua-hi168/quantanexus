@@ -3,7 +3,7 @@
 # ==============================
 global:
   # 域名配置
-  domainName: qntest002.example.com
+  domainName: cs1.quantanexus.com
   # 镜像仓库地址
   registry: registry.cn-hangzhou.aliyuncs.com/quantanexus
   # 主节点名称（已注释）

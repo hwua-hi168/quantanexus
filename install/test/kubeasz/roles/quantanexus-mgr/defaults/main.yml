@@ -1,6 +1,7 @@
 # Quantanexus 配置默认值
 quantanexus_version: "1.0.0"
 quantanexus_cs_namespace: "quantanexus-cs"
+quantanexus_cs_domain:  "{{ QN_CS_DOMAIN | default('cs1.quantanexus.com') }}"
 quantanexus_mgr_namespace: "quantanexus-mgr"
 quantanexus_helm_repository: "https://helm.hi168.com/charts"
 quantanexus_clusster_issuer_name: "{{ QN_CLUSTER_ISSUER }}"

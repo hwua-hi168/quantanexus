@@ -1,7 +1,8 @@
 # Global configuration
 global:
-  service_namespace: quantanexus-cs
-  domainName: cs1.quantanexus.com
+  serviceNamespace: quantanexus-cs
+  serviceDomain: cs1.quantanexus.com
+  domainName: mgr.quantanexus.com
   # registry: harbor.hi168.com/quantanexus
   # In China, please use aliyuncs
   registry: registry.cn-hangzhou.aliyuncs.com/quantanexus

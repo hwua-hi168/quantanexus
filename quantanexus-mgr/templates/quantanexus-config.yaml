@@ -36,7 +36,7 @@ data:
     limit_memory_soft = 8000000000
     max_cron_threads = {{ .Values.quantanexus.config.maxCronThreads }}
     workers          = {{ .Values.quantanexus.config.workers }}    
-    system_install_namespace = {{ .Values.global.service_namespace }}
+    system_install_namespace = {{ .Values.global.serviceNamespace }}
     module_image_center_enable = {{ .Values.quantanexus.config.moduleImageCenterEnable }}
     module_oss_manage_enable = {{ .Values.quantanexus.config.moduleOssManageEnable }}
     module_cloud_link_enable = {{ .Values.quantanexus.config.moduleCloudLinkEnable }}
@@ -70,7 +70,7 @@ data:
     limit_memory_soft = 8000000000
     max_cron_threads = {{ .Values.quantanexus.config.maxCronThreads }}
     workers          = {{ .Values.quantanexus.config.workers }}    
-    system_install_namespace = {{ .Values.global.service_namespace }}
+    system_install_namespace = {{ .Values.global.serviceNamespace }}
     module_image_center_enable = {{ .Values.quantanexus.config.moduleImageCenterEnable }}
     module_oss_manage_enable = {{ .Values.quantanexus.config.moduleOssManageEnable }}
     module_cloud_link_enable = {{ .Values.quantanexus.config.moduleCloudLinkEnable }}
@@ -78,6 +78,6 @@ data:
 
   pre-start.sh: |
     echo "quantanexus pre-start.sh called"
-    sed -i 's/demo\.hi168\.com/{{ .Values.global.domainName }}/g' "${QUANTANEXUS_HOME}/quantanexus-addons/hw_experiment/data/zone.xml"
+    sed -i 's/demo\.hi168\.com/{{ .Values.global.serviceDomain }}/g' "${QUANTANEXUS_HOME}/quantanexus-addons/hw_experiment/data/zone.xml"
     echo "quantanexus pre-start.sh finished"    
 {{- end }}
