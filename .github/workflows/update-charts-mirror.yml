@@ -8,6 +8,8 @@ on:
       - 'v*'
     # paths:
     #   - 'tools/charts-mirror/**'
+    #   - 'quantanexus-cs/**'
+    #   - 'quantanexus-mgr/**'
       
 jobs:
   update-charts:
@@ -16,16 +18,14 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
+      
     # 安装 helm
     - uses: azure/setup-helm@v4
       with:
         version: latest
         
-    - name: Setup Git and dependencies
+    - name: Install dependencies
       run: |
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
         sudo apt-get update
         sudo apt-get install -y wget
         
@@ -33,16 +33,12 @@ jobs:
       env:
         DOWNLOAD_CENTER_PASSWORD: ${{ secrets.DOWNLOAD_CENTER_PASSWORD }}
       run: |
-        cd tools/charts-mirror/
-        
         echo "=== Step 1: Updating Helm Charts ==="
         
         # 配置变量
-        CHART_DESTINATION="charts"
-        CHART_FILE="charts.csv"
-        QUANTANEXUS_REPO="git@github.com:hwua-hi168/quantanexus.git"
-        QUANTANEXUS_TAG="main"
-        MIRRORS_ARCHIVE="mirrors.tar.gz"
+        CHART_DESTINATION="tools/charts-mirror/charts"
+        CHART_FILE="tools/charts-mirror/charts.csv"
+        MIRRORS_ARCHIVE="tools/charts-mirror/mirrors.tar.gz"
         DOWNLOAD_URL="https://d.hi168.com/qn/mirrors.tar.gz"
         
         # 1. 检查 CSV 文件是否存在
@@ -59,27 +55,11 @@ jobs:
         if wget -O "$MIRRORS_ARCHIVE" "$DOWNLOAD_URL"; then
             echo "Successfully downloaded existing charts archive"
             echo "Extracting charts from archive..."
-            tar -xzf "$MIRRORS_ARCHIVE" -C ./
+            tar -xzf "$MIRRORS_ARCHIVE" -C tools/charts-mirror/
             echo "Extracted existing charts to $CHART_DESTINATION/"
         else
             echo "Warning: Could not download existing charts archive, starting fresh"
         fi
-        
-        # 克隆并打包 quantanexus 仓库中的 charts
-        echo "=== Processing Quantanexus Charts ==="
-        QUANTANEXUS_TEMP_DIR="quantanexus-temp"
-        
-        # 清理临时目录
-        if [ -d "$QUANTANEXUS_TEMP_DIR" ]; then
-            echo "Removing existing temporary directory..."
-            rm -rf "$QUANTANEXUS_TEMP_DIR"
-        fi
-        
-        # 克隆仓库
-        echo "Cloning quantanexus repository (tag: $QUANTANEXUS_TAG)..."
-        git clone --branch "$QUANTANEXUS_TAG" --depth 1 "$QUANTANEXUS_REPO" "$QUANTANEXUS_TEMP_DIR"
-        
-        cd "$QUANTANEXUS_TEMP_DIR"
         
         # 打包 quantanexus-cs
         if [ -d "quantanexus-cs" ]; then
@@ -88,7 +68,7 @@ jobs:
             helm package .
             PACKAGED_FILE=$(ls *.tgz | head -1)
             if [ -n "$PACKAGED_FILE" ]; then
-                mv "$PACKAGED_FILE" ../../"$CHART_DESTINATION"/
+                mv "$PACKAGED_FILE" "../$CHART_DESTINATION/"
                 echo "   Moved $PACKAGED_FILE to charts directory"
             fi
             cd ..
@@ -104,18 +84,13 @@ jobs:
             helm package .
             PACKAGED_FILE=$(ls *.tgz | head -1)
             if [ -n "$PACKAGED_FILE" ]; then
-                mv "$PACKAGED_FILE" ../../"$CHART_DESTINATION"/
+                mv "$PACKAGED_FILE" "../$CHART_DESTINATION/"
                 echo "   Moved $PACKAGED_FILE to charts directory"
             fi
             cd ..
         else
             echo "Warning: quantanexus-mgr directory not found"
         fi
-        
-        # 返回原始目录并清理临时目录
-        cd ../..
-        echo "Cleaning up temporary directory..."
-        rm -rf "$QUANTANEXUS_TEMP_DIR"
         
         # 从 CSV 文件下载依赖的 charts
         echo "=== Downloading Dependency Charts from $CHART_FILE ==="
@@ -149,7 +124,7 @@ jobs:
         
         # 显示生成的 charts
         echo "Generated charts:"
-        ls -la charts/
+        ls -la "$CHART_DESTINATION"/
         
         echo "=== Step 1 Complete: Charts updated and packaged ==="
         
@@ -188,8 +163,6 @@ jobs:
         
     - name: Step 2 - Build and Push Docker Image
       run: |
-        cd tools/charts-mirror/
-        
         echo "=== Step 2: Building and Pushing Docker Image ==="
         
         # 确定镜像标签
@@ -205,10 +178,11 @@ jobs:
         echo "Building Docker image with tag: $TAG"
         
         # 构建镜像
+        cd tools/charts-mirror/
         docker build -t "$REGISTRY/$REPO_NAME:$TAG" .
         
         # 推送镜像
-        echo "Pushing Docker image: $REGISTRY/$REPO_NAME:$TAG..."
+        echo "Pushing Docker image..."
         docker push "$REGISTRY/$REPO_NAME:$TAG"
         
         # 如果是标签推送，同时标记为latest
