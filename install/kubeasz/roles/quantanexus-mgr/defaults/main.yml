@@ -1,5 +1,5 @@
 # Quantanexus 配置默认值
-quantanexus_version: "1.0.0"
+quantanexus_version: "1.0.1"
 quantanexus_cs_namespace: "quantanexus-cs"
 quantanexus_cs_domain:  "{{ QN_CS_DOMAIN | default('cs1.quantanexus.com') }}"
 quantanexus_mgr_namespace: "quantanexus-mgr"
