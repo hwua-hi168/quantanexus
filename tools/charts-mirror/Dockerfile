@@ -1,4 +1,5 @@
-FROM swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/nginx:1.24.0-alpine
+# FROM swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/nginx:1.24.0-alpine
+FROM docker.io/library/nginx:1.24.0-alpine
 
 # 创建 Helm 仓库目录
 RUN mkdir -p /usr/share/nginx/html/charts
