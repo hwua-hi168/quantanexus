@@ -20,13 +20,13 @@ juicefs_secret_bucket: "http://minio.{{ minio_namespace }}.svc.cluster.local:900
 juicefs_kubelet_dir: "/var/lib/kubelet"
 
 # 镜像仓库（国内加速可改）
-juicefs_image_registry: ""
-juicefs_image_tag: ""              # 空=Chart 默认
+# juicefs_image_registry: ""
+# juicefs_image_tag: ""              # 空=Chart 默认
 
-juicefs_dashboard_image: "juicedata/csi-dashboard"
+# juicefs_dashboard_image: "juicedata/csi-dashboard"
 
 # sidecar 国内镜像
-juicefs_sidecar_registry: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s"
+juicefs_sidecar_registry: "{{ IMAGE_REGISTRY }}"
 
 # ====== CSI 专用 ======
 juicefs_csi_metaurl: "{{ juicefs_secret_metaurl }}"   # 默认引用，可覆盖
@@ -85,8 +85,8 @@ juicefs_s3_secret_key: "{{ juicefs_secret_secret_key }}"
 juicefs_s3_bucket: "{{ juicefs_secret_bucket }}"
 
 # 控制台账号（需要重新查询)
-juicefs_s3_env_root_user: "admin"
-juicefs_s3_env_root_password: "hwua123456"
+#juicefs_s3_env_root_user: "admin"
+#juicefs_s3_env_root_password: "hwua123456"
 
 # 资源限制
 juicefs_s3_cpu_req: "100m"
@@ -96,3 +96,23 @@ juicefs_s3_mem_lim: "512Mi"
 
 # 探测 Redis 超时
 juicefs_s3_redis_probe_timeout: 300
+
+# CSI Driver 镜像配置
+juicefs_csi_image_repository: "{{ IMAGE_REGISTRY }}/juicedata-juicefs-csi-driver"
+juicefs_csi_image_tag: "v0.30.1"
+juicefs_dashboard_image_repository: "{{ IMAGE_REGISTRY }}/juicedata-csi-dashboard"
+juicefs_dashboard_image_tag: "v0.30.1"
+
+# Sidecar 镜像配置
+juicefs_liveness_probe_image: "{{ IMAGE_REGISTRY }}/registry.k8s.io-sig-storage-livenessprobe"
+juicefs_liveness_probe_tag: "v2.12.0"
+juicefs_node_driver_registrar_image: "{{ IMAGE_REGISTRY }}/registry.k8s.io-sig-storage-csi-node-driver-registrar"
+juicefs_node_driver_registrar_tag: "v2.9.0"
+juicefs_csi_provisioner_image: "{{ IMAGE_REGISTRY }}/registry.k8s.io-sig-storage-csi-provisioner"
+juicefs_csi_provisioner_tag: "v2.2.2"
+juicefs_csi_resizer_image: "{{ IMAGE_REGISTRY }}/registry.k8s.io-sig-storage-csi-resizer"
+juicefs_csi_resizer_tag: "v1.9.0"
+
+# S3 Gateway 镜像配置
+juicefs_s3_image_repository: "{{ IMAGE_REGISTRY }}/juicedata-mount"
+juicefs_s3_image_tag: "ce-v1.2.3"

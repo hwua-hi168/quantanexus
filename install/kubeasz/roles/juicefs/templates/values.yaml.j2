@@ -1,25 +1,38 @@
 # 全局
 kubeletDir: "{{ juicefs_kubelet_dir }}"
 
-# 镜像
-{% if juicefs_image_registry %}
+# 镜像配置
 image:
-  registry: "{{ juicefs_image_registry }}"
-  {% endif %}
-  {% if juicefs_image_tag %}
-  tag: "{{ juicefs_image_tag }}"
+  repository: "{{ juicefs_csi_image_repository | default('juicedata/juicefs-csi-driver') }}"
+  {% if juicefs_csi_image_tag %}
+  tag: "{{ juicefs_csi_image_tag }}"
   {% endif %}
 
 dashboardImage:
-  repository: "{{ juicefs_dashboard_image }}"
+  repository: "{{ juicefs_dashboard_image_repository | default('juicedata/csi-dashboard') }}"
+  {% if juicefs_dashboard_image_tag %}
+  tag: "{{ juicefs_dashboard_image_tag }}"
+  {% endif %}
 
 # sidecar 镜像
 sidecars:
   livenessProbeImage:
-    repository: "{{ juicefs_sidecar_registry }}/registry.k8s.io/sig-storage/livenessprobe"
+    repository: "{{ juicefs_liveness_probe_image | default(juicefs_sidecar_registry + '/registry.k8s.io/sig-storage/livenessprobe') }}"
+    {% if juicefs_liveness_probe_tag %}
+    tag: "{{ juicefs_liveness_probe_tag }}"
+    {% endif %}
   nodeDriverRegistrarImage:
-    repository: "{{ juicefs_sidecar_registry }}/registry.k8s.io/sig-storage/csi-node-driver-registrar"
+    repository: "{{ juicefs_node_driver_registrar_image | default(juicefs_sidecar_registry + '/registry.k8s.io/sig-storage/csi-node-driver-registrar') }}"
+    {% if juicefs_node_driver_registrar_tag %}
+    tag: "{{ juicefs_node_driver_registrar_tag }}"
+    {% endif %}
   csiProvisionerImage:
-    repository: "{{ juicefs_sidecar_registry }}/registry.k8s.io/sig-storage/csi-provisioner"
+    repository: "{{ juicefs_csi_provisioner_image | default(juicefs_sidecar_registry + '/registry.k8s.io/sig-storage/csi-provisioner') }}"
+    {% if juicefs_csi_provisioner_tag %}
+    tag: "{{ juicefs_csi_provisioner_tag }}"
+    {% endif %}
   csiResizerImage:
-    repository: "{{ juicefs_sidecar_registry }}/registry.k8s.io/sig-storage/csi-resizer"
+    repository: "{{ juicefs_csi_resizer_image | default(juicefs_sidecar_registry + '/registry.k8s.io/sig-storage/csi-resizer') }}"
+    {% if juicefs_csi_resizer_tag %}
+    tag: "{{ juicefs_csi_resizer_tag }}"
+    {% endif %}
