@@ -85,8 +85,8 @@ juicefs_s3_secret_key: "{{ juicefs_secret_secret_key }}"
 juicefs_s3_bucket: "{{ juicefs_secret_bucket }}"
 
 # 控制台账号（需要重新查询)
-#juicefs_s3_env_root_user: "admin"
-#juicefs_s3_env_root_password: "hwua123456"
+juicefs_s3_env_root_user: "admin"
+juicefs_s3_env_root_password: "hwua123456"
 
 # 资源限制
 juicefs_s3_cpu_req: "100m"

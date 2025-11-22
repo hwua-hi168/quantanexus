@@ -1,12 +1,7 @@
 # 镜像配置
 image:
   repository: "{{ juicefs_s3_image_repository | default('juicedata/juicefs-s3-gateway') }}"
-  {% if juicefs_s3_image_tag %}
   tag: "{{ juicefs_s3_image_tag }}"
-  {% endif %}
-  {% if juicefs_s3_image_registry %}
-  registry: "{{ juicefs_s3_image_registry }}"
-  {% endif %}
 
 # Redis 连接（Secret 会自动创建）
 secret:
@@ -27,9 +22,7 @@ secret:
 # 服务暴露
 service:
   type: {{ juicefs_s3_service_type }}
-  {% if juicefs_s3_service_type == 'NodePort' and juicefs_s3_node_port is defined %}
   nodePort: {{ juicefs_s3_node_port }}
-  {% endif %}
 
 # Ingress（默认关闭）
 ingress:
