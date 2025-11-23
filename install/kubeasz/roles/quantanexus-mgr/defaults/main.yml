@@ -4,10 +4,10 @@ quantanexus_cs_namespace: "quantanexus-cs"
 quantanexus_cs_domain:  "{{ QN_CS_DOMAIN | default('cs1.quantanexus.com') }}"
 quantanexus_mgr_namespace: "quantanexus-mgr"
 quantanexus_helm_repository: "https://helm.hi168.com/charts"
-quantanexus_clusster_issuer_name: "{{ QN_CLUSTER_ISSUER }}"
+
 # 镜像仓库配置
 quantanexus_image_registry: "{{ IMAGE_REGISTRY }}"
 
 # Quantanexus 组件配置
-quantanexus_domain_name: "{{ QN_DOMAIN | default('quantanexus.io') }}"
-quantanexus_cert_manager_issuer_name: "{{ QN_CLUSTER_ISSUER | default('quantanexus-cluster-issuer')  }}"
+quantanexus_domain_name: "{{ QN_DOMAIN | default('mgr.quantanexus.com') }}"
+quantanexus_cert_manager_issuer_name:  "{{ QN_CLUSTER_ISSUER | default('hwua-quantanexus') }}"
