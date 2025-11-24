@@ -33,7 +33,7 @@ check_files_exist() {
         "install_kubeasz.sh"
         "configure_kubeasz.sh"
         "run_kubeasz_setup.sh"
-        "install_helm.sh"
+        # "install_helm.sh"
         "run_longhorn.sh"
         "run_cert_manager.sh"
         "run_prometheus.sh"
@@ -144,10 +144,10 @@ EOF
     echo "# ==================== run_kubeasz_setup.sh ====================" >> "$output_file"
     extract_file_content "run_kubeasz_setup.sh" >> "$output_file"
     
-    print_info "添加Helm安装模块..."
-    echo "" >> "$output_file"
-    echo "# ==================== install_helm.sh ====================" >> "$output_file"
-    extract_file_content "install_helm.sh" >> "$output_file"
+    # print_info "添加Helm安装模块..."
+    # echo "" >> "$output_file"
+    # echo "# ==================== install_helm.sh ====================" >> "$output_file"
+    # extract_file_content "install_helm.sh" >> "$output_file"
     
     print_info "添加Longhorn安装模块..."
     echo "" >> "$output_file"
@@ -228,7 +228,6 @@ EOF
         /^[[:space:]]*source[[:space:]]+.*install_kubeasz\.sh/d
         /^[[:space:]]*source[[:space:]]+.*configure_kubeasz\.sh/d
         /^[[:space:]]*source[[:space:]]+.*run_kubeasz_setup\.sh/d
-        /^[[:space:]]*source[[:space:]]+.*install_helm\.sh/d
         /^[[:space:]]*source[[:space:]]+.*run_longhorn\.sh/d
         /^[[:space:]]*source[[:space:]]+.*run_minio\.sh/d
         /^[[:space:]]*source[[:space:]]+.*run_redis_sentinel\.sh/d
