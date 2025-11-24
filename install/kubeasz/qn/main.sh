@@ -16,7 +16,7 @@ source "$SCRIPT_DIR/download_source.sh"
 source "$SCRIPT_DIR/install_kubeasz.sh"
 source "$SCRIPT_DIR/configure_kubeasz.sh"
 source "$SCRIPT_DIR/run_kubeasz_setup.sh"
-source "$SCRIPT_DIR/install_helm.sh"
+# source "$SCRIPT_DIR/install_helm.sh"
 
 # 新增组件安装模块
 source "$SCRIPT_DIR/run_longhorn.sh"
@@ -816,24 +816,16 @@ main() {
                 print_error "节点 uncordon 操作失败"
                 exit 1
             fi
-            if ! install_helm; then
-                print_error "Helm安装失败"
-                exit 1
-            fi
+            # if ! install_helm; then
+            #     print_error "Helm安装失败"
+            #     exit 1
+            # fi
             if ! run_longhorn_playbook; then
                 print_error "Longhorn安装失败"
                 exit 1
             fi
-            if ! run_minio_playbook; then
-                print_error "MinIO安装失败"
-                exit 1
-            fi
             if ! run_redis_sentinel_playbook; then
                 print_error "Redis Sentinel安装失败"
-                exit 1
-            fi
-            if ! run_juicefs_playbook; then
-                print_error "JuiceFS安装失败"
                 exit 1
             fi
             if ! run_cert_manager_playbook; then
@@ -854,6 +846,14 @@ main() {
             fi
             if ! run_gpu_operator_playbook; then
                 print_error "GPU Operator安装失败"
+                exit 1
+            fi
+            if ! run_minio_playbook; then
+                print_error "MinIO安装失败"
+                exit 1
+            fi
+            if ! run_juicefs_playbook; then
+                print_error "JuiceFS安装失败"
                 exit 1
             fi
             if ! run_volcano_playbook; then
