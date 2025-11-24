@@ -49,7 +49,7 @@ jobs:
         UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
           "$SERVER/api/resources/$LOCAL_FILE?override=true" \
           -H "X-Auth: $API_TOKEN" \
-          -F "file=@./$LOCAL_FILE")
+          --data-binary "@$LOCAL_FILE")
         
         # 分离响应体和状态码
         HTTP_STATUS=$(echo "$UPLOAD_RESPONSE" | tail -n1)
