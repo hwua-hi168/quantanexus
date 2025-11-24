@@ -750,10 +750,6 @@ main() {
                 print_error "节点 uncordon 操作失败"
                 exit 1
             fi
-            if ! install_helm; then
-                print_error "Helm安装失败"
-                exit 1
-            fi
             if ! run_longhorn_playbook; then
                 print_error "Longhorn安装失败"
                 exit 1
