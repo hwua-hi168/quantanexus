@@ -44,6 +44,9 @@ check_files_exist() {
         "run_quantanexus_mgr.sh"
         "run_quantanexus_cs.sh"
         "run_uncordon.sh"
+        "run_minio.sh"
+        "run_redis_sentinel.sh"
+        "run_juicefs.sh"
     )
     
     local missing_files=()
@@ -89,7 +92,7 @@ extract_file_content() {
 
 # 创建打包文件
 create_packed_file() {
-    local output_file="${1:-kct.sh}"
+    local output_file="${1:-qni.sh}"
     
     print_info "开始创建打包文件: $output_file"
     
@@ -150,6 +153,21 @@ EOF
     echo "" >> "$output_file"
     echo "# ==================== run_longhorn.sh ====================" >> "$output_file"
     extract_file_content "run_longhorn.sh" >> "$output_file"
+    
+    print_info "添加MinIO安装模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== run_minio.sh ====================" >> "$output_file"
+    extract_file_content "run_minio.sh" >> "$output_file"
+    
+    print_info "添加Redis Sentinel安装模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== run_redis_sentinel.sh ====================" >> "$output_file"
+    extract_file_content "run_redis_sentinel.sh" >> "$output_file"
+    
+    print_info "添加JuiceFS安装模块..."
+    echo "" >> "$output_file"
+    echo "# ==================== run_juicefs.sh ====================" >> "$output_file"
+    extract_file_content "run_juicefs.sh" >> "$output_file"
     
     print_info "添加Cert-Manager安装模块..."
     echo "" >> "$output_file"
@@ -212,6 +230,9 @@ EOF
         /^[[:space:]]*source[[:space:]]+.*run_kubeasz_setup\.sh/d
         /^[[:space:]]*source[[:space:]]+.*install_helm\.sh/d
         /^[[:space:]]*source[[:space:]]+.*run_longhorn\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*run_minio\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*run_redis_sentinel\.sh/d
+        /^[[:space:]]*source[[:space:]]+.*run_juicefs\.sh/d
         /^[[:space:]]*source[[:space:]]+.*run_cert_manager\.sh/d
         /^[[:space:]]*source[[:space:]]+.*run_prometheus\.sh/d
         /^[[:space:]]*source[[:space:]]+.*run_ingress_nginx\.sh/d
@@ -279,7 +300,7 @@ show_usage() {
     echo "  -h, --help    显示此帮助信息"
     echo ""
     echo "示例:"
-    echo "  $0                       # 生成 kct.sh"
+    echo "  $0                       # 生成 qni.sh"
     echo "  $0 my_k8s_tool.sh        # 生成指定文件名的打包文件"
     echo ""
     echo "说明:"
@@ -287,7 +308,7 @@ show_usage() {
 }
 
 main() {
-    local output_file="${1:-kct.sh}"
+    local output_file="${1:-qni.sh}"
     
     # 检查帮助选项
     if [[ "$1" == "-h" || "$1" == "--help" ]]; then
