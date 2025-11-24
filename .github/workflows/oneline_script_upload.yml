@@ -1,12 +1,13 @@
 # .github/workflows/build-upload.yml
-name: Build and Upload Oneline Script Tool(kct.sh)
+name: Build and Upload Oneline Script Tool(qni.sh)
 
 on:
   workflow_dispatch:
   push:
     tags:
       - 'v*'
-      
+    paths:
+      - 'install/kubeasz/qn/**'
 jobs:
   build-upload:
     runs-on: ubuntu-latest
@@ -21,13 +22,13 @@ jobs:
         
         bash pack.sh
         
-        ls -lhs kct.sh
+        ls -lhs qni.sh
         
         # upload.sh 脚本
         SERVER="https://d.hi168.com/filebrowser"
         USERNAME="${{ secrets.DOWNLOAD_CENTER_USERNAME }}"
         PASSWORD="${{ secrets.DOWNLOAD_CENTER_PASSWORD }}"
-        LOCAL_FILE=kct.sh
+        LOCAL_FILE=qni.sh
         #REMOTE_PATH="backups"
         
         # 1. 登录获取 Token
