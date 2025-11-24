@@ -41,8 +41,18 @@ jobs:
 
       - name: Sync all branches & tags to Gitee
         run: |
+          # 如果远程已存在则删除，忽略报错
           git remote remove gitee || true
+          # 添加远程仓库
           git remote add gitee git@gitee.com:hwua/quantanexus.git
-          GIT_SSH_COMMAND="ssh -i ~/.ssh/gitee_key -o IdentitiesOnly=yes" \
-          git push gitee --all --force --verbose \
-          git push gitee --tags --force --verbose
+          
+          # 1. 设置 SSH 命令环境变量，使其对后续所有命令生效
+          export GIT_SSH_COMMAND="ssh -i ~/.ssh/gitee_key -o IdentitiesOnly=yes"
+          
+          # 2. 推送所有分支
+          echo "Pushing all branches..."
+          git push gitee --all --force --verbose
+          
+          # 3. 推送所有标签（必须分开执行）
+          echo "Pushing all tags..."
+          git push gitee --tags --force --verbose          
