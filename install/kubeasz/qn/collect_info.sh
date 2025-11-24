@@ -374,6 +374,8 @@ collect_auth_info() {
             print_success "SSH密钥对生成完成"
         else
             print_info "跳过SSH密钥对生成"
+            # 即使跳过，我们也需要调用 save_config 来确保 use_password_auth 等其他变量被保存
+            save_config 
             return 0
         fi
     fi
@@ -387,6 +389,7 @@ collect_auth_info() {
       if [[ $use_password =~ ^[Nn]$ ]]; then
           print_info "跳过密码认证配置，请确保已配置SSH免密登录"
           use_password_auth=false
+          save_config # 即使跳过，也要保存 use_password_auth=false
           return 0
       fi
     fi
@@ -416,7 +419,11 @@ collect_auth_info() {
       fi
     fi    
     
+    # 删除了错误的 'export $username;' 和 'export $password;'
+    
     print_success "认证信息收集完成"
+    # 添加 save_config，确保用户名和密码被保存到配置文件
+    save_config
     return 0
 }
 
@@ -439,6 +446,14 @@ show_config_summary() {
     for ip in "${!node_names[@]}"; do
         echo "  $ip -> ${node_names[$ip]}"
     done
+    
+    # 显示认证信息 (避免显示明文密码)
+    print_success "SSH用户名: $username"
+    if [[ "$use_password_auth" == "true" ]]; then
+        print_success "认证方式: 密码认证 (密码已保存)"
+    else
+        print_success "认证方式: SSH密钥认证"
+    fi
     echo ""
 }
 # 生成hosts文件
