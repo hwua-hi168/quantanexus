@@ -1,6 +1,7 @@
 name: Sync to Gitee via SSH
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 4 * * *'   # 每天 04:00 UTC（北京时间 12:00）
 
