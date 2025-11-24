@@ -83,7 +83,7 @@ configure_kubeasz() {
     
     # 定义你要同步的所有变量名 (对应 .k8s_cluster_config 中的 Key)
     # 你可以随时在这里添加新变量，如 "NEW_VAR_1"
-    local vars_to_sync=("QN_DOMAIN" "IMAGE_REGISTRY" "NEW_VAR_1")
+    local vars_to_sync=("QN_DOMAIN" "IMAGE_REGISTRY" "QN_CS_DOMAIN")
     
     declare -A var_map
     

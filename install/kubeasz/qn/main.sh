@@ -16,7 +16,7 @@ source "$SCRIPT_DIR/download_source.sh"
 source "$SCRIPT_DIR/install_kubeasz.sh"
 source "$SCRIPT_DIR/configure_kubeasz.sh"
 source "$SCRIPT_DIR/run_kubeasz_setup.sh"
-# source "$SCRIPT_DIR/install_helm.sh"
+source "$SCRIPT_DIR/install_helm.sh"
 
 # 新增组件安装模块
 source "$SCRIPT_DIR/run_longhorn.sh"
@@ -104,75 +104,13 @@ show_usage() {
     echo "  $0 generate            # 生成hosts文件"
 }
 
-# 检查配置文件是否存在
-check_config_file() {
-    if [[ ! -f "$SCRIPT_DIR/.k8s_cluster_config" ]]; then
-        print_error "配置文件不存在，请先运行 '$0 collect' 收集配置信息"
-        return 1
-    fi
-    return 0
-}
 
-# 加载配置文件
-load_config() {
-    if [[ -f "$SCRIPT_DIR/.k8s_cluster_config" ]]; then
-        source "$SCRIPT_DIR/.k8s_cluster_config"
-        # 恢复数组变量
-        all_ips=($all_ips_str)
-        etcd_ips=($etcd_ips_str)
-        master_ips=($master_ips_str)
-        worker_ips=($worker_ips_str)
-        
-        # 恢复节点名称映射
-        declare -gA node_names
-        for mapping in $node_names_mappings; do
-            IFS=':' read -r ip name <<< "$mapping"
-            node_names["$ip"]="$name"
-        done
-        
-        return 0
-    else
-        return 1
-    fi
-}
-
-# 保存配置文件
-save_config() {
-    # 将数组转换为字符串
-    all_ips_str="${all_ips[@]}"
-    etcd_ips_str="${etcd_ips[@]}"
-    master_ips_str="${master_ips[@]}"
-    worker_ips_str="${worker_ips[@]}"
-    
-    # 将节点名称映射转换为字符串
-    node_names_mappings=""
-    for ip in "${!node_names[@]}"; do
-        node_names_mappings+="$ip:${node_names[$ip]} "
-    done
-    
-    cat > "$SCRIPT_DIR/.k8s_cluster_config" << EOF
-# K8s集群配置 - 自动生成，请勿手动修改
-all_ips_str="$all_ips_str"
-etcd_ips_str="$etcd_ips_str"
-master_ips_str="$master_ips_str"
-worker_ips_str="$worker_ips_str"
-QN_DOMAIN="$QN_DOMAIN"
-IMAGE_REGISTRY="$IMAGE_REGISTRY"
-username="$username"
-password="$password"
-use_password_auth="$use_password_auth"
-node_names_mappings="$node_names_mappings"
-EOF
-    
-    print_success "配置已保存到 $SCRIPT_DIR/.k8s_cluster_config"
-}
 
 # 收集信息命令
 cmd_collect() {
     print_banner
     configure_nodes
     collect_auth_info
-    save_config
     show_config_summary
 }
 
@@ -816,16 +754,24 @@ main() {
                 print_error "节点 uncordon 操作失败"
                 exit 1
             fi
-            # if ! install_helm; then
-            #     print_error "Helm安装失败"
-            #     exit 1
-            # fi
+            if ! install_helm; then
+                print_error "Helm安装失败"
+                exit 1
+            fi
             if ! run_longhorn_playbook; then
                 print_error "Longhorn安装失败"
                 exit 1
             fi
+            if ! run_minio_playbook; then
+                print_error "MinIO安装失败"
+                exit 1
+            fi
             if ! run_redis_sentinel_playbook; then
                 print_error "Redis Sentinel安装失败"
+                exit 1
+            fi
+            if ! run_juicefs_playbook; then
+                print_error "JuiceFS安装失败"
                 exit 1
             fi
             if ! run_cert_manager_playbook; then
@@ -846,14 +792,6 @@ main() {
             fi
             if ! run_gpu_operator_playbook; then
                 print_error "GPU Operator安装失败"
-                exit 1
-            fi
-            if ! run_minio_playbook; then
-                print_error "MinIO安装失败"
-                exit 1
-            fi
-            if ! run_juicefs_playbook; then
-                print_error "JuiceFS安装失败"
                 exit 1
             fi
             if ! run_volcano_playbook; then
