@@ -46,9 +46,9 @@ run_minio_playbook() {
     cd /etc/kubeasz || return 1
     
     # 执行MinIO安装的ansible-playbook
-    print_info "执行MinIO安装: docker exec -it -w /etc/kubeasz ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/minio.yml"
+    print_info "执行MinIO安装: docker exec -it -w /etc/kubeasz kubeasz ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/minio.yml"
     
-    if execute_with_privileges docker exec -it -w /etc/kubeasz ansible-playbook -i "clusters/$cluster_name/hosts" -e "@clusters/$cluster_name/config.yml" playbooks/minio.yml; then
+    if execute_with_privileges docker exec -it -w /etc/kubeasz kubeasz ansible-playbook -i "clusters/$cluster_name/hosts" -e "@clusters/$cluster_name/config.yml" playbooks/minio.yml; then
         print_success "MinIO对象存储安装完成"
         cd "$original_dir"
         return 0

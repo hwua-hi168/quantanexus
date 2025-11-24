@@ -46,9 +46,9 @@ run_volcano_playbook() {
     fi
     
     # 执行Volcano安装的ansible-playbook
-    print_info "执行Volcano安装: docker exec -it -w /etc/kubeasz ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/volcano.yml"
+    print_info "执行Volcano安装: docker exec -it -w /etc/kubeasz kubeasz ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/volcano.yml"
     
-    if execute_with_privileges docker exec -it -w /etc/kubeasz ansible-playbook -i "clusters/$cluster_name/hosts" -e "@clusters/$cluster_name/config.yml" playbooks/volcano.yml; then
+    if execute_with_privileges docker exec -it -w /etc/kubeasz kubeasz ansible-playbook -i "clusters/$cluster_name/hosts" -e "@clusters/$cluster_name/config.yml" playbooks/volcano.yml; then
         print_success "Volcano批处理系统安装完成"
         cd "$original_dir"
         return 0

@@ -46,9 +46,9 @@ run_ingress_nginx_playbook() {
     cd /etc/kubeasz || return 1
     
     # 执行Ingress-Nginx安装的ansible-playbook
-    print_info "执行Ingress-Nginx安装: docker exec -it -w /etc/kubeasz ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/ingress-nginx.yml"
+    print_info "执行Ingress-Nginx安装: docker exec -it -w /etc/kubeasz kubeasz ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/ingress-nginx.yml"
     
-    if execute_with_privileges docker exec -it -w /etc/kubeasz ansible-playbook -i "clusters/$cluster_name/hosts" -e "@clusters/$cluster_name/config.yml" playbooks/ingress-nginx.yml; then
+    if execute_with_privileges docker exec -it -w /etc/kubeasz kubeasz ansible-playbook -i "clusters/$cluster_name/hosts" -e "@clusters/$cluster_name/config.yml" playbooks/ingress-nginx.yml; then
         print_success "Ingress-Nginx安装完成"
         cd "$original_dir"
         return 0
