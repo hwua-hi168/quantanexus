@@ -46,9 +46,9 @@ run_prometheus_playbook() {
     fi
     
     # 执行Prometheus安装的ansible-playbook
-    print_info "执行Prometheus安装: ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/prometheus.yml"
+    print_info "执行Prometheus安装: docker exec -it -w /etc/kubeasz ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/prometheus.yml"
     
-    if execute_with_privileges ansible-playbook -i "clusters/$cluster_name/hosts" -e "@clusters/$cluster_name/config.yml" playbooks/prometheus.yml; then
+    if execute_with_privileges docker exec -it -w /etc/kubeasz ansible-playbook -i "clusters/$cluster_name/hosts" -e "@clusters/$cluster_name/config.yml" playbooks/prometheus.yml; then
         print_success "Prometheus监控安装完成"
         cd "$original_dir"
         return 0

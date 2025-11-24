@@ -36,9 +36,9 @@ run_uncordon_masters() {
     cd /etc/kubeasz || return 1
     
     # 执行ansible playbook进行uncordon操作
-    print_info "执行uncordon: ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/uncordon.yml"
+    print_info "执行uncordon: docker exec -it -w /etc/kubeasz ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/uncordon.yml"
     
-    if execute_with_privileges ansible-playbook -i "clusters/$cluster_name/hosts" -e "@clusters/$cluster_name/config.yml" playbooks/uncordon.yml; then
+    if execute_with_privileges docker exec -it -w /etc/kubeasz ansible-playbook -i "clusters/$cluster_name/hosts" -e "@clusters/$cluster_name/config.yml" playbooks/uncordon.yml; then
         print_success "节点 uncordon 操作完成"
         cd "$original_dir"
         return 0

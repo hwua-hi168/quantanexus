@@ -46,9 +46,9 @@ run_quantanexus_mgr_playbook() {
     cd /etc/kubeasz || return 1
     
     # 执行Quantanexus管理组件安装的ansible-playbook
-    print_info "执行Quantanexus管理组件安装: ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/quantanexus-mgr.yml"
+    print_info "执行Quantanexus管理组件安装: docker exec -it -w /etc/kubeasz ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/quantanexus-mgr.yml"
     
-    if execute_with_privileges ansible-playbook -i "clusters/$cluster_name/hosts" -e "@clusters/$cluster_name/config.yml" playbooks/quantanexus-mgr.yml; then
+    if execute_with_privileges docker exec -it -w /etc/kubeasz ansible-playbook -i "clusters/$cluster_name/hosts" -e "@clusters/$cluster_name/config.yml" playbooks/quantanexus-mgr.yml; then
         print_success "Quantanexus管理组件安装完成"
         cd "$original_dir"
         return 0

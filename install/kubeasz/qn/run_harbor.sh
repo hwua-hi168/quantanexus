@@ -46,9 +46,9 @@ run_harbor_playbook() {
     fi
     
     # 执行Harbor安装的ansible-playbook
-    print_info "执行Harbor安装: ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/harbor.yml"
+    print_info "执行Harbor安装: docker exec -it -w /etc/kubeasz ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/harbor.yml"
     
-    if execute_with_privileges ansible-playbook -i "clusters/$cluster_name/hosts" -e "@clusters/$cluster_name/config.yml" playbooks/harbor.yml; then
+    if execute_with_privileges docker exec -it -w /etc/kubeasz ansible-playbook -i "clusters/$cluster_name/hosts" -e "@clusters/$cluster_name/config.yml" playbooks/harbor.yml; then
         print_success "Harbor镜像仓库安装完成"
         cd "$original_dir"
         return 0
