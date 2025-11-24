@@ -32,6 +32,10 @@ source "$SCRIPT_DIR/run_uncordon.sh"
 source "$SCRIPT_DIR/run_containerd_config.sh"
 # 新增MinIO模块
 source "$SCRIPT_DIR/run_minio.sh"
+# 新增Redis Sentinel模块
+source "$SCRIPT_DIR/run_redis_sentinel.sh"
+# 新增JuiceFS模块
+source "$SCRIPT_DIR/run_juicefs.sh"
 
 # 显示使用说明
 show_usage() {
@@ -61,6 +65,8 @@ show_usage() {
     echo "  quantanexus-cs 安装Quantanexus计算服务"
     echo "  uncordon     执行节点 uncordon 操作"
     echo "  minio        安装MinIO对象存储"
+    echo "  redis-sentinel 安装Redis Sentinel"
+    echo "  juicefs      安装JuiceFS存储"
     echo "  all          执行所有步骤（默认）"
     echo "  show         显示当前配置"
     echo "  generate     生成hosts文件"
@@ -91,6 +97,8 @@ show_usage() {
     echo "  $0 quantanexus-cs      # 安装Quantanexus计算服务"
     echo "  $0 uncordon            # 执行节点 uncordon 操作"
     echo "  $0 minio               # 安装MinIO对象存储"
+    echo "  $0 redis-sentinel      # 安装Redis Sentinel"
+    echo "  $0 juicefs             # 安装JuiceFS存储"
     echo "  $0 all                 # 执行完整流程"
     echo "  $0 show                # 显示当前配置"
     echo "  $0 generate            # 生成hosts文件"
@@ -418,6 +426,42 @@ cmd_minio() {
     print_success "MinIO对象存储安装完成"
 }
 
+# 执行Redis Sentinel安装命令
+cmd_redis_sentinel() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! run_redis_sentinel_playbook "$cluster_name"; then
+        print_error "Redis Sentinel安装失败"
+        return 1
+    fi
+    
+    print_success "Redis Sentinel安装完成"
+}
+
+# 执行JuiceFS存储安装命令
+cmd_juicefs() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! run_juicefs_playbook "$cluster_name"; then
+        print_error "JuiceFS存储安装失败"
+        return 1
+    fi
+    
+    print_success "JuiceFS存储安装完成"
+}
+
 # 执行Cert-Manager安装命令
 cmd_cert_manager() {
     print_banner
@@ -670,6 +714,16 @@ main() {
             load_config
             cmd_minio "${2:-k8s-qn-01}"
             ;;
+        "redis-sentinel")
+            check_config_file || exit 1
+            load_config
+            cmd_redis_sentinel "${2:-k8s-qn-01}"
+            ;;
+        "juicefs")
+            check_config_file || exit 1
+            load_config
+            cmd_juicefs "${2:-k8s-qn-01}"
+            ;;
         "cert-manager")
             check_config_file || exit 1
             load_config
@@ -772,6 +826,14 @@ main() {
             fi
             if ! run_minio_playbook; then
                 print_error "MinIO安装失败"
+                exit 1
+            fi
+            if ! run_redis_sentinel_playbook; then
+                print_error "Redis Sentinel安装失败"
+                exit 1
+            fi
+            if ! run_juicefs_playbook; then
+                print_error "JuiceFS安装失败"
                 exit 1
             fi
             if ! run_cert_manager_playbook; then
