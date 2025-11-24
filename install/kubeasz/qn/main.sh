@@ -564,14 +564,10 @@ cmd_uncordon() {
 
 # 配置containerd镜像仓库命令
 cmd_containerd_config() {
-    print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
     fi
-    
-    # 导入containerd配置模块
-    source "$SCRIPT_DIR/run_containerd_config.sh"
     
     local cluster_name="${1:-k8s-qn-01}"
     
