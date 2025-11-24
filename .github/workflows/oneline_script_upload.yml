@@ -1,5 +1,5 @@
 # .github/workflows/build-upload.yml
-name: Build and Upload Oneline Script Tool(qni.sh)
+name: Build and Upload qni.sh
 
 on:
   workflow_dispatch:
