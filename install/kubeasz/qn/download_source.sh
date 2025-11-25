@@ -28,7 +28,8 @@ download_source_code() {
     # 尝试通过镜像代理下载
     print_info "尝试通过镜像代理下载..."
     # 下载release tar.gz包
-    if wget -O "quantanexus-${quantanexus_version}.tar.gz" "https://hub.gitmirror.com/https://github.com/hwua-hi168/quantanexus/releases/download/${quantanexus_version}/quantanexus-${quantanexus_version}.tar.gz"; then
+    # if wget -O "quantanexus-${quantanexus_version}.tar.gz" "https://hub.gitmirror.com/https://github.com/hwua-hi168/quantanexus/releases/download/${quantanexus_version}/quantanexus-${quantanexus_version}.tar.gz"; then
+    if wget -O "quantanexus-${quantanexus_version}.tar.gz" "https://d.hi168.com/qn/quantanexus-${quantanexus_version}.tar.gz"; then
         print_success "通过镜像代理下载成功"
     else
         print_warning "镜像代理下载失败，尝试通过源站下载..."
