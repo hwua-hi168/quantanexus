@@ -1,6 +1,6 @@
 global:
-  registry: registry.cn-hangzhou.aliyuncs.com
-  imageName: quantanexus/chrislusf-seaweedfs
+  registry: {{ IMAGE_REGISTRY }}
+  imageName: chrislusf-seaweedfs
   replicaCount: 3
 filer:
   s3:
@@ -8,9 +8,9 @@ filer:
     port: 8333
 volume:
   resizeHook:
-    image: quantanexus/alpine-k8s
+    image: alpine-k8s
 
 cosi:
-  image: quantanexus/ghcr.io-seaweedfs-seaweedfs-cosi-driver
+  image: ghcr.io-seaweedfs-seaweedfs-cosi-driver
   sidecar:
-    image: quantanexus/gcr.io-k8s-staging-sig-storage-objectstorage-sidecar
+    image: gcr.io-k8s-staging-sig-storage-objectstorage-sidecar

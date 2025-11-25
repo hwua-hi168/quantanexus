@@ -33,7 +33,7 @@ run_juicefs_playbook() {
     
     # 检查JuiceFS是否已经安装
     print_info "检查JuiceFS是否已经安装..."
-    if execute_with_privileges docker exec -it -w /etc/kubeasz kubeasz helm status juicefs -n juicefs >/dev/null 2>&1; then
+    if execute_with_privileges docker exec -it -w /etc/kubeasz kubeasz helm status juicefs-csi -n juicefs >/dev/null 2>&1; then
         print_warning "JuiceFS已经安装，跳过安装步骤"
         cd "$original_dir"
         return 0

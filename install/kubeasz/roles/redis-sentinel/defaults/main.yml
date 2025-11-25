@@ -8,7 +8,7 @@ redis_chart_version: ""   # 空=latest
 global_security_allow_insecure_images: true
 
 # 镜像与仓库 - 修改为你的自定义镜像仓库
-redis_image_registry: "registry.cn-hangzhou.aliyuncs.com/quantanexus"
+redis_image_registry: "{{ IMAGE_REGISTRY }}"
 redis_image_repository: "registry-1.docker.io-bitnami-redis"
 redis_image_tag: "latest"
 redis_sentinel_image_repository: "registry-1.docker.io-bitnami-redis-sentinel"
