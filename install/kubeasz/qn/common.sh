@@ -84,7 +84,7 @@ validate_ip_list() {
 # 检查命令是否存在
 check_command() {
     if ! command -v "$1" &> /dev/null; then
-        print_error "命令 $1 未找到，请先安装"
+        print_warning "命令 $1 未找到，请先安装"
         return 1
     fi
     return 0
