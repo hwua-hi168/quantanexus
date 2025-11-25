@@ -179,7 +179,7 @@ configure_kubeasz() {
                 
                 # 使用 sed 在行首添加注释符号 #
                 # 匹配：行首(任意空格)KEY:
-                execute_with_privileges sed -i "s/^[[:space:]]*$var_key:/# &/" "$global_config_file"
+                sed -i "s/^[[:space:]]*$var_key:/# &/" "$global_config_file"
                 config_changed=true
             fi
         done
