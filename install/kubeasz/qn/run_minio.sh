@@ -33,7 +33,7 @@ run_minio_playbook() {
     
     # 检查MinIO是否已经安装
     print_info "检查MinIO是否已经安装..."
-    if execute_with_privileges docker exec -it -w /etc/kubeasz kubeasz helm status minio -n minio-system >/dev/null 2>&1; then
+    if execute_with_privileges docker exec -it -w /etc/kubeasz kubeasz helm status minio -n minio >/dev/null 2>&1; then
         print_warning "MinIO已经安装，跳过安装步骤"
         cd "$original_dir"
         return 0
