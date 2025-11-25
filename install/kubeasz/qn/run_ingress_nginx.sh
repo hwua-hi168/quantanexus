@@ -33,7 +33,7 @@ run_ingress_nginx_playbook() {
     
     # 检查Ingress-Nginx是否已经安装
     print_info "检查Ingress-Nginx是否已经安装..."
-    if execute_with_privileges helm status ingress-nginx -n ingress-nginx >/dev/null 2>&1; then
+    if execute_with_privileges docker exec -it -w /etc/kubeasz kubeasz helm status ingress-nginx -n ingress-nginx >/dev/null 2>&1; then
         print_warning "Ingress-Nginx已经安装，跳过安装步骤"
         cd "$original_dir"
         return 0

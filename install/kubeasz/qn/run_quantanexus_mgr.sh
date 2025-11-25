@@ -33,7 +33,7 @@ run_quantanexus_mgr_playbook() {
     
     # 检查Quantanexus Manager是否已经安装
     print_info "检查Quantanexus管理组件是否已经安装..."
-    if execute_with_privileges helm status quantanexus-mgr -n quantanexus-mgr >/dev/null 2>&1; then
+    if execute_with_privileges docker exec -it -w /etc/kubeasz kubeasz helm status quantanexus-mgr -n quantanexus-mgr >/dev/null 2>&1; then
         print_warning "Quantanexus管理组件已经安装，跳过安装步骤"
         cd "$original_dir"
         return 0

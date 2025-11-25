@@ -37,7 +37,7 @@ run_prometheus_playbook() {
     
     # 检查Prometheus是否已经安装
     print_info "检查Prometheus是否已经安装..."
-    if execute_with_privileges helm status prometheus -n prom >/dev/null 2>&1; then
+    if execute_with_privileges docker exec -it -w /etc/kubeasz kubeasz helm status prometheus -n prom >/dev/null 2>&1; then
         print_warning "Prometheus已经安装，跳过安装步骤"
         cd "$original_dir"
         return 0

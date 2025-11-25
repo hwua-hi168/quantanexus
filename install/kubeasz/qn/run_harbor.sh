@@ -37,7 +37,7 @@ run_harbor_playbook() {
     
     # 检查Harbor是否已经安装
     print_info "检查Harbor是否已经安装..."
-    if execute_with_privileges helm status harbor -n harbor >/dev/null 2>&1; then
+    if execute_with_privileges docker exec -it -w /etc/kubeasz kubeasz helm status harbor -n harbor >/dev/null 2>&1; then
         print_warning "Harbor已经安装，跳过安装步骤"
         cd "$original_dir"
         return 0

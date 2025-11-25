@@ -37,7 +37,7 @@ run_quantanexus_cs_playbook() {
     
     # 检查Quantanexus CS是否已经安装
     print_info "检查Quantanexus计算服务是否已经安装..."
-    if execute_with_privileges helm status quantanexus-cs -n quantanexus-cs >/dev/null 2>&1; then
+    if execute_with_privileges docker exec -it -w /etc/kubeasz kubeasz helm status quantanexus-cs -n quantanexus-cs >/dev/null 2>&1; then
         print_warning "Quantanexus计算服务已经安装，跳过安装步骤"
         cd "$original_dir"
         return 0

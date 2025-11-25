@@ -33,7 +33,8 @@ run_longhorn_playbook() {
     
     # 检查Longhorn是否已经安装
     print_info "检查Longhorn是否已经安装..."
-    if execute_with_privileges helm status longhorn -n longhorn-system >/dev/null 2>&1; then
+    // 修改:将直接执行helm命令改为在容器中执行
+    if execute_with_privileges docker exec -it -w /etc/kubeasz kubeasz helm status longhorn -n longhorn-system >/dev/null 2>&1; then
         print_warning "Longhorn已经安装，跳过安装步骤"
         cd "$original_dir"
         return 0

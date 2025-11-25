@@ -37,7 +37,7 @@ run_volcano_playbook() {
     
     # 检查Volcano是否已经安装
     print_info "检查Volcano批处理系统是否已经安装..."
-    if execute_with_privileges helm status volcano -n volcano-system >/dev/null 2>&1; then
+    if execute_with_privileges docker exec -it -w /etc/kubeasz kubeasz helm status volcano -n volcano-system >/dev/null 2>&1; then
         print_warning "Volcano批处理系统已经安装，跳过安装步骤"
         cd "$original_dir"
         return 0
