@@ -56,7 +56,6 @@
     minio_pods.resources | length
   retries: 60
   delay: 10
-  when: minio_helm_info.status is undefined
 
 # 1. 获取 MinIO NodePort（控制台 9001）
 - name: 获取 MinIO 控制台 NodePort
