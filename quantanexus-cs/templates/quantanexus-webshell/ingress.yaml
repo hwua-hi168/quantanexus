@@ -20,7 +20,12 @@ metadata:
 spec:
   ingressClassName: {{ .Values.abcWebShell.ingress.className }}
   rules:
+    {{- if .Values.global.useHttpIP }}
+    - host: null
+    {{- end }}
+    {{- if not .Values.global.useHttpIP }}
     - host: {{ include "quantanexus.domainName" . }}
+    {{- end }}
       http:
         paths:
           {{- range .Values.abcWebShell.ingress.paths }}
@@ -32,7 +37,7 @@ spec:
                 port:
                   number: 80
           {{- end }}
-  {{- if .Values.abcWebShell.ingress.tls.enabled }}
+  {{- if and .Values.abcWebShell.ingress.tls.enabled (not .Values.global.useHttpIP) }}
   tls:
     - hosts:
         - {{ include "quantanexus.domainName" . }}

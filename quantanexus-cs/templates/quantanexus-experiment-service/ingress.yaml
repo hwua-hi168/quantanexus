@@ -1,20 +1,20 @@
-{{- if and .Values.abcUploader.enabled .Values.abcUploader.ingress.enabled }}
+{{- if and .Values.abcExperimentService.enabled .Values.abcExperimentService.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: abc-uploader-ingress
+  name: abc-experiment-service
   namespace: {{ .Release.Namespace | default "quantanexus" }}
   labels:
-    app: abc-uploader
+    app: abc-experiment-service
     {{- include "quantanexus.labels" . | nindent 4 }}  
   annotations:
-    {{- range $key, $value := .Values.abcUploader.ingress.annotations }}
+    {{- range $key, $value := .Values.abcExperimentService.ingress.annotations }}
     {{ $key }}: {{ $value | quote }}
     {{- end }}
     {{- include "quantanexus.labels" . | nindent 4 }}
 
 spec:
-  ingressClassName: {{ .Values.abcUploader.ingress.className }}
+  ingressClassName: {{ .Values.abcExperimentService.ingress.className }}
   rules:
     {{- if .Values.global.useHttpIP }}
     - host: null
@@ -24,19 +24,19 @@ spec:
     {{- end }}
       http:
         paths:
-          {{- range .Values.abcUploader.ingress.paths }}
+          {{- range .Values.abcExperimentService.ingress.paths }}
           - pathType: Prefix
             path: {{ . }}
             backend:
               service:
-                name: abc-uploader
+                name: abc-experiment-service
                 port:
-                  number: 80
+                  number: 8075
           {{- end }}
-  {{- if and .Values.abcUploader.ingress.tls.enabled (not .Values.global.useHttpIP) }}
+  {{- if and .Values.abcExperimentService.ingress.tls.enabled (not .Values.global.useHttpIP) }}
   tls:
     - hosts:
         - {{ include "quantanexus.domainName" . }}
-      secretName: {{ .Values.abcUploader.ingress.tls.secretName }}
+      secretName: {{ .Values.abcExperimentService.ingress.tls.secretName }}
   {{- end }}
 {{- end }}
