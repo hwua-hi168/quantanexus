@@ -10,6 +10,9 @@ global:
   # registry: docker.io/hwua
   # masterNode: com-calino-master-1
   labelController: true
+  useHttpIP: true
+  mgrDomainIP: 192.168.103.134
+  mgrDomainPort: 80
   
 # Cert Manager 配置块
 certManager:
@@ -103,6 +106,7 @@ quantanexus:
     moduleImageCenterEnable: false
     moduleOssManageEnable: false
     moduleCloudLinkEnable: false
+    useHwuaNodeServiceProxy: true
 
   # Quantanexus core application
   app:
@@ -173,3 +177,17 @@ quantanexus:
     periodSeconds: 5
     timeoutSeconds: 3
     failureThreshold: 3
+
+  # 如果mgr和svc使用同一个K8S集群，但是部署在不同的命名空间，
+  # 那么由于mgr和svc共用了同一个ingress的80端口，nginx-reverse-proxy会拦截所有的流量，
+  # 所以这里就需要在nginx-reverse-proxy-config里添加下面webshell、uploader和experimentService三个服务组件的路由信息。
+  webshell:
+    host: abc-webshell
+    port: 80
+  uploader:
+    host: abc-uploader
+    port: 80
+  experimentService:
+    host: abc-experiment-service
+    port: 8075
+
