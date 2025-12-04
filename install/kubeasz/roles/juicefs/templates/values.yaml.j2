@@ -1,25 +1,25 @@
 # 全局
 kubeletDir: "{{ juicefs_kubelet_dir }}"
 
-# 镜像
-{% if juicefs_image_registry %}
+# 镜像配置
 image:
-  registry: "{{ juicefs_image_registry }}"
-  {% endif %}
-  {% if juicefs_image_tag %}
-  tag: "{{ juicefs_image_tag }}"
-  {% endif %}
+  repository: "{{ juicefs_csi_image_repository | default('juicedata/juicefs-csi-driver') }}"
+  tag: "{{ juicefs_csi_image_tag }}"
 
 dashboardImage:
-  repository: "{{ juicefs_dashboard_image }}"
+  repository: "{{ juicefs_dashboard_image_repository | default('juicedata/csi-dashboard') }}"
+  tag: "{{ juicefs_dashboard_image_tag }}"
 
 # sidecar 镜像
 sidecars:
   livenessProbeImage:
-    repository: "{{ juicefs_sidecar_registry }}/registry.k8s.io/sig-storage/livenessprobe"
+    repository: "{{ juicefs_liveness_probe_image | default(juicefs_sidecar_registry + '/registry.k8s.io/sig-storage/livenessprobe') }}"
+    tag: "{{ juicefs_liveness_probe_tag }}"
   nodeDriverRegistrarImage:
-    repository: "{{ juicefs_sidecar_registry }}/registry.k8s.io/sig-storage/csi-node-driver-registrar"
+    repository: "{{ juicefs_node_driver_registrar_image | default(juicefs_sidecar_registry + '/registry.k8s.io/sig-storage/csi-node-driver-registrar') }}"
+    tag: "{{ juicefs_node_driver_registrar_tag }}"
   csiProvisionerImage:
-    repository: "{{ juicefs_sidecar_registry }}/registry.k8s.io/sig-storage/csi-provisioner"
+    repository: "{{ juicefs_csi_provisioner_image | default(juicefs_sidecar_registry + '/registry.k8s.io/sig-storage/csi-provisioner') }}"
+    tag: "{{ juicefs_csi_provisioner_tag }}"
   csiResizerImage:
-    repository: "{{ juicefs_sidecar_registry }}/registry.k8s.io/sig-storage/csi-resizer"
+    repository: "{{ juicefs_csi_resizer_image | default(juicefs_sidecar_registry + '/registry.k8s.io/sig-storage/csi-resizer') }}"

@@ -18,7 +18,7 @@ configure_containerd_registry() {
     print_info "执行playbook: $playbook_name"
     
     # 在kubeasz容器中执行playbook
-    if execute_with_privileges docker exec -it kubeasz ansible-playbook \
+    if execute_with_privileges docker exec -it -w /etc/kubeasz kubeasz ansible-playbook \
         -i "clusters/$cluster_name/hosts" \
         "playbooks/$playbook_name.yml"; then
         print_success "containerd镜像仓库配置完成"

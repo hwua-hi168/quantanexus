@@ -2,6 +2,70 @@
 
 # 收集用户信息模块
 
+# 检查配置文件是否存在
+check_config_file() {
+    if [[ ! -f "$SCRIPT_DIR/.k8s_cluster_config" ]]; then
+        print_error "配置文件不存在，请先运行 '$0 collect' 收集配置信息"
+        return 1
+    fi
+    return 0
+}
+
+# 加载配置文件
+load_config() {
+    if [[ -f "$SCRIPT_DIR/.k8s_cluster_config" ]]; then
+        source "$SCRIPT_DIR/.k8s_cluster_config"
+        # 恢复数组变量
+        all_ips=($all_ips_str)
+        etcd_ips=($etcd_ips_str)
+        master_ips=($master_ips_str)
+        worker_ips=($worker_ips_str)
+        
+        # 恢复节点名称映射
+        declare -gA node_names
+        for mapping in $node_names_mappings; do
+            IFS=':' read -r ip name <<< "$mapping"
+            node_names["$ip"]="$name"
+        done
+        
+        return 0
+    else
+        return 1
+    fi
+}
+
+# 保存配置文件
+save_config() {
+    # 将数组转换为字符串
+    all_ips_str="${all_ips[@]}"
+    etcd_ips_str="${etcd_ips[@]}"
+    master_ips_str="${master_ips[@]}"
+    worker_ips_str="${worker_ips[@]}"
+    
+    # 将节点名称映射转换为字符串
+    node_names_mappings=""
+    for ip in "${!node_names[@]}"; do
+        node_names_mappings+="$ip:${node_names[$ip]} "
+    done
+    
+    cat > "$SCRIPT_DIR/.k8s_cluster_config" << EOF
+# K8s集群配置 - 自动生成，请勿手动修改
+all_ips_str="$all_ips_str"
+etcd_ips_str="$etcd_ips_str"
+master_ips_str="$master_ips_str"
+worker_ips_str="$worker_ips_str"
+QN_DOMAIN="$QN_DOMAIN"
+QN_CS_DOMAIN="$QN_CS_DOMAIN"
+IMAGE_REGISTRY="$IMAGE_REGISTRY"
+username="$username"
+password="$password"
+use_password_auth="$use_password_auth"
+node_names_mappings="$node_names_mappings"
+EOF
+    
+    print_success "配置已保存到 $SCRIPT_DIR/.k8s_cluster_config"
+}
+
 # 检查是否已有配置
 check_existing_config() {
     echo "all_ips $all_ips"
@@ -252,6 +316,22 @@ configure_nodes() {
     print_success "域名配置完成: $QN_DOMAIN"
     echo ""
 
+    # 新增：配置Quantanexus Service域名
+    echo "=== 第5.1步：配置Quantanexus Service域名 ==="
+    print_info "Quantanexus Service是否使用与主域名相同的域名?"
+    print_info "默认使用相同域名: $QN_DOMAIN"
+    read -p "是否使用相同域名? (y/n, 默认y): " use_same_cs_domain
+
+    if [[ $use_same_cs_domain =~ ^[Nn]$ ]]; then
+        read -p "请输入Quantanexus Service域名: " custom_cs_domain
+        QN_CS_DOMAIN=$custom_cs_domain
+    else
+        QN_CS_DOMAIN=$QN_DOMAIN
+    fi
+
+    print_success "Quantanexus Service域名配置完成: $QN_CS_DOMAIN"
+    echo ""
+
     # 第6步：配置镜像仓库地址
     echo "=== 第6步：配置镜像仓库地址 ==="
     default_registry="registry.cn-hangzhou.aliyuncs.com/quantanexus"
@@ -270,6 +350,9 @@ configure_nodes() {
 
     # 生成节点名称映射
     generate_node_names
+    
+    # 保存配置到文件
+    save_config
 }
 
 # 收集认证信息
@@ -291,6 +374,8 @@ collect_auth_info() {
             print_success "SSH密钥对生成完成"
         else
             print_info "跳过SSH密钥对生成"
+            # 即使跳过，我们也需要调用 save_config 来确保 use_password_auth 等其他变量被保存
+            save_config 
             return 0
         fi
     fi
@@ -304,6 +389,7 @@ collect_auth_info() {
       if [[ $use_password =~ ^[Nn]$ ]]; then
           print_info "跳过密码认证配置，请确保已配置SSH免密登录"
           use_password_auth=false
+          save_config # 即使跳过，也要保存 use_password_auth=false
           return 0
       fi
     fi
@@ -333,7 +419,11 @@ collect_auth_info() {
       fi
     fi    
     
+    # 删除了错误的 'export $username;' 和 'export $password;'
+    
     print_success "认证信息收集完成"
+    # 添加 save_config，确保用户名和密码被保存到配置文件
+    save_config
     return 0
 }
 
@@ -347,6 +437,7 @@ show_config_summary() {
     print_success "master节点: ${master_ips[*]}"
     print_success "worker节点: ${worker_ips[*]}"
     print_success "域名: $QN_DOMAIN"
+    print_success "Quantanexus Service域名: $QN_CS_DOMAIN"
     print_success "镜像仓库: $IMAGE_REGISTRY"
     echo ""
     
@@ -355,6 +446,14 @@ show_config_summary() {
     for ip in "${!node_names[@]}"; do
         echo "  $ip -> ${node_names[$ip]}"
     done
+    
+    # 显示认证信息 (避免显示明文密码)
+    print_success "SSH用户名: $username"
+    if [[ "$use_password_auth" == "true" ]]; then
+        print_success "认证方式: 密码认证 (密码已保存)"
+    else
+        print_success "认证方式: SSH密钥认证"
+    fi
     echo ""
 }
 # 生成hosts文件
@@ -395,6 +494,7 @@ generate_hosts_file() {
         echo "[all:vars]"
         echo "# --------- Main Variables ---------------"
         echo "QN_DOMAIN=\"$QN_DOMAIN\""
+        echo "QN_CS_DOMAIN=\"$QN_CS_DOMAIN\""
         echo "IMAGE_REGISTRY=\"$IMAGE_REGISTRY\""
         echo ""
     } > "$output_file"

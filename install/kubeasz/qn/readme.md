@@ -2,7 +2,7 @@
 
 一键安装命令行
 ````bash
-curl -sSl https://d.hi168.com/kct.sh -o kct.sh & bash kct.sh
+curl -sSl https://d.hi168.com/qni.sh -o qni.sh & bash qni.sh
 `````
 
 ### 安装和使用

@@ -5,7 +5,7 @@
 # 安装kubeasz
 install_kubeasz() {
     print_info "开始安装kubeasz..."
-    cd $SCRIPT_DIR    
+    cd $SCRIPT_DIR
     # 检查quantanexus源码是否存在
     if [[ ! -d "quantanexus-main" ]]; then
         print_error "quantanexus源码目录不存在，请先下载源码"
@@ -14,6 +14,12 @@ install_kubeasz() {
     
     # 进入quantanexus目录中的kubeasz目录
     cd quantanexus-main/install/kubeasz || return 1
+    
+    # 获取最新的标签
+    print_info "获取Quantanexus最新标签..."
+    QNI_VER=$(curl -s "https://api.github.com/repos/hwua-hi168/quantanexus/tags" | grep -o '"name": "[^"]*' | head -1 | cut -d'"' -f4)
+
+    sed "s/{{ QNI_VER }}/$QNI_VER/" ezdown.in > ezdown
     
     # 给ezdown脚本添加执行权限
     print_info "设置ezdown执行权限..."

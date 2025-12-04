@@ -107,19 +107,75 @@ jobs:
           git commit -m "Add chart ${{ github.ref_name }}"
           git push
           
-      # 3. 构建产物（源码包 + 校验文件）
-      - name: Build artifacts
+      # 3. 构建产物（源码包 + 校验文件）并上传到 d.hi168.com/qn
+      - name: Build artifacts and Upload to d.hi168.com/qn
         run: |
           mkdir -p /tmp/artifacts
-          VERSION="${GITHUB_REF_NAME}"   
+          VERSION="${GITHUB_REF_NAME}"    
+          ZIP_FILE="quantanexus-${GITHUB_REF_NAME}.zip"
+          TAR_GZ_FILE="quantanexus-${GITHUB_REF_NAME}.tar.gz"
+          
+          # 3.1. 构建产物
+          echo "--- 3.1. 构建产物 ---"
           sed  "s/{{ QNI_VER }}/$VERSION/" install/kubeasz/ezdown.in > /tmp/artifacts/ezdown
-          zip -r /tmp/artifacts/quantanexus-${GITHUB_REF_NAME}.zip . \
+          # 构建源码包（zip 和 tar.gz）
+          zip -r /tmp/artifacts/$ZIP_FILE . \
             -x '.git/*' -x '*.zip' -x '.github/*' -x '*.gz' \
             -x 'quantanexus-*.zip' -x 'quantanexus-*.tar.gz'
           tar --exclude='.git' --exclude='*.zip' --exclude='.github' --exclude='*.gz' \
-            -czf /tmp/artifacts/quantanexus-${GITHUB_REF_NAME}.tar.gz .
-          mv /tmp/artifacts/* .                       
+            -czf /tmp/artifacts/$TAR_GZ_FILE .
+            
+          # 移动到当前目录，供后续步骤使用
+          mv /tmp/artifacts/* .              
+          
+          # 生成校验文件
           sha256sum *.zip *.tar.gz ezdown > quantanexus-checksums.txt  
+          
+          # 3.2. 上传源码包 (.tar.gz) 到 d.hi168.com/qn
+          echo "--- 3.2. 上传源码包到 d.hi168.com/qn ---"
+          LOCAL_FILE="$TAR_GZ_FILE"
+          SERVER="https://d.hi168.com/filebrowser"
+          USERNAME="${{ secrets.DOWNLOAD_CENTER_USERNAME }}"
+          PASSWORD="${{ secrets.DOWNLOAD_CENTER_PASSWORD }}"
+          REMOTE_PATH="qn" # 目标路径设置为 qn
+          
+          echo "准备上传文件 $LOCAL_FILE 到 $SERVER/$REMOTE_PATH/"
+          
+          # 1. 登录获取 Token
+          echo "正在登录..."
+          API_TOKEN=$(curl -s -X POST \
+            $SERVER/api/login \
+            -H 'Content-Type: application/json' \
+            -d "{\"username\":\"$USERNAME\",\"password\":\"$PASSWORD\"}" )
+          
+          if [ -z "$API_TOKEN" ]; then
+              echo "错误：登录失败，请检查用户名和密码"
+              exit 1
+          fi
+          echo "API_TOKEN: (Hidden)"
+          
+          # 2. 上传文件
+          # 目标 API 路径应为 $SERVER/api/resources/$REMOTE_PATH/$LOCAL_FILE
+          TARGET_URL="$SERVER/api/resources/${REMOTE_PATH}/${LOCAL_FILE}?override=true"
+          echo "正在上传文件 $LOCAL_FILE 到 $TARGET_URL ..."
+          UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+            "$TARGET_URL" \
+            -H "X-Auth: $API_TOKEN" \
+            --data-binary "@$LOCAL_FILE")
+          
+          # 分离响应体和状态码
+          HTTP_STATUS=$(echo "$UPLOAD_RESPONSE" | tail -n1)
+          RESPONSE_BODY=$(echo "$UPLOAD_RESPONSE" | head -n -1)
+          
+          echo "HTTP状态码: $HTTP_STATUS"
+          echo "服务器响应: $RESPONSE_BODY"
+          
+          if [ "$HTTP_STATUS" -eq 200 ] || [ "$HTTP_STATUS" -eq 201 ]; then # 200/201 均视为成功
+              echo "上传成功！文件可在 d.hi168.com/$REMOTE_PATH/$LOCAL_FILE 访问。"
+          else
+              echo "上传失败！"
+              exit 1
+          fi
 
       # 4. 创建 GitHub Release 并上传资产
       - name: Create Release & Upload assets

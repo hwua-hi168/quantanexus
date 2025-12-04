@@ -151,7 +151,7 @@ run_kubeasz_setup() {
     return 0
 }
 
-# 检查集群状态
+# 检查集群状态（详细输出）
 check_cluster_status() {
     local cluster_name="${1:-k8s-qn-01}"
     
@@ -161,11 +161,15 @@ check_cluster_status() {
         return 1
     fi
     
-    if execute_with_privileges docker exec -it kubeasz ezctl status "$cluster_name"; then
-        print_success "集群状态检查完成"
+    # 【已修复】用 kubectl 检查集群状态，替代无效的 ezctl status
+    # 尝试静默检查 kubectl 是否能访问集群
+    if execute_with_privileges docker exec -i kubeasz /opt/kube/bin/kubectl get nodes >/dev/null 2>&1; then
+        print_success "集群状态检查成功"
+        # 成功后，调用 show_cluster_info 显示详细信息
+        show_cluster_info "$cluster_name"
         return 0
     else
-        print_error "集群状态检查失败"
+        print_error "集群状态检查失败 (kubectl 无法访问集群或节点)"
         exit 1
         return 1
     fi
@@ -185,19 +189,21 @@ show_cluster_info() {
     echo "=================================================="
     echo "          集群节点信息"
     echo "=================================================="
-    if ! execute_with_privileges /opt/kube/bin/kubectl get nodes -o wide; then
+    # 【已修复】确保 kubectl 命令在 kubeasz 容器内执行
+    if ! execute_with_privileges docker exec -it kubeasz /usr/bin/kubectl get nodes -o wide; then
         print_error "获取节点信息失败"
+        # 修正：将 exit 1 改为 return 1，让调用者决定是否退出
         return 1
-        exit 1
     fi
     
     echo ""
     echo "=================================================="
     echo "          集群Pod状态"
     echo "=================================================="
-    if ! execute_with_privileges /opt/kube/bin/kubectl get pods -A; then
+    # 【已修复】确保 kubectl 命令在 kubeasz 容器内执行
+    if ! execute_with_privileges docker exec -it kubeasz /usr/bin/kubectl get pods -A; then
         print_error "获取Pod信息失败"
-        exit 1
+        # 修正：将 exit 1 改为 return 1
         return 1
     fi
     
@@ -205,9 +211,10 @@ show_cluster_info() {
     echo "=================================================="
     echo "          集群服务状态"
     echo "=================================================="
-    if ! execute_with_privileges /opt/kube/bin/kubectl get svc -A; then
+    # 【已修复】确保 kubectl 命令在 kubeasz 容器内执行
+    if ! execute_with_privileges docker exec -it kubeasz /usr/bin/kubectl get svc -A; then
         print_error "获取服务信息失败"
-        exit 1
+        # 修正：将 exit 1 改为 return 1
         return 1
     fi
     
@@ -233,10 +240,11 @@ check_cluster_status_quiet() {
         return 1
     fi
     
-    # 尝试执行status命令，但不输出到终端
-    if execute_with_privileges docker exec -it kubeasz ezctl status "$cluster_name" >/dev/null 2>&1; then
-        return 0
+    # 【已修复】用 kubectl 检查集群状态，替代无效的 ezctl status
+    # 使用 'kubectl get nodes' 检查集群是否已部署并可用
+    if execute_with_privileges docker exec -i kubeasz /opt/kube/bin/kubectl get nodes >/dev/null 2>&1; then
+        return 0 # 成功: 集群已部署且可用
     else
-        return 1
+        return 1 # 失败: 集群未部署或不可用
     fi
 }

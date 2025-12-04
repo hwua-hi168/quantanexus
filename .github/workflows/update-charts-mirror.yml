@@ -1,0 +1,342 @@
+# .github/workflows/update-charts-mirror.yml
+name: Update Helm Charts Mirror
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+    paths:
+      - 'tools/charts-mirror/**'
+      - 'quantanexus-cs/**'
+      - 'quantanexus-mgr/**'
+      
+jobs:
+  update-charts:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    # 安装 helm
+    - uses: azure/setup-helm@v4
+      with:
+        version: latest
+        
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget
+        
+    - name: Step 1 - Update and Package Charts
+      env:
+        DOWNLOAD_CENTER_PASSWORD: ${{ secrets.DOWNLOAD_CENTER_PASSWORD }}
+      run: |
+        echo "=== Step 1: Updating Helm Charts ==="
+        
+        # 配置变量
+        CHART_DESTINATION="tools/charts-mirror/charts"
+        CHART_FILE="tools/charts-mirror/charts.csv"
+        MIRRORS_ARCHIVE="tools/charts-mirror/mirrors.tar.gz"
+        DOWNLOAD_URL="https://d.hi168.com/qn/mirrors.tar.gz"
+        
+        # 1. 检查 CSV 文件是否存在
+        if [ ! -f "$CHART_FILE" ]; then
+            echo "Error: Chart list file '$CHART_FILE' not found." >&2
+            exit 1
+        fi
+        
+        # 确保 charts 目录存在
+        mkdir -p "$CHART_DESTINATION"
+        
+        # 下载旧的 charts 包
+        echo "=== Downloading existing charts archive ==="
+        if wget -O "$MIRRORS_ARCHIVE" "$DOWNLOAD_URL"; then
+            echo "Successfully downloaded existing charts archive"
+            echo "Extracting charts from archive..."
+            # 创建临时目录解压，然后只移动 charts 内容
+            mkdir -p temp_extract
+            tar -xzf "$MIRRORS_ARCHIVE" -C temp_extract
+            # 检查解压后的目录结构，找到 charts 目录并移动内容
+            if [ -d "temp_extract/tools/charts-mirror/charts" ]; then
+                mv temp_extract/tools/charts-mirror/charts/* "$CHART_DESTINATION"/ 2>/dev/null || true
+            elif [ -d "temp_extract/charts" ]; then
+                mv temp_extract/charts/* "$CHART_DESTINATION"/ 2>/dev/null || true
+            fi
+            rm -rf temp_extract
+            echo "Extracted existing charts to $CHART_DESTINATION/"
+        else
+            echo "Warning: Could not download existing charts archive, starting fresh"
+        fi
+        
+        # 打包 quantanexus-cs
+        if [ -d "quantanexus-cs" ]; then
+            echo "-> Packaging quantanexus-cs..."
+            cd quantanexus-cs
+            helm package .
+            PACKAGED_FILE=$(ls *.tgz | head -1)
+            if [ -n "$PACKAGED_FILE" ]; then
+                mv "$PACKAGED_FILE" "../$CHART_DESTINATION/"
+                echo "   Moved $PACKAGED_FILE to charts directory"
+            fi
+            cd ..
+        else
+            echo "Warning: quantanexus-cs directory not found"
+        fi
+        
+        # 打包 quantanexus-mgr
+        if [ -d "quantanexus-mgr" ]; then
+            echo "-> Packaging quantanexus-mgr..."
+            cd quantanexus-mgr
+            helm dependency update
+            helm package .
+            PACKAGED_FILE=$(ls *.tgz | head -1)
+            if [ -n "$PACKAGED_FILE" ]; then
+                mv "$PACKAGED_FILE" "../$CHART_DESTINATION/"
+                echo "   Moved $PACKAGED_FILE to charts directory"
+            fi
+            cd ..
+        else
+            echo "Warning: quantanexus-mgr directory not found"
+        fi
+        
+        # 从 CSV 文件下载依赖的 charts
+        echo "=== Downloading Dependency Charts from $CHART_FILE ==="
+        
+        while IFS=, read -r NAME VERSION REPO
+        do
+            # 跳过以 '#' 开头的注释行
+            [[ "$NAME" =~ ^#.* ]] && continue
+            
+            # 移除行首尾的空格
+            NAME=$(echo "$NAME" | xargs)
+            VERSION=$(echo "$VERSION" | xargs)
+            REPO=$(echo "$REPO" | xargs)
+            
+            if [ -z "$NAME" ] || [ -z "$VERSION" ] || [ -z "$REPO" ]; then
+                continue
+            fi
+            
+            echo "-> Pulling chart: $NAME (Version: $VERSION) from $REPO"
+            helm pull "$NAME" --version "$VERSION" --repo "$REPO" --destination "$CHART_DESTINATION"/
+        done < "$CHART_FILE"
+        
+        # 生成新的索引
+        echo "Generating new repository index..."
+        helm repo index "$CHART_DESTINATION"/ --url https://helm.hi168.com/charts/
+        
+        # 打包 charts 目录 - 修改这里，只打包 charts 目录内容
+        echo "=== Packaging charts directory ==="
+        # 进入 charts 目录的父目录
+        cd "$(dirname "$CHART_DESTINATION")"
+        # 只打包 charts 目录，不包含完整路径
+        tar -zcvf "$(basename "$MIRRORS_ARCHIVE")" "$(basename "$CHART_DESTINATION")"/
+        # 回到原目录
+        cd -
+        echo "Created archive: $MIRRORS_ARCHIVE"
+        
+        # 显示生成的 charts
+        echo "Generated charts:"
+        ls -la "$CHART_DESTINATION"/
+        
+        echo "=== Step 1 Complete: Charts updated and packaged ==="
+        
+    - name: Upload charts artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: charts-mirror
+        path: |
+          tools/charts-mirror/charts/
+          tools/charts-mirror/mirrors.tar.gz
+        retention-days: 1
+
+  build-docker:
+    runs-on: ubuntu-latest
+    needs: update-charts
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download charts artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: charts-mirror
+        path: tools/charts-mirror/
+        
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Log in to Aliyun Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: registry.cn-hangzhou.aliyuncs.com
+        username: ${{ secrets.ALIYUN_REGISTRY_USER }}
+        password: ${{ secrets.ALIYUN_REGISTRY_PASSWORD }}
+        
+    - name: Step 2 - Build and Push Docker Image
+      run: |
+        echo "=== Step 2: Building and Pushing Docker Image ==="
+        
+        # 确定镜像标签
+        if [ -n "${{ github.ref_name }}" ] && [[ "${{ github.ref_name }}" == v* ]]; then
+          TAG="${{ github.ref_name }}"
+        else
+          TAG="${{ github.sha }}"
+        fi
+        
+        REPO_NAME="quantanexus/helm"
+        REGISTRY="registry.cn-hangzhou.aliyuncs.com"
+        
+        echo "Building Docker image with tag: $TAG"
+        
+        # 构建镜像
+        cd tools/charts-mirror/
+        docker build -t "$REGISTRY/$REPO_NAME:$TAG" .
+        
+        # 推送镜像
+        echo "Pushing Docker image..."
+        docker push "$REGISTRY/$REPO_NAME:$TAG"
+        
+        # 如果是标签推送，同时标记为latest
+        if [ -n "${{ github.ref_name }}" ] && [[ "${{ github.ref_name }}" == v* ]]; then
+          echo "Also tagging as latest..."
+          docker tag "$REGISTRY/$REPO_NAME:$TAG" "$REGISTRY/$REPO_NAME:latest"
+          docker push "$REGISTRY/$REPO_NAME:latest"
+        fi
+        
+        echo "=== Step 2 Complete: Docker image built and pushed ==="
+
+  upload-archive:
+    runs-on: ubuntu-latest
+    needs: [update-charts, build-docker]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download charts artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: charts-mirror
+        path: tools/charts-mirror/
+        
+    - name: Step 3 - Upload Archive to Server
+      env:
+        DOWNLOAD_CENTER_PASSWORD: ${{ secrets.DOWNLOAD_CENTER_PASSWORD }}
+        DOWNLOAD_CENTER_USERNAME: ${{ secrets.DOWNLOAD_CENTER_USERNAME }}
+      run: |
+        cd tools/charts-mirror/
+        
+        echo "=== Step 3: Uploading Archive to Server ==="
+        
+        SERVER="https://d.hi168.com/filebrowser"
+        USERNAME="$DOWNLOAD_CENTER_USERNAME"
+        LOCAL_FILE="mirrors.tar.gz"
+        
+        # 检查密码环境变量
+        if [ -z "$DOWNLOAD_CENTER_PASSWORD" ]; then
+            echo "Error: DOWNLOAD_CENTER_PASSWORD environment variable is not set" >&2
+            exit 1
+        fi
+        
+        # 1. 登录获取 Token
+        echo "正在登录..."
+        API_TOKEN=$(curl -s -X POST \
+          $SERVER/api/login \
+          -H 'Content-Type: application/json' \
+          -d "{\"username\":\"$DOWNLOAD_CENTER_USERNAME\",\"password\":\"$DOWNLOAD_CENTER_PASSWORD\"}" )
+
+        if [ -z "$API_TOKEN" ]; then
+            echo "错误：登录失败，请检查用户名和密码"
+            exit 1
+        fi
+        echo "Login successful"
+        
+        # 2. 上传文件 - 使用更简单的方式
+        echo "正在上传文件 $LOCAL_FILE 到 $SERVER ..."
+        
+        # 首先检查本地文件是否存在且有效
+        if [ ! -f "$LOCAL_FILE" ]; then
+            echo "错误：本地文件 $LOCAL_FILE 不存在"
+            exit 1
+        fi
+        
+        # 验证本地文件是否是有效的 tar.gz 文件
+        if ! tar -tzf "$LOCAL_FILE" > /dev/null 2>&1; then
+            echo "错误：本地文件 $LOCAL_FILE 不是有效的 tar.gz 文件"
+            exit 1
+        fi
+        
+        echo "本地文件验证通过，开始上传..."
+        
+        # 使用更简洁的上传方式
+        UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+          "$SERVER/api/resources/qn/$LOCAL_FILE?override=true" \
+          -H "X-Auth: $API_TOKEN" \
+          -H "Content-Type: application/octet-stream" \
+          --data-binary "@$LOCAL_FILE")
+        
+        # 分离响应体和状态码
+        HTTP_STATUS=$(echo "$UPLOAD_RESPONSE" | tail -n1)
+        RESPONSE_BODY=$(echo "$UPLOAD_RESPONSE" | head -n -1)
+        
+        echo "HTTP状态码: $HTTP_STATUS"
+        echo "服务器响应: $RESPONSE_BODY"
+        
+        if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "上传成功！"
+        else
+            echo "上传失败！"
+            echo "尝试使用备用上传方法..."
+            
+            # 备用方法：使用 multipart form 但更简洁的方式
+            UPLOAD_RESPONSE2=$(curl -s -w "\n%{http_code}" -X POST \
+              "$SERVER/api/upload/qn/?override=true" \
+              -H "X-Auth: $API_TOKEN" \
+              -F "file=@$LOCAL_FILE")
+            
+            HTTP_STATUS2=$(echo "$UPLOAD_RESPONSE2" | tail -n1)
+            RESPONSE_BODY2=$(echo "$UPLOAD_RESPONSE2" | head -n -1)
+            
+            echo "备用方法 HTTP状态码: $HTTP_STATUS2"
+            echo "备用方法服务器响应: $RESPONSE_BODY2"
+            
+            if [ "$HTTP_STATUS2" -ne 200 ]; then
+                exit 1
+            fi
+        fi
+        
+        echo "=== Step 3 Complete: Archive uploaded to server ==="
+        
+    - name: Verify upload
+      run: |
+        # 验证文件是否已上传
+        echo "Verifying upload by checking if mirrors.tar.gz exists..."
+        
+        # 尝试下载刚刚上传的文件来验证
+        if wget -q --spider "https://d.hi168.com/qn/mirrors.tar.gz"; then
+          echo "✅ mirrors.tar.gz is accessible"
+        else
+          echo "❌ mirrors.tar.gz might not be accessible"
+          exit 1
+        fi
+
+  summary:
+    runs-on: ubuntu-latest
+    needs: [update-charts, build-docker, upload-archive]
+    
+    steps:
+    - name: Workflow Summary
+      run: |
+        echo "🎉 Helm Charts Mirror Update Complete!"
+        echo ""
+        echo "📊 Summary:"
+        echo "  ✅ Charts updated and packaged"
+        echo "  ✅ Docker image built and pushed"
+        echo "  ✅ Archive uploaded to server"
+        echo ""
+        echo "🌐 Access your updated charts at:"
+        echo "   https://d.hi168.com/qn/mirrors.tar.gz"
+        echo "   https://helm.hi168.com/charts/"

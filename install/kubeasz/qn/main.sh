@@ -30,6 +30,12 @@ source "$SCRIPT_DIR/run_quantanexus_mgr.sh"
 source "$SCRIPT_DIR/run_quantanexus_cs.sh"
 source "$SCRIPT_DIR/run_uncordon.sh"
 source "$SCRIPT_DIR/run_containerd_config.sh"
+# 新增MinIO模块
+source "$SCRIPT_DIR/run_minio.sh"
+# 新增Redis Sentinel模块
+source "$SCRIPT_DIR/run_redis_sentinel.sh"
+# 新增JuiceFS模块
+source "$SCRIPT_DIR/run_juicefs.sh"
 
 # 显示使用说明
 show_usage() {
@@ -58,6 +64,9 @@ show_usage() {
     echo "  quantanexus-mgr 安装Quantanexus管理组件"
     echo "  quantanexus-cs 安装Quantanexus计算服务"
     echo "  uncordon     执行节点 uncordon 操作"
+    echo "  minio        安装MinIO对象存储"
+    echo "  redis-sentinel 安装Redis Sentinel"
+    echo "  juicefs      安装JuiceFS存储"
     echo "  all          执行所有步骤（默认）"
     echo "  show         显示当前配置"
     echo "  generate     生成hosts文件"
@@ -87,80 +96,21 @@ show_usage() {
     echo "  $0 quantanexus-mgr     # 安装Quantanexus管理组件"
     echo "  $0 quantanexus-cs      # 安装Quantanexus计算服务"
     echo "  $0 uncordon            # 执行节点 uncordon 操作"
+    echo "  $0 minio               # 安装MinIO对象存储"
+    echo "  $0 redis-sentinel      # 安装Redis Sentinel"
+    echo "  $0 juicefs             # 安装JuiceFS存储"
     echo "  $0 all                 # 执行完整流程"
     echo "  $0 show                # 显示当前配置"
     echo "  $0 generate            # 生成hosts文件"
 }
 
-# 检查配置文件是否存在
-check_config_file() {
-    if [[ ! -f "$SCRIPT_DIR/.k8s_cluster_config" ]]; then
-        print_error "配置文件不存在，请先运行 '$0 collect' 收集配置信息"
-        return 1
-    fi
-    return 0
-}
 
-# 加载配置文件
-load_config() {
-    if [[ -f "$SCRIPT_DIR/.k8s_cluster_config" ]]; then
-        source "$SCRIPT_DIR/.k8s_cluster_config"
-        # 恢复数组变量
-        all_ips=($all_ips_str)
-        etcd_ips=($etcd_ips_str)
-        master_ips=($master_ips_str)
-        worker_ips=($worker_ips_str)
-        
-        # 恢复节点名称映射
-        declare -gA node_names
-        for mapping in $node_names_mappings; do
-            IFS=':' read -r ip name <<< "$mapping"
-            node_names["$ip"]="$name"
-        done
-        
-        return 0
-    else
-        return 1
-    fi
-}
-
-# 保存配置文件
-save_config() {
-    # 将数组转换为字符串
-    all_ips_str="${all_ips[@]}"
-    etcd_ips_str="${etcd_ips[@]}"
-    master_ips_str="${master_ips[@]}"
-    worker_ips_str="${worker_ips[@]}"
-    
-    # 将节点名称映射转换为字符串
-    node_names_mappings=""
-    for ip in "${!node_names[@]}"; do
-        node_names_mappings+="$ip:${node_names[$ip]} "
-    done
-    
-    cat > "$SCRIPT_DIR/.k8s_cluster_config" << EOF
-# K8s集群配置 - 自动生成，请勿手动修改
-all_ips_str="$all_ips_str"
-etcd_ips_str="$etcd_ips_str"
-master_ips_str="$master_ips_str"
-worker_ips_str="$worker_ips_str"
-QN_DOMAIN="$QN_DOMAIN"
-IMAGE_REGISTRY="$IMAGE_REGISTRY"
-username="$username"
-password="$password"
-use_password_auth="$use_password_auth"
-node_names_mappings="$node_names_mappings"
-EOF
-    
-    print_success "配置已保存到 $SCRIPT_DIR/.k8s_cluster_config"
-}
 
 # 收集信息命令
 cmd_collect() {
     print_banner
     configure_nodes
     collect_auth_info
-    save_config
     show_config_summary
 }
 
@@ -396,6 +346,60 @@ cmd_longhorn() {
     print_success "Longhorn存储安装完成"
 }
 
+# 执行MinIO对象存储安装命令
+cmd_minio() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! run_minio_playbook "$cluster_name"; then
+        print_error "MinIO对象存储安装失败"
+        return 1
+    fi
+    
+    print_success "MinIO对象存储安装完成"
+}
+
+# 执行Redis Sentinel安装命令
+cmd_redis_sentinel() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! run_redis_sentinel_playbook "$cluster_name"; then
+        print_error "Redis Sentinel安装失败"
+        return 1
+    fi
+    
+    print_success "Redis Sentinel安装完成"
+}
+
+# 执行JuiceFS存储安装命令
+cmd_juicefs() {
+    print_banner
+    if ! load_config; then
+        print_error "无法加载配置，请先运行 '$0 collect'"
+        exit 1
+    fi
+    
+    local cluster_name="${1:-k8s-qn-01}"
+    
+    if ! run_juicefs_playbook "$cluster_name"; then
+        print_error "JuiceFS存储安装失败"
+        return 1
+    fi
+    
+    print_success "JuiceFS存储安装完成"
+}
+
 # 执行Cert-Manager安装命令
 cmd_cert_manager() {
     print_banner
@@ -560,14 +564,10 @@ cmd_uncordon() {
 
 # 配置containerd镜像仓库命令
 cmd_containerd_config() {
-    print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
     fi
-    
-    # 导入containerd配置模块
-    source "$SCRIPT_DIR/run_containerd_config.sh"
     
     local cluster_name="${1:-k8s-qn-01}"
     
@@ -642,6 +642,21 @@ main() {
             check_config_file || exit 1
             load_config
             cmd_longhorn "${2:-k8s-qn-01}"
+            ;;
+        "minio")
+            check_config_file || exit 1
+            load_config
+            cmd_minio "${2:-k8s-qn-01}"
+            ;;
+        "redis-sentinel")
+            check_config_file || exit 1
+            load_config
+            cmd_redis_sentinel "${2:-k8s-qn-01}"
+            ;;
+        "juicefs")
+            check_config_file || exit 1
+            load_config
+            cmd_juicefs "${2:-k8s-qn-01}"
             ;;
         "cert-manager")
             check_config_file || exit 1
@@ -735,12 +750,20 @@ main() {
                 print_error "节点 uncordon 操作失败"
                 exit 1
             fi
-            if ! install_helm; then
-                print_error "Helm安装失败"
-                exit 1
-            fi
             if ! run_longhorn_playbook; then
                 print_error "Longhorn安装失败"
+                exit 1
+            fi
+            if ! run_minio_playbook; then
+                print_error "MinIO安装失败"
+                exit 1
+            fi
+            if ! run_redis_sentinel_playbook; then
+                print_error "Redis Sentinel安装失败"
+                exit 1
+            fi
+            if ! run_juicefs_playbook; then
+                print_error "JuiceFS安装失败"
                 exit 1
             fi
             if ! run_cert_manager_playbook; then

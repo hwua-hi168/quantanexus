@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v*'         
+    paths:
+      - 'install/kubeasz/**'      
 
 env:
   REGISTRY: registry.cn-hangzhou.aliyuncs.com

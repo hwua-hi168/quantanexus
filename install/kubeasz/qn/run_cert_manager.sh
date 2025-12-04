@@ -33,7 +33,7 @@ run_cert_manager_playbook() {
     
     # 检查Cert-Manager是否已经安装
     print_info "检查Cert-Manager是否已经安装..."
-    if execute_with_privileges helm status cert-manager -n cert-manager >/dev/null 2>&1; then
+    if execute_with_privileges docker exec -it -w /etc/kubeasz kubeasz helm status cert-manager -n cert-manager >/dev/null 2>&1; then
         print_warning "Cert-Manager已经安装，跳过安装步骤"
         cd "$original_dir"
         return 0
@@ -46,9 +46,9 @@ run_cert_manager_playbook() {
     cd /etc/kubeasz || return 1
     
     # 执行Cert-Manager安装的ansible-playbook
-    print_info "执行Cert-Manager安装: ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/cert-manager.yml"
+    print_info "执行Cert-Manager安装: docker exec -it -w /etc/kubeasz kubeasz ansible-playbook -i clusters/$cluster_name/hosts -e @clusters/$cluster_name/config.yml playbooks/cert-manager.yml"
     
-    if execute_with_privileges ansible-playbook -i "clusters/$cluster_name/hosts" -e "@clusters/$cluster_name/config.yml" playbooks/cert-manager.yml; then
+    if execute_with_privileges docker exec -it -w /etc/kubeasz kubeasz ansible-playbook -i "clusters/$cluster_name/hosts" -e "@clusters/$cluster_name/config.yml" playbooks/cert-manager.yml; then
         print_success "Cert-Manager安装完成"
         cd "$original_dir"
         return 0

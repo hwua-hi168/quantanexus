@@ -1,6 +1,7 @@
 # Global configuration
 global:
-  service_namespace: quantanexus-cs
+  serviceNamespace: quantanexus-cs
+  serviceDomain: qntest002.hi168.com
   domainName: qntest002.hi168.com
   # registry: harbor.hi168.com/quantanexus
   # In China, please use aliyuncs

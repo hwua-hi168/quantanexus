@@ -1,9 +1,25 @@
----
 - name: 添加 Quantanexus Helm 仓库
   kubernetes.core.helm_repository:
     name: hi168
     repo_url: https://helm.hi168.com/charts
     state: present
+
+- name: 更新 Helm 仓库
+  shell: helm repo update
+  args:
+    executable: /bin/bash
+
+- name: 检查 quantanexus-mgr chart 是否可用
+  shell: |
+    helm search repo hi168/quantanexus-mgr --version "{{ quantanexus_version }}" -o json
+  args:
+    executable: /bin/bash
+  register: chart_search
+  changed_when: false
+
+- name: 显示 chart 信息
+  debug:
+    msg: "Chart 信息: {{ chart_search.stdout }}"
 
 - name: 创建 values.yaml 配置文件
   template:
@@ -17,7 +33,7 @@
     kind: Namespace
     state: present
 
-- name: 部署Quantanexus-Mgr
+- name: 部署 Quantanexus-Mgr
   kubernetes.core.helm:
     name: quantanexus-mgr
     chart_ref: hi168/quantanexus-mgr
@@ -27,4 +43,4 @@
       - "/tmp/quantanexus-mgr-values.yaml"
     state: present
     wait: true
-    wait_timeout: "300s"   # Helm 要求带单位
+    wait_timeout: "300s"
