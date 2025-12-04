@@ -86,6 +86,14 @@ data:
 
   pre-start.sh: |
     echo "quantanexus pre-start.sh called"
+    {{- if not .Values.global.useHttpIP  }}
     sed -i 's/demo\.hi168\.com/{{ .Values.global.serviceDomain }}/g' "${QUANTANEXUS_HOME}/quantanexus-addons/hw_experiment/data/zone.xml"
+    {{- end }}
+    {{- if .Values.global.useHttpIP  }}
+    sed -i 's/demo\.hi168\.com/{{ .Values.global.mgrDomainIP }}:{{ .Values.global.mgrDomainPort }}/g' "${QUANTANEXUS_HOME}/quantanexus-addons/hw_experiment/data/zone.xml"
+    sed -i 's|<field name="zone_domain_ssl">True</field>|<field name="zone_domain_ssl">False</field>|g' "${QUANTANEXUS_HOME}/quantanexus-addons/hw_experiment/data/zone.xml"
+    sed -i 's|<field name="zone_domain_port">443</field>|<field name="zone_domain_port">{{ .Values.global.mgrDomainPort }}</field>|g' "${QUANTANEXUS_HOME}/quantanexus-addons/hw_experiment/data/zone.xml"
+    {{- end }}
     echo "quantanexus pre-start.sh finished"    
 {{- end }}
+
