@@ -178,8 +178,8 @@ quantanexus:
     timeoutSeconds: 3
     failureThreshold: 3
 
-  # 如果mgr和svc使用同一个K8S集群，但是部署在不同的命名空间，
-  # 那么由于mgr和svc共用了同一个ingress的80端口，nginx-reverse-proxy会拦截所有的流量，
+  # 如果mgr和cs使用同一个K8S集群，但是部署在不同的命名空间，
+  # 那么由于mgr和cs共用了同一个ingress的80端口，nginx-reverse-proxy会拦截所有的流量，
   # 所以这里就需要在nginx-reverse-proxy-config里添加下面webshell、uploader和experimentService三个服务组件的路由信息。
   webshell:
     host: abc-webshell
