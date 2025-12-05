@@ -42,7 +42,12 @@ spec:
         - name: HI168_SHOW_MODULE_LIST
           value: {{ .Values.quantanexus.nginx.frontend.env.moduleList | quote }}
         - name: HI168_COMMON_VAR_1
-          value: "HI168_COMMON_VAR_1"
+          {{- if .Values.global.useHttpIP  }}
+          value: ""
+          {{- end }}
+          {{- if not .Values.global.useHttpIP  }}
+          value: "upgrade-insecure-requests"
+          {{- end }}
         - name: HI168_COMMON_VAR_2
           value: "HI168_COMMON_VAR_2"
         - name: HI168_COMMON_VAR_3
