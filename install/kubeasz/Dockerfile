@@ -11,7 +11,7 @@ ENV TZ="Asia/Shanghai"
 WORKDIR /root
 COPY install/kubeasz /etc/kubeasz
 RUN set -x \
-    && apk update && apk add --no-cache curl tar openssl openssh-client sshpass  \
+    && apk update && apk add --no-cache curl tar openssl openssh-client sshpass jq \
     && curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 \
     && chmod 700 get_helm.sh \
     && ./get_helm.sh \

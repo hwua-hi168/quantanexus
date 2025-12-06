@@ -6,3 +6,6 @@
       command: qm rollback {{ item }} {{ hostvars[item].snapshot | default('ansible-ready') }} #默认snap是ansible ready
       loop: "{{ groups['vm_ids'] }}"
       # when: INIT_VM | default(false) | bool 
+      when:
+        - pve_host_defined | bool
+        - vm_ids_defined | bool
