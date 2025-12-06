@@ -36,7 +36,7 @@ spec:
   rules:
     {{- if .Values.global.useHttpIP }}
     - host: null
-    {{- end } }
+    {{- end }}
     {{- if not .Values.global.useHttpIP }}
     - host: {{ .Values.global.domainName }}
     {{- end }}
