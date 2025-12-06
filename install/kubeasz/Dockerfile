@@ -8,6 +8,7 @@ FROM easzlab/ansible:2.14.4-lite
 ARG QNI_VER=
 ARG KUBECTL_VERSION=v1.34.2 
 ENV TZ="Asia/Shanghai"
+WORKDIR /root
 COPY install/kubeasz /etc/kubeasz
 RUN set -x \
     && apk update && apk add --no-cache curl tar openssl openssh-client sshpass  \
