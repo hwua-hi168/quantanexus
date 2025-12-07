@@ -87,7 +87,7 @@ data:
   pre-start.sh: |
     echo "quantanexus pre-start.sh called"
     {{- if not .Values.global.useHttpIP  }}
-    sed -i 's/demo\.hi168\.com/{{ .Values.global.serviceDomain }}/g' "${QUANTANEXUS_HOME}/quantanexus-addons/hw_experiment/data/zone.xml"
+    sed -i 's/demo\.hi168\.com/{{ .Values.global.mgrDomainIP }}/g' "${QUANTANEXUS_HOME}/quantanexus-addons/hw_experiment/data/zone.xml"
     {{- end }}
     {{- if .Values.global.useHttpIP  }}
     sed -i 's/demo\.hi168\.com/{{ .Values.global.mgrDomainIP }}:{{ .Values.global.mgrDomainPort }}/g' "${QUANTANEXUS_HOME}/quantanexus-addons/hw_experiment/data/zone.xml"
