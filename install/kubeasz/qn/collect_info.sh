@@ -68,29 +68,35 @@ EOF
     print_success "配置已保存到 $SCRIPT_DIR/.k8s_cluster_config"
 }
 
+# 🌟 重点修改 check_existing_config 函数
 # 检查是否已有配置
 check_existing_config() {
-    echo "all_ips $all_ips"
-    echo "etcd_ips $etcd_ips"
-    echo "master_ips $master_ips"
-    echo "worker_ips $worker_ips"
-    echo "QN_DOMAIN $QN_DOMAIN"
-    echo "IMAGE_REGISTRY $IMAGE_REGISTRY"
-    if [[ -n "$all_ips" && -n "$etcd_ips" && -n "$master_ips" && -n "$worker_ips" && -n "$QN_DOMAIN" && -n "$IMAGE_REGISTRY" ]]; then
+    # 检查配置文件是否存在
+    if [[ -f "$SCRIPT_DIR/.k8s_cluster_config" ]]; then
+        # 配置文件存在，加载配置
+        load_config
+        
+        # 简单检查 essential_vars，如果这些核心数组为空，说明上次收集失败或文件为空
+        if [[ -z "$all_ips_str" ]]; then
+             print_warning "检测到配置文件存在，但核心IP列表为空，将重新收集配置..."
+             return 1
+        fi
+
         echo "=== 检测到已有配置信息 ==="
-        show_config_summary
+        show_config_summary # 展示现有配置
         
         read -p "是否使用以上配置? (y/n, 默认y): " use_existing_config
         if [[ ! $use_existing_config =~ ^[Nn]$ ]]; then
             print_success "使用现有配置"
-            return 0
+            return 0 # 使用现有配置
         else
             print_info "重新配置节点信息..."
-            # 清空现有配置
-            unset all_ips etcd_ips master_ips worker_ips QN_DOMAIN IMAGE_REGISTRY node_names USE_HTTP_IP MGR_DOMAIN_IP
+            # 清空现有配置 (仅清空在 load_config 中加载的数组和变量，确保 configure_nodes 重新开始)
+            unset all_ips etcd_ips master_ips worker_ips QN_DOMAIN QN_CS_DOMAIN IMAGE_REGISTRY node_names USE_HTTP_IP MGR_DOMAIN_IP
+            return 1 # 不使用现有配置，继续进行 configure_nodes
         fi
     fi
-    return 1
+    return 1 # 配置文件不存在
 }
 
 # 配置节点信息
@@ -286,7 +292,7 @@ configure_nodes() {
                         break
                     fi
                 done
-                
+
                 if [ "$found_all" = true ]; then
                     break
                 fi
@@ -302,10 +308,9 @@ configure_nodes() {
     # 新增：判断是否使用IP直接访问
     echo "=== 第5步：配置访问方式 ==="
     print_info "是否使用IP直接访问（不使用域名）Quantanexus管理组件和计算服务?"
-    # 🌟 修改点：将默认提示改为 (y/n, 默认y)
+    # 默认使用 IP 直接访问 (y)
     read -p "使用IP直接访问? (y/n, 默认y): " use_http_ip_input
     
-    # 🌟 修改点：判断逻辑调整，如果输入是'N'或'n'，则走域名流程；否则（包括空和'y'）走IP流程。
     if [[ $use_http_ip_input =~ ^[Nn]$ ]]; then
         USE_HTTP_IP="false"
         MGR_DOMAIN_IP=""
@@ -372,10 +377,8 @@ configure_nodes() {
             print_warning "警告: MGR_DOMAIN_IP ($MGR_DOMAIN_IP) 不在您提供的集群节点列表中"
         fi
         
-        # 假设 validate_ip 已经存在于 common.sh 中
         if ! validate_ip "$MGR_DOMAIN_IP"; then
             print_error "错误: MGR_DOMAIN_IP ($MGR_DOMAIN_IP) 格式无效"
-            # 这里可以考虑退出或强制用户重新输入，为简化处理，暂时仅报错
         fi
         
         print_success "MGR_DOMAIN_IP 配置完成: $MGR_DOMAIN_IP"
@@ -425,7 +428,6 @@ collect_auth_info() {
             print_success "SSH密钥对生成完成"
         else
             print_info "跳过SSH密钥对生成"
-            # 即使跳过，我们也需要调用 save_config 来确保 use_password_auth 等其他变量被保存
             save_config 
             return 0
         fi
@@ -440,7 +442,7 @@ collect_auth_info() {
       if [[ $use_password =~ ^[Nn]$ ]]; then
           print_info "跳过密码认证配置，请确保已配置SSH免密登录"
           use_password_auth=false
-          save_config # 即使跳过，也要保存 use_password_auth=false
+          save_config 
           return 0
       fi
     fi
