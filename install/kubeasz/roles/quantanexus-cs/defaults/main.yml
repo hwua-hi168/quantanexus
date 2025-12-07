@@ -1,5 +1,5 @@
 ---
-quantanexus_cs_version: "1.0.0"
+quantanexus_cs_version: "1.1.0"
 quantanexus_helm_repository: "https://helm.hi168.com/charts"
 
 quantanexus_cs_namespace: "quantanexus-cs"
