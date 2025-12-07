@@ -1,0 +1,8 @@
+#calico_enterprise_components_enabled: true
+calico_operator_namespace: "tigera-operator"
+calico_version: "v3.31.2"
+calico_pod_cidr: "10.160.0.0/16"
+calico_block_size: 26
+calico_encapsulation: "VXLANCrossSubnet"
+calico_nat_outgoing: "Enabled"
+calico_enterprise_enabled: true
