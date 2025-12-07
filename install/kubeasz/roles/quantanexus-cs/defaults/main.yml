@@ -9,6 +9,8 @@ quantanexus_cs_image_registry: "{{ IMAGE_REGISTRY }}"
 # Quantanexus CS 组件配置
 quantanexus_cs_service_namespace: "quantanexus-cs"
 quantanexus_cs_domain_name:  "{{ QN_CS_DOMAIN | default('cs1.quantanexus.com') }}"
+quantanexus_use_http_ip: "{{ USE_HTTP_IP }}"
+
 source_secret_ca_name: "root-ca-secret"
 target_secret_ca_name: "root-ca-secret"
 

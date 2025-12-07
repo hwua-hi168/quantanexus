@@ -7,6 +7,8 @@ quantanexus_helm_repository: "https://helm.hi168.com/charts"
 
 # 镜像仓库配置
 quantanexus_image_registry: "{{ IMAGE_REGISTRY }}"
+quantanexus_use_http_ip: "{{ USE_HTTP_IP }}"
+quantanexus_mgr_domain_ip: "{{ MGR_DOMAIN_IP }}"
 
 # Quantanexus 组件配置
 quantanexus_domain_name: "{{ QN_DOMAIN | default('mgr.quantanexus.com') }}"
