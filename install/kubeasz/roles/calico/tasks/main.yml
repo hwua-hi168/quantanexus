@@ -1,51 +1,47 @@
----
-- name: Install Tigera Operator and Calico Enterprise Resources
-  hosts: localhost
-  gather_facts: yes
-  tasks:
-    # ==================== Step 1: Deploy Tigera Operator ====================
-    - name: Deploy Tigera Operator (from template)
-      k8s:
-        definition: "{{ lookup('template', 'templates/calico-tigera-operator-v3.31.2.yaml.j2') }}"
-        state: present
-      delegate_to: localhost
-      run_once: true
 
-    - name: Wait for tigera-operator pod to be ready
-      k8s_info:
-        api_version: v1
-        kind: Pod
-        namespace: "{{ calico_operator_namespace }}"
-        label_selectors:
-          - k8s-app=tigera-operator
-      register: operator_pod
-      until: >
-        operator_pod.resources | length == 1 and
-        operator_pod.resources[0].status.phase == 'Running' and
-        operator_pod.resources[0].status.containerStatuses is defined and
-        operator_pod.resources[0].status.containerStatuses[0].ready == true
-      retries: 30
-      delay: 5
-      delegate_to: localhost
-      run_once: true
+# ==================== Step 1: Deploy Tigera Operator ====================
+- name: Deploy Tigera Operator (from template)
+  k8s:
+    definition: "{{ lookup('template', 'templates/calico-tigera-operator-v3.31.2.yaml.j2') }}"
+    state: present
+  delegate_to: localhost
+  run_once: true
 
-    # ==================== Step 2: Deploy Calico CRs ====================
-    - name: Deploy Calico Enterprise Configuration (Installation, APIServer, etc.)
-      k8s:
-        definition: "{{ lookup('template', 'templates/customer-resource.yaml.j2') }}"
-        state: present
-      when: calico_enterprise_enabled | bool
-      delegate_to: localhost
-      run_once: true
+- name: Wait for tigera-operator pod to be ready
+  k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: "{{ calico_operator_namespace }}"
+    label_selectors:
+      - k8s-app=tigera-operator
+  register: operator_pod
+  until: >
+    operator_pod.resources | length == 1 and
+    operator_pod.resources[0].status.phase == 'Running' and
+    operator_pod.resources[0].status.containerStatuses is defined and
+    operator_pod.resources[0].status.containerStatuses[0].ready == true
+  retries: 30
+  delay: 5
+  delegate_to: localhost
+  run_once: true
 
-    - name: Wait for Installation to be ready
-      k8s_info:
-        api_version: operator.tigera.io/v1
-        kind: Installation
-        name: default
-      register: install_status
-      until: install_status.resources[0].status.phase == 'Ready'
-      retries: 30
-      delay: 10
-      delegate_to: localhost
-      run_once: true
+# ==================== Step 2: Deploy Calico CRs ====================
+- name: Deploy Calico Enterprise Configuration (Installation, APIServer, etc.)
+  k8s:
+    definition: "{{ lookup('template', 'templates/customer-resource.yaml.j2') }}"
+    state: present
+  when: calico_enterprise_enabled | bool
+  delegate_to: localhost
+  run_once: true
+
+- name: Wait for Installation to be ready
+  k8s_info:
+    api_version: operator.tigera.io/v1
+    kind: Installation
+    name: default
+  register: install_status
+  until: install_status.resources[0].status.phase == 'Ready'
+  retries: 30
+  delay: 10
+  delegate_to: localhost
+  run_once: true

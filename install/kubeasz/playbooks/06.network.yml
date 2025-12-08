@@ -1,7 +1,7 @@
-# to install network plugin, only one can be choosen 
-- hosts:
-  - kube_master
-  - kube_node
+- hosts: localhost
+  gather_facts: no
+  vars:
+    CLUSTER_DIR: "{{ cluster_dir | default('/etc/kubeasz/cluster') }}"
   roles:
   - { role: calico, when: "CLUSTER_NETWORK == 'calico'" }
   - { role: cilium, when: "CLUSTER_NETWORK == 'cilium'" }
