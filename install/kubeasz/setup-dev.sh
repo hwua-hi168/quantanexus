@@ -151,6 +151,21 @@ if [[ -n "${bak:-}" ]] && [[ -d "$bak/clusters" ]]; then
     echo "[INFO] 恢复 clusters 目录完成"
 fi
 
+EZDOWN_PATH="$SCRIPT_DIR/ezdown"
+if [[ -f "$EZDOWN_PATH" ]]; then
+    echo "[INFO] ezdown 已存在：$EZDOWN_PATH"
+    chmod +x "$EZDOWN_PATH"
+else
+    echo "[INFO] 正在下载 ezdown ..."
+    # 先保证有 jq
+    command -v jq >/dev/null || sudo apt install -y jq
+    # 取最新 tag 并下载
+    LATEST_TAG=$(curl -s "https://api.github.com/repos/hwua-hi168/quantanexus/releases/latest" | jq -r .tag_name)
+    URL="https://github.com/hwua-hi168/quantanexus/releases/download/${LATEST_TAG}/ezdown"
+    curl -L "$URL" -o "$EZDOWN_PATH" || { echo "[ERROR] ezdown 下载失败"; exit 1; }
+    chmod +x "$EZDOWN_PATH"
+    echo "[OK] ezdown 下载完成并已赋可执行权限"
+fi
 # 9. 打印摘要
 cat <<EOF
 ----------------------------------------------------
