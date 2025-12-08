@@ -41,6 +41,10 @@ data:
     module_oss_manage_enable = {{ .Values.quantanexus.config.moduleOssManageEnable }}
     module_cloud_link_enable = {{ .Values.quantanexus.config.moduleCloudLinkEnable }}
     course_video_dir = /opt/misc/quantanexus/abc_resource_base/videos
+    use_hwua_node_service_proxy = {{ .Values.quantanexus.config.useHwuaNodeServiceProxy }}
+    {{- if .Values.global.useHttpIP  }}
+    use_http_and_ip: yes
+    {{- end }}
 
   test.conf: |
     [options]
@@ -75,9 +79,21 @@ data:
     module_oss_manage_enable = {{ .Values.quantanexus.config.moduleOssManageEnable }}
     module_cloud_link_enable = {{ .Values.quantanexus.config.moduleCloudLinkEnable }}
     course_video_dir = /opt/misc/quantanexus/abc_resource_base/videos
+    use_hwua_node_service_proxy = {{ .Values.quantanexus.config.useHwuaNodeServiceProxy }}
+    {{- if .Values.global.useHttpIP  }}
+    use_http_and_ip: yes
+    {{- end }}
 
   pre-start.sh: |
     echo "quantanexus pre-start.sh called"
-    sed -i 's/demo\.hi168\.com/{{ .Values.global.serviceDomain }}/g' "${QUANTANEXUS_HOME}/quantanexus-addons/hw_experiment/data/zone.xml"
+    {{- if not .Values.global.useHttpIP  }}
+    sed -i 's/demo\.hi168\.com/{{ .Values.global.mgrDomainIP }}/g' "${QUANTANEXUS_HOME}/quantanexus-addons/hw_experiment/data/zone.xml"
+    {{- end }}
+    {{- if .Values.global.useHttpIP  }}
+    sed -i 's/demo\.hi168\.com/{{ .Values.global.mgrDomainIP }}:{{ .Values.global.mgrDomainPort }}/g' "${QUANTANEXUS_HOME}/quantanexus-addons/hw_experiment/data/zone.xml"
+    sed -i 's|<field name="zone_domain_ssl">True</field>|<field name="zone_domain_ssl">False</field>|g' "${QUANTANEXUS_HOME}/quantanexus-addons/hw_experiment/data/zone.xml"
+    sed -i 's|<field name="zone_domain_port">443</field>|<field name="zone_domain_port">{{ .Values.global.mgrDomainPort }}</field>|g' "${QUANTANEXUS_HOME}/quantanexus-addons/hw_experiment/data/zone.xml"
+    {{- end }}
     echo "quantanexus pre-start.sh finished"    
 {{- end }}
+

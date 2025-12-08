@@ -76,7 +76,140 @@ data:
         # 移除 Set-Cookie 响应头
         proxy_hide_header Set-Cookie;
       }
-
+    
+      # abc-webshell配置
+      location = /t {
+          proxy_pass http://{{ .Values.quantanexus.webshell.host }}.{{ .Values.global.serviceNamespace }}.svc.cluster.local:{{ .Values.quantanexus.webshell.port }};
+          # 启用 WebSocket 支持
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          # 可选：传递 Host 和真实 IP
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+      location = /t/s {
+          proxy_pass http://{{ .Values.quantanexus.webshell.host }}.{{ .Values.global.serviceNamespace }}.svc.cluster.local:{{ .Values.quantanexus.webshell.port }};
+          # 启用 WebSocket 支持
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          # 可选：传递 Host 和真实 IP
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+      location /t/s/ {
+          proxy_pass http://{{ .Values.quantanexus.webshell.host }}.{{ .Values.global.serviceNamespace }}.svc.cluster.local:{{ .Values.quantanexus.webshell.port }};
+          # 启用 WebSocket 支持
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          # 可选：传递 Host 和真实 IP
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+      location = /demo {
+          proxy_pass http://{{ .Values.quantanexus.webshell.host }}.{{ .Values.global.serviceNamespace }}.svc.cluster.local:{{ .Values.quantanexus.webshell.port }};
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+      location = /static/css/xterm.css {
+          proxy_pass http://{{ .Values.quantanexus.webshell.host }}.{{ .Values.global.serviceNamespace }}.svc.cluster.local:{{ .Values.quantanexus.webshell.port }};
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+      location = /static/css/bootstrap.min.css {
+          proxy_pass http://{{ .Values.quantanexus.webshell.host }}.{{ .Values.global.serviceNamespace }}.svc.cluster.local:{{ .Values.quantanexus.webshell.port }};
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+      location = /static/js/index.js {
+          proxy_pass http://{{ .Values.quantanexus.webshell.host }}.{{ .Values.global.serviceNamespace }}.svc.cluster.local:{{ .Values.quantanexus.webshell.port }};
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+      location = /static/xml/app.xml {
+         proxy_pass http://{{ .Values.quantanexus.webshell.host }}.{{ .Values.global.serviceNamespace }}.svc.cluster.local:{{ .Values.quantanexus.webshell.port }};
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+      location = /static/imgs/favicon.ico {
+          proxy_pass http://{{ .Values.quantanexus.webshell.host }}.{{ .Values.global.serviceNamespace }}.svc.cluster.local:{{ .Values.quantanexus.webshell.port }};
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+    
+      # abc-uploader配置
+      location = /file/upload {
+          proxy_pass http://{{ .Values.quantanexus.uploader.host }}.{{ .Values.global.serviceNamespace }}.svc.cluster.local:{{ .Values.quantanexus.uploader.port }};
+          # 启用 WebSocket 支持
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          # 可选：传递 Host 和真实 IP
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+    
+      # abc-experiment-service配置
+      location = /certterminal {
+          proxy_pass http://{{ .Values.quantanexus.experimentService.host }}.{{ .Values.global.serviceNamespace }}.svc.cluster.local:{{ .Values.quantanexus.experimentService.port }};
+          # 启用 WebSocket 支持
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          # 可选：传递 Host 和真实 IP
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+      location = /websockify {
+          proxy_pass http://{{ .Values.quantanexus.experimentService.host }}.{{ .Values.global.serviceNamespace }}.svc.cluster.local:{{ .Values.quantanexus.experimentService.port }};
+          # 启用 WebSocket 支持
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          # 可选：传递 Host 和真实 IP
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+      location = /hwua_node_service {
+          proxy_pass http://{{ .Values.quantanexus.experimentService.host }}.{{ .Values.global.serviceNamespace }}.svc.cluster.local:{{ .Values.quantanexus.experimentService.port }};
+          # 启用 WebSocket 支持
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          # 可选：传递 Host 和真实 IP
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+    
+      # odoo配置    
       location /hwua/ {
           rewrite ^/hwua/(.*)$ /odoo/$1 break;
           proxy_pass http://{{ include "quantanexus.fullname" . }}:8069;

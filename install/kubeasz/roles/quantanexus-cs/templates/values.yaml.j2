@@ -4,6 +4,8 @@ global:
   # registry: harbor.hi168.com/quantanexus
   # In China, please use aliyuncs
   registry: {{ quantanexus_cs_image_registry }}
+  useHttpIP: {{ quantanexus_use_http_ip }}
+  mgrDomainIP: {{ quantanexus_mgr_domain_ip }}
 certManager:
   # 是否己安装 Cert Manager
   enabled: true
