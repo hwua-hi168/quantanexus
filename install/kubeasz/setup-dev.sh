@@ -151,7 +151,7 @@ if [[ -n "${bak:-}" ]] && [[ -d "$bak/clusters" ]]; then
     echo "[INFO] 恢复 clusters 目录完成"
 fi
 
-EZDOWN_PATH="$SCRIPT_DIR/install/kubeasz/ezdown"
+EZDOWN_PATH="$SCRIPT_DIR/ezdown"
 if [[ -f "$EZDOWN_PATH" ]]; then
     echo "[INFO] ezdown 已存在：$EZDOWN_PATH"
     chmod +x "$EZDOWN_PATH"
