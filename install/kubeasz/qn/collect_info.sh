@@ -61,34 +61,42 @@ username="$username"
 password="$password"
 use_password_auth="$use_password_auth"
 node_names_mappings="$node_names_mappings"
+USE_HTTP_IP="$USE_HTTP_IP"
+MGR_DOMAIN_IP="$MGR_DOMAIN_IP"
 EOF
     
     print_success "配置已保存到 $SCRIPT_DIR/.k8s_cluster_config"
 }
 
+# 🌟 重点修改 check_existing_config 函数
 # 检查是否已有配置
 check_existing_config() {
-    echo "all_ips $all_ips"
-    echo "etcd_ips $etcd_ips"
-    echo "master_ips $master_ips"
-    echo "worker_ips $worker_ips"
-    echo "QN_DOMAIN $QN_DOMAIN"
-    echo "IMAGE_REGISTRY $IMAGE_REGISTRY"
-    if [[ -n "$all_ips" && -n "$etcd_ips" && -n "$master_ips" && -n "$worker_ips" && -n "$QN_DOMAIN" && -n "$IMAGE_REGISTRY" ]]; then
+    # 检查配置文件是否存在
+    if [[ -f "$SCRIPT_DIR/.k8s_cluster_config" ]]; then
+        # 配置文件存在，加载配置
+        load_config
+        
+        # 简单检查 essential_vars，如果这些核心数组为空，说明上次收集失败或文件为空
+        if [[ -z "$all_ips_str" ]]; then
+             print_warning "检测到配置文件存在，但核心IP列表为空，将重新收集配置..."
+             return 1
+        fi
+
         echo "=== 检测到已有配置信息 ==="
-        show_config_summary
+        show_config_summary # 展示现有配置
         
         read -p "是否使用以上配置? (y/n, 默认y): " use_existing_config
         if [[ ! $use_existing_config =~ ^[Nn]$ ]]; then
             print_success "使用现有配置"
-            return 0
+            return 0 # 使用现有配置
         else
             print_info "重新配置节点信息..."
-            # 清空现有配置
-            unset all_ips etcd_ips master_ips worker_ips QN_DOMAIN IMAGE_REGISTRY node_names
+            # 清空现有配置 (仅清空在 load_config 中加载的数组和变量，确保 configure_nodes 重新开始)
+            unset all_ips etcd_ips master_ips worker_ips QN_DOMAIN QN_CS_DOMAIN IMAGE_REGISTRY node_names USE_HTTP_IP MGR_DOMAIN_IP
+            return 1 # 不使用现有配置，继续进行 configure_nodes
         fi
     fi
-    return 1
+    return 1 # 配置文件不存在
 }
 
 # 配置节点信息
@@ -284,7 +292,7 @@ configure_nodes() {
                         break
                     fi
                 done
-                
+
                 if [ "$found_all" = true ]; then
                     break
                 fi
@@ -296,41 +304,87 @@ configure_nodes() {
 
     print_success "worker节点配置完成: ${worker_ips[*]}"
     echo ""
-
-    # 第5步：配置域名
-    echo "=== 第5步：配置域名 ==="
-    # 生成8位随机字符串
-    random_str=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1 | tr 'A-Z' 'a-z')
-    default_domain="qn-${random_str}.hi168.com"
-
-    print_info "默认生成域名: $default_domain"
-    read -p "是否使用默认域名? (y/n, 默认y): " use_default_domain
-
-    if [[ $use_default_domain =~ ^[Nn]$ ]]; then
-        read -p "请输入自定义域名: " custom_domain
-        QN_DOMAIN=$custom_domain
+    
+    # 新增：判断是否使用IP直接访问
+    echo "=== 第5步：配置访问方式 ==="
+    print_info "是否使用IP直接访问（不使用域名）Quantanexus管理组件和计算服务?"
+    # 默认使用 IP 直接访问 (y)
+    read -p "使用IP直接访问? (y/n, 默认y): " use_http_ip_input
+    
+    if [[ $use_http_ip_input =~ ^[Nn]$ ]]; then
+        USE_HTTP_IP="false"
+        MGR_DOMAIN_IP=""
+        
+        # 第5.1步：配置域名
+        echo "=== 第5.1步：配置域名 ==="
+        # 生成8位随机字符串
+        random_str=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1 | tr 'A-Z' 'a-z')
+        default_domain="qn-${random_str}.hi168.com"
+    
+        print_info "默认生成域名: $default_domain"
+        read -p "是否使用默认域名? (y/n, 默认y): " use_default_domain
+    
+        if [[ $use_default_domain =~ ^[Nn]$ ]]; then
+            read -p "请输入自定义域名: " custom_domain
+            QN_DOMAIN=$custom_domain
+        else
+            QN_DOMAIN=$default_domain
+        fi
+    
+        print_success "域名配置完成: $QN_DOMAIN"
+        echo ""
+    
+        # 第5.2步：配置Quantanexus Service域名
+        echo "=== 第5.2步：配置Quantanexus Service域名 ==="
+        print_info "Quantanexus Service是否使用与主域名相同的域名?"
+        print_info "默认使用相同域名: $QN_DOMAIN"
+        read -p "是否使用相同域名? (y/n, 默认y): " use_same_cs_domain
+    
+        if [[ $use_same_cs_domain =~ ^[Nn]$ ]]; then
+            read -p "请输入Quantanexus Service域名: " custom_cs_domain
+            QN_CS_DOMAIN=$custom_cs_domain
+        else
+            QN_CS_DOMAIN=$QN_DOMAIN
+        fi
+    
+        print_success "Quantanexus Service域名配置完成: $QN_CS_DOMAIN"
+        echo ""
     else
-        QN_DOMAIN=$default_domain
+        # 默认或明确输入 'y'
+        USE_HTTP_IP="true"
+        QN_DOMAIN=""
+        QN_CS_DOMAIN=""
+        print_success "配置为使用IP直接访问"
+        
+        # 收集 MGR_DOMAIN_IP
+        default_mgr_ip="${all_ips[0]}" # 默认使用第一个 IP
+        print_info "请输入用于访问Quantanexus管理组件的IP地址 (MGR_DOMAIN_IP)"
+        print_info "默认IP为第一个节点IP: $default_mgr_ip"
+        read -p "请输入MGR_DOMAIN_IP (默认: $default_mgr_ip): " mgr_domain_ip_input
+        
+        MGR_DOMAIN_IP=${mgr_domain_ip_input:-$default_mgr_ip}
+        
+        # 验证 MGR_DOMAIN_IP 是否在所有 IP 列表中
+        local found_mgr_ip=false
+        for ip in "${all_ips[@]}"; do
+            if [[ "$ip" == "$MGR_DOMAIN_IP" ]]; then
+                found_mgr_ip=true
+                break
+            fi
+        done
+        
+        if [ "$found_mgr_ip" == "false" ]; then
+            print_warning "警告: MGR_DOMAIN_IP ($MGR_DOMAIN_IP) 不在您提供的集群节点列表中"
+        fi
+        
+        if ! validate_ip "$MGR_DOMAIN_IP"; then
+            print_error "错误: MGR_DOMAIN_IP ($MGR_DOMAIN_IP) 格式无效"
+        fi
+        
+        print_success "MGR_DOMAIN_IP 配置完成: $MGR_DOMAIN_IP"
+        echo ""
     fi
-
-    print_success "域名配置完成: $QN_DOMAIN"
-    echo ""
-
-    # 新增：配置Quantanexus Service域名
-    echo "=== 第5.1步：配置Quantanexus Service域名 ==="
-    print_info "Quantanexus Service是否使用与主域名相同的域名?"
-    print_info "默认使用相同域名: $QN_DOMAIN"
-    read -p "是否使用相同域名? (y/n, 默认y): " use_same_cs_domain
-
-    if [[ $use_same_cs_domain =~ ^[Nn]$ ]]; then
-        read -p "请输入Quantanexus Service域名: " custom_cs_domain
-        QN_CS_DOMAIN=$custom_cs_domain
-    else
-        QN_CS_DOMAIN=$QN_DOMAIN
-    fi
-
-    print_success "Quantanexus Service域名配置完成: $QN_CS_DOMAIN"
-    echo ""
+    
 
     # 第6步：配置镜像仓库地址
     echo "=== 第6步：配置镜像仓库地址 ==="
@@ -374,7 +428,6 @@ collect_auth_info() {
             print_success "SSH密钥对生成完成"
         else
             print_info "跳过SSH密钥对生成"
-            # 即使跳过，我们也需要调用 save_config 来确保 use_password_auth 等其他变量被保存
             save_config 
             return 0
         fi
@@ -389,7 +442,7 @@ collect_auth_info() {
       if [[ $use_password =~ ^[Nn]$ ]]; then
           print_info "跳过密码认证配置，请确保已配置SSH免密登录"
           use_password_auth=false
-          save_config # 即使跳过，也要保存 use_password_auth=false
+          save_config 
           return 0
       fi
     fi
@@ -419,8 +472,6 @@ collect_auth_info() {
       fi
     fi    
     
-    # 删除了错误的 'export $username;' 和 'export $password;'
-    
     print_success "认证信息收集完成"
     # 添加 save_config，确保用户名和密码被保存到配置文件
     save_config
@@ -436,8 +487,18 @@ show_config_summary() {
     print_success "etcd节点: ${etcd_ips[*]}"
     print_success "master节点: ${master_ips[*]}"
     print_success "worker节点: ${worker_ips[*]}"
-    print_success "域名: $QN_DOMAIN"
-    print_success "Quantanexus Service域名: $QN_CS_DOMAIN"
+    
+    if [[ "$USE_HTTP_IP" == "true" ]]; then
+        print_success "访问方式: IP直接访问 (USE_HTTP_IP=true)"
+        print_success "管理组件IP (MGR_DOMAIN_IP): $MGR_DOMAIN_IP"
+        print_warning "域名 (QN_DOMAIN/QN_CS_DOMAIN): (未配置)"
+    else
+        print_success "访问方式: 域名访问 (USE_HTTP_IP=false)"
+        print_success "域名 (QN_DOMAIN): $QN_DOMAIN"
+        print_success "Quantanexus Service域名 (QN_CS_DOMAIN): $QN_CS_DOMAIN"
+        print_warning "管理组件IP (MGR_DOMAIN_IP): (未配置)"
+    fi
+    
     print_success "镜像仓库: $IMAGE_REGISTRY"
     echo ""
     
@@ -496,6 +557,8 @@ generate_hosts_file() {
         echo "QN_DOMAIN=\"$QN_DOMAIN\""
         echo "QN_CS_DOMAIN=\"$QN_CS_DOMAIN\""
         echo "IMAGE_REGISTRY=\"$IMAGE_REGISTRY\""
+        echo "USE_HTTP_IP=\"$USE_HTTP_IP\""
+        echo "MGR_DOMAIN_IP=\"$MGR_DOMAIN_IP\""
         echo ""
     } > "$output_file"
     

@@ -1,73 +1,47 @@
-- block:
-    - name: 创建calico 证书请求
-      template: src=calico-csr.json.j2 dest={{ cluster_dir }}/ssl/calico-csr.json
 
-    - name: 创建 calico证书和私钥
-      shell: "cd {{ cluster_dir }}/ssl && {{ base_dir }}/bin/cfssl gencert \
-            -ca=ca.pem \
-            -ca-key=ca-key.pem \
-            -config=ca-config.json \
-            -profile=kubernetes calico-csr.json|{{ base_dir }}/bin/cfssljson -bare calico"
-
-    - name: 删除旧 calico-etcd-secrets
-      shell: "{{ base_dir }}/bin/kubectl -n kube-system delete secrets calico-etcd-secrets || echo NotFound"
-
-    - name: 创建 calico-etcd-secrets
-      shell: "cd {{ cluster_dir }}/ssl && \
-            {{ base_dir }}/bin/kubectl create secret generic -n kube-system calico-etcd-secrets \
-            --from-file=etcd-ca=ca.pem \
-            --from-file=etcd-key=calico-key.pem \
-            --from-file=etcd-cert=calico.pem"
-
-    - name: 配置 calico DaemonSet yaml文件
-      template: src=calico-{{ calico_ver_main }}.yaml.j2 dest={{ cluster_dir }}/yml/calico.yaml
-
-    - name: 删除 calico网络
-      shell: "{{ base_dir }}/bin/kubectl delete -f {{ cluster_dir }}/yml/calico.yaml || echo NotFound; sleep 3"
-      when: 'CHANGE_CA|bool'
-
-    - name: 运行 calico网络
-      shell: "{{ base_dir }}/bin/kubectl apply -f {{ cluster_dir }}/yml/calico.yaml"
+# ==================== Step 1: Deploy Tigera Operator ====================
+- name: Deploy Tigera Operator (from template)
+  k8s:
+    definition: "{{ lookup('template', 'templates/calico-tigera-operator-v3.31.2.yaml.j2') }}"
+    state: present
+  delegate_to: localhost
   run_once: true
-  connection: local
-  tags: force_change_certs
 
-- name: 在节点创建相关目录
-  file: name={{ item }} state=directory
-  with_items:
-  - /etc/calico/ssl
+- name: Wait for tigera-operator pod to be ready
+  k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: "{{ calico_operator_namespace }}"
+    label_selectors:
+      - k8s-app=tigera-operator
+  register: operator_pod
+  until: >
+    operator_pod.resources | length == 1 and
+    operator_pod.resources[0].status.phase == 'Running' and
+    operator_pod.resources[0].status.containerStatuses is defined and
+    operator_pod.resources[0].status.containerStatuses[0].ready == true
+  retries: 30
+  delay: 5
+  delegate_to: localhost
+  run_once: true
 
-- name: 分发calico证书相关
-  copy: src={{ cluster_dir }}/ssl/{{ item }} dest=/etc/calico/ssl/{{ item }}
-  with_items:
-  - ca.pem
-  - calico.pem
-  - calico-key.pem
-  tags: force_change_certs
+# ==================== Step 2: Deploy Calico CRs ====================
+- name: Deploy Calico Enterprise Configuration (Installation, APIServer, etc.)
+  k8s:
+    definition: "{{ lookup('template', 'templates/customer-resource.yaml.j2') }}"
+    state: present
+  when: calico_enterprise_enabled | bool
+  delegate_to: localhost
+  run_once: true
 
-- name: 删除默认cni配置
-  file: path=/etc/cni/net.d/10-default.conf state=absent
-
-- name: 下载calicoctl 客户端
-  copy: src={{ base_dir }}/bin/{{ item }} dest={{ bin_dir }}/{{ item }} mode=0755
-  with_items:
-  #- calico
-  - calicoctl
-  ignore_errors: false
-
-- name: 准备 calicoctl配置文件
-  template: src=calicoctl.cfg.j2 dest=/etc/calico/calicoctl.cfg
-
-- name: 轮询等待calico-node 运行
-  shell: "{{ base_dir }}/bin/kubectl get pod -n kube-system -o wide|grep 'calico-node'|grep ' {{ K8S_NODENAME }} '|awk '{print $3}'"
-  register: pod_status
-  until: pod_status.stdout == "Running"
-  retries: 15
-  delay: 15
-  ignore_errors: true
-  connection: local
-  tags: force_change_certs
-
-- import_tasks: calico-rr.yml
-  when: 'CALICO_RR_ENABLED|bool'
-  tags: force_change_certs
+- name: Wait for Installation to be ready
+  k8s_info:
+    api_version: operator.tigera.io/v1
+    kind: Installation
+    name: default
+  register: install_status
+  until: install_status.resources[0].status.phase == 'Ready'
+  retries: 30
+  delay: 10
+  delegate_to: localhost
+  run_once: true

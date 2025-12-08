@@ -33,11 +33,21 @@ spec:
         - name: HI168_ENV_TYPE
           value: {{ .Values.quantanexus.nginx.frontend.env.type | quote }}
         - name: HI168_ENV_URL_BASE
+          {{- if .Values.global.useHttpIP  }}
+          value: "http://{{ .Values.global.mgrDomainIP }}:{{ .Values.global.mgrDomainPort }}"
+          {{- end }}
+          {{- if not .Values.global.useHttpIP }}
           value: "https://{{ include "quantanexus.domainName" . }}"
+          {{- end }}
         - name: HI168_SHOW_MODULE_LIST
           value: {{ .Values.quantanexus.nginx.frontend.env.moduleList | quote }}
         - name: HI168_COMMON_VAR_1
-          value: "HI168_COMMON_VAR_1"
+          {{- if .Values.global.useHttpIP  }}
+          value: ""
+          {{- end }}
+          {{- if not .Values.global.useHttpIP  }}
+          value: "upgrade-insecure-requests"
+          {{- end }}
         - name: HI168_COMMON_VAR_2
           value: "HI168_COMMON_VAR_2"
         - name: HI168_COMMON_VAR_3

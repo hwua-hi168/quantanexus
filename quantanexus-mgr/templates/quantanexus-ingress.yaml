@@ -34,7 +34,12 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
+    {{- if .Values.global.useHttpIP }}
+    - host: null
+    {{- end }}
+    {{- if not .Values.global.useHttpIP }}
     - host: {{ .Values.global.domainName }}
+    {{- end }}
       http:
         paths:
           - backend:
@@ -50,28 +55,7 @@ spec:
                 name: {{ include "quantanexus.fullname" . }}
                 port:
                   number: 8072
-          - backend:
-              service:
-                name: abc-experiment-service
-                port:
-                  number: 8075
-            path: /certterminal
-            pathType: Prefix
-          - backend:
-              service:
-                name: abc-experiment-service
-                port:
-                  number: 8075
-            path: /websockify
-            pathType: Prefix
-          - pathType: Prefix
-            path: /hwua_node_service
-            backend:
-              service:
-                name: abc-experiment-service
-                port:
-                  number: 8075
-  {{- if .Values.ingress.tlsSecret }}
+  {{- if and .Values.ingress.tlsSecret (not .Values.global.useHttpIP) }}
   tls:
     - hosts:
       - {{ .Values.global.domainName }}

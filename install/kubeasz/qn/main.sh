@@ -108,7 +108,7 @@ show_usage() {
 
 # 收集信息命令
 cmd_collect() {
-    print_banner
+    # print_banner
     configure_nodes
     collect_auth_info
     show_config_summary

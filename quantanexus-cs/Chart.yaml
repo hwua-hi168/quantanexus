@@ -1,6 +1,6 @@
 apiVersion: v2
 name: quantanexus-cs
 description: A Helm chart for deploying quantanexus cluster service on Kubernetes
-version: 1.0.0
+version: 1.1.0
 # 以abcExperimentService 为版本基础
-appVersion: "v1.3.6"
+appVersion: "v1.4.6"

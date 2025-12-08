@@ -76,7 +76,7 @@ configure_kubeasz() {
     # [变量定义区域] 
     # ==========================================
     # 定义你要同步的所有变量名
-    local vars_to_sync=("QN_DOMAIN" "IMAGE_REGISTRY" "QN_CS_DOMAIN" "NEW_VAR_1")
+    local vars_to_sync=("QN_DOMAIN" "IMAGE_REGISTRY" "QN_CS_DOMAIN" "USE_HTTP_IP" "MGR_DOMAIN_IP")
     
     declare -A var_map
     
