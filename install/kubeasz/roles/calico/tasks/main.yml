@@ -1,3 +1,4 @@
+# In main.yml
 
 # ==================== Step 1: Deploy Tigera Operator ====================
 - name: Deploy Tigera Operator (from template)
@@ -25,6 +26,22 @@
   delegate_to: localhost
   run_once: true
 
+# --- 新增任务：等待 Installation CRD 建立 ---
+- name: Wait for Installation CRD to be established
+  k8s_info:
+    api_version: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: installations.operator.tigera.io
+  register: crd_status
+  until: >
+    crd_status.resources | length == 1 and
+    crd_status.resources[0].status.conditions | selectattr('type', 'equalto', 'Established') | map(attribute='status') | first == 'True'
+  retries: 30
+  delay: 5
+  delegate_to: localhost
+  run_once: true
+# ---------------------------------------------
+
 # ==================== Step 2: Deploy Calico CRs ====================
 - name: Deploy Calico Enterprise Configuration (Installation, APIServer, etc.)
   k8s:
@@ -34,13 +51,18 @@
   delegate_to: localhost
   run_once: true
 
-- name: Wait for Installation to be ready
+- name: Wait for Installation to be ready (Fixed to check 'Ready' condition)
   k8s_info:
     api_version: operator.tigera.io/v1
     kind: Installation
     name: default
   register: install_status
-  until: install_status.resources[0].status.phase == 'Ready'
+  until: >
+    install_status.resources | length == 1 and
+    install_status.resources[0].status.conditions | 
+    selectattr('type', 'equalto', 'Ready') | 
+    map(attribute='status') | 
+    first == 'True'
   retries: 30
   delay: 10
   delegate_to: localhost

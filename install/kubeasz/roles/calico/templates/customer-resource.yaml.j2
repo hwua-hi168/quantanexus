@@ -6,6 +6,8 @@ metadata:
   name: default
 spec:
   calicoNetwork:
+    nodeAddressAutodetectionV4:
+      interface: "eth0|en.*|ens.*|enp.*"  
     ipPools:
       - name: default-ipv4-ippool
         blockSize: {{ calico_block_size | default(26) }}
@@ -13,6 +15,7 @@ spec:
         encapsulation: {{ calico_encapsulation | default('VXLANCrossSubnet') }}
         natOutgoing: {{ calico_nat_outgoing | default('Enabled') }}
         nodeSelector: all()
+  mtu: 1450
 
 ---
 
