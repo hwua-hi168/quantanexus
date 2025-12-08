@@ -151,6 +151,20 @@ if [[ -n "${bak:-}" ]] && [[ -d "$bak/clusters" ]]; then
     echo "[INFO] 恢复 clusters 目录完成"
 fi
 
+if [[ -f "install/kubeasz/ezdown" ]]; then
+    echo "[INFO] ezdown 文件已存在: install/kubeasz/ezdown"
+    # 确保文件可执行
+    if [[ ! -x "install/kubeasz/ezdown" ]]; then
+        echo "[INFO] 添加执行权限到 ezdown"
+        chmod +x install/kubeasz/ezdown
+    fi
+else
+    echo " ---------------------get ezdown -------------------------------"
+    curl -LO https://github.com/hwua-hi168/quantanexus/releases/download/$(curl \
+    -s "https://api.github.com/repos/hwua-hi168/quantanexus/releases/latest" | \
+    jq -r .tag_name)/ezdown -o install/kubeasz/ezdown && chmod +x install/kubeasz/ezdown
+
+fi
 # 9. 打印摘要
 cat <<EOF
 ----------------------------------------------------
