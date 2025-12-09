@@ -51,7 +51,7 @@
   delegate_to: localhost
   run_once: true
 
-- name: Wait for Installation to be ready (Fixed to check 'Ready' condition)
+- name: Wait for Installation to be ready
   k8s_info:
     api_version: operator.tigera.io/v1
     kind: Installation
@@ -59,11 +59,17 @@
   register: install_status
   until: >
     install_status.resources | length == 1 and
+    install_status.resources[0] is defined and
+    install_status.resources[0].status is defined and
+    install_status.resources[0].status.conditions is defined and
     install_status.resources[0].status.conditions | 
     selectattr('type', 'equalto', 'Ready') | 
-    map(attribute='status') | 
-    first == 'True'
-  retries: 30
+    list | length > 0 and
+    (install_status.resources[0].status.conditions | 
+     selectattr('type', 'equalto', 'Ready') | 
+     map(attribute='status') | 
+     first) == 'True'
+  retries: 40
   delay: 10
   delegate_to: localhost
   run_once: true
