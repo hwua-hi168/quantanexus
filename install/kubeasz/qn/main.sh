@@ -16,7 +16,7 @@ source "$SCRIPT_DIR/download_source.sh"
 source "$SCRIPT_DIR/install_kubeasz.sh"
 source "$SCRIPT_DIR/configure_kubeasz.sh"
 source "$SCRIPT_DIR/run_kubeasz_setup.sh"
-source "$SCRIPT_DIR/install_helm.sh"
+# source "$SCRIPT_DIR/install_helm.sh"
 
 # 新增组件安装模块
 source "$SCRIPT_DIR/run_longhorn.sh"
@@ -29,7 +29,7 @@ source "$SCRIPT_DIR/run_volcano.sh"
 source "$SCRIPT_DIR/run_quantanexus_mgr.sh"
 source "$SCRIPT_DIR/run_quantanexus_cs.sh"
 source "$SCRIPT_DIR/run_uncordon.sh"
-source "$SCRIPT_DIR/run_containerd_config.sh"
+# source "$SCRIPT_DIR/run_containerd_config.sh"
 # 新增MinIO模块
 source "$SCRIPT_DIR/run_minio.sh"
 # 新增Redis Sentinel模块
