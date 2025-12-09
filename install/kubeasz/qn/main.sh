@@ -790,12 +790,12 @@ main() {
                 print_error "Volcano安装失败"
                 exit 1
             fi
-            if ! run_quantanexus_mgr_playbook; then
-                print_error "Quantanexus管理组件安装失败"
-                exit 1
-            fi
             if ! run_quantanexus_cs_playbook; then
                 print_error "Quantanexus计算服务安装失败"
+                exit 1
+            fi
+            if ! run_quantanexus_mgr_playbook; then
+                print_error "Quantanexus管理组件安装失败"
                 exit 1
             fi
             print_success "所有配置完成！"
