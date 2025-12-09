@@ -39,6 +39,18 @@ check_kubeasz_container() {
     return 0
 }
 
+# 清理ANSI转义序列（颜色代码等）
+clean_ansi_escape() {
+    # 移除ANSI转义序列（颜色代码、光标控制等）
+    sed -r "s/\x1B\[[0-9;]*[mK]//g" | sed -r "s/\x1B\][0-9;]*//g" | sed -r "s/\x1B\[?[0-9;]*[hHl]//g"
+}
+
+# 安全的输出函数
+safe_echo() {
+    # 确保输出格式正确，添加明确的换行
+    echo -e "$@"
+}
+
 # 执行kubeasz单步安装
 run_kubeasz_single_step() {
     local cluster_name="$1"
@@ -55,12 +67,21 @@ run_kubeasz_single_step() {
     fi
     
     print_info "执行kubeasz步骤 $step: ${kubeasz_steps[$step]:-未知步骤}"
+    echo ""  # 添加空行分隔
     
-    # 执行安装步骤
-    if execute_with_privileges docker exec -it kubeasz ezctl setup "$cluster_name" "$step"; then
+    # 执行安装步骤 - 添加stderr重定向和输出处理
+    # 使用 -i 禁用tty分配，避免进度条导致的格式问题
+    if execute_with_privileges docker exec -i kubeasz ezctl setup "$cluster_name" "$step" 2>&1 | \
+        while IFS= read -r line; do
+            # 清理每行的ANSI转义序列，确保正常显示
+            cleaned_line=$(echo "$line" | clean_ansi_escape)
+            echo "$cleaned_line"
+        done; then
+        echo ""  # 步骤完成后添加空行
         print_success "kubeasz步骤 $step 执行完成"
         return 0
     else
+        echo ""  # 步骤完成后添加空行
         print_error "kubeasz步骤 $step 执行失败"
         return 1
     fi
@@ -71,11 +92,14 @@ run_kubeasz_setup() {
     local cluster_name="${1:-k8s-qn-01}"
     
     print_info "开始执行kubeasz分步安装..."
+    echo ""  # 添加空行分隔
     
     # 检查kubeasz容器
     if ! check_kubeasz_container; then
         return 1
     fi
+    
+    echo ""  # 添加空行分隔
     
     # 检查集群是否已经存在并且状态正常
     print_info "检查集群 $cluster_name 是否已经存在..."
@@ -88,47 +112,36 @@ run_kubeasz_setup() {
     # 显示步骤信息
     show_kubeasz_steps
     
-    # 确认是否继续
-    read -p "是否开始执行kubeasz安装? (y/n, 默认y): " confirm_start
-    if [[ $confirm_start =~ ^[Nn]$ ]]; then
-        print_info "用户取消安装"
-        exit 0;
-        return 0
-    fi
-    
     # 定义安装步骤顺序
     local steps=("01" "02" "03" "04" "05" "06" "07")
     
     # 执行每个步骤
     for step in "${steps[@]}"; do
         echo ""
-        print_info "=== 开始执行步骤 $step: ${kubeasz_steps[$step]} ==="
+        echo "=================================================="
+        print_info "开始执行步骤 $step: ${kubeasz_steps[$step]}"
+        echo "=================================================="
+        echo ""
         
         # 执行当前步骤
         if ! run_kubeasz_single_step "$cluster_name" "$step"; then
             print_error "步骤 $step 执行失败，安装中止"
             exit 1;
-            
-            # # 询问是否继续执行后续步骤
-            # read -p "是否跳过此步骤继续执行后续步骤? (y/n, 默认n): " skip_step
-            # if [[ ! $skip_step =~ ^[Yy]$ ]]; then
-            #     return 1
-            # else
-            #     print_warning "跳过步骤 $step，继续执行后续步骤"
-            #     continue
-            # fi
         fi
         
-        # 步骤间暂停（可选）
-        # if [[ "$step" != "07" ]]; then
+        # 步骤间添加分隔线
+        if [[ "$step" != "07" ]]; then
             echo ""
-            # read -p "步骤 $step 完成，按回车继续下一步骤..." dummy
-            echo  "步骤 $step 完成"
-        # fi
+            echo "--- 步骤 $step 完成，继续下一步 ---"
+            sleep 2  # 短暂暂停，让用户有时间查看输出
+        fi
     done
     
     echo ""
+    echo "=================================================="
     print_success "所有kubeasz安装步骤执行完成！"
+    echo "=================================================="
+    echo ""
     
     # 显示完成信息
     echo ""
@@ -143,7 +156,7 @@ run_kubeasz_setup() {
     echo "  - Worker节点: ${#worker_ips[@]} 个"
     echo ""
     echo "下一步操作:"
-    echo "  1. 检查集群状态: docker exec -it kubeasz ezctl status $cluster_name"
+    echo "  1. 检查集群状态: docker exec -i kubeasz ezctl status $cluster_name"
     echo "  2. 查看集群节点: /opt/kube/bin/kubectl get nodes"
     echo "  3. 查看所有Pod: /opt/kube/bin/kubectl get pods -A"
     echo ""
@@ -161,7 +174,6 @@ check_cluster_status() {
         return 1
     fi
     
-    # 【已修复】用 kubectl 检查集群状态，替代无效的 ezctl status
     # 尝试静默检查 kubectl 是否能访问集群
     if execute_with_privileges docker exec -i kubeasz /opt/kube/bin/kubectl get nodes >/dev/null 2>&1; then
         print_success "集群状态检查成功"
@@ -180,19 +192,18 @@ show_cluster_info() {
     local cluster_name="${1:-k8s-qn-01}"
     
     print_info "显示集群 $cluster_name 信息..."
+    echo ""  # 添加空行分隔
     
     if ! check_kubeasz_container; then
         return 1
     fi
     
-    echo ""
     echo "=================================================="
     echo "          集群节点信息"
     echo "=================================================="
-    # 【已修复】确保 kubectl 命令在 kubeasz 容器内执行
-    if ! execute_with_privileges docker exec -it kubeasz /usr/bin/kubectl get nodes -o wide; then
+    # 确保 kubectl 命令在 kubeasz 容器内执行，使用 -i 避免tty问题
+    if ! execute_with_privileges docker exec -i kubeasz /usr/bin/kubectl get nodes -o wide; then
         print_error "获取节点信息失败"
-        # 修正：将 exit 1 改为 return 1，让调用者决定是否退出
         return 1
     fi
     
@@ -200,10 +211,8 @@ show_cluster_info() {
     echo "=================================================="
     echo "          集群Pod状态"
     echo "=================================================="
-    # 【已修复】确保 kubectl 命令在 kubeasz 容器内执行
-    if ! execute_with_privileges docker exec -it kubeasz /usr/bin/kubectl get pods -A; then
+    if ! execute_with_privileges docker exec -i kubeasz /usr/bin/kubectl get pods -A; then
         print_error "获取Pod信息失败"
-        # 修正：将 exit 1 改为 return 1
         return 1
     fi
     
@@ -211,10 +220,8 @@ show_cluster_info() {
     echo "=================================================="
     echo "          集群服务状态"
     echo "=================================================="
-    # 【已修复】确保 kubectl 命令在 kubeasz 容器内执行
-    if ! execute_with_privileges docker exec -it kubeasz /usr/bin/kubectl get svc -A; then
+    if ! execute_with_privileges docker exec -i kubeasz /usr/bin/kubectl get svc -A; then
         print_error "获取服务信息失败"
-        # 修正：将 exit 1 改为 return 1
         return 1
     fi
     
@@ -225,7 +232,7 @@ show_cluster_info() {
 check_cluster_exists() {
     local cluster_name="${1:-k8s-qn-01}"
     
-    if execute_with_privileges docker exec -it kubeasz ezctl list | grep -q "$cluster_name"; then
+    if execute_with_privileges docker exec -i kubeasz ezctl list 2>/dev/null | grep -q "$cluster_name"; then
         return 0
     else
         return 1
@@ -240,11 +247,12 @@ check_cluster_status_quiet() {
         return 1
     fi
     
-    # 【已修复】用 kubectl 检查集群状态，替代无效的 ezctl status
     # 使用 'kubectl get nodes' 检查集群是否已部署并可用
-    if execute_with_privileges docker exec -i kubeasz /opt/kube/bin/kubectl get nodes >/dev/null 2>&1; then
+    if execute_with_privileges docker exec -i kubeasz kubectl get nodes >/dev/null 2>&1; then
+        echo '成功: 集群已部署且可用'
         return 0 # 成功: 集群已部署且可用
     else
+        echo '集群未部署或不可用'
         return 1 # 失败: 集群未部署或不可用
     fi
 }

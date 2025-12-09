@@ -33,13 +33,10 @@ check_files_exist() {
         "install_kubeasz.sh"
         "configure_kubeasz.sh"
         "run_kubeasz_setup.sh"
-        # "install_helm.sh"
         "run_longhorn.sh"
         "run_cert_manager.sh"
         "run_prometheus.sh"
         "run_ingress_nginx.sh"
-        "install_helm.sh"
-        "run_containerd_config.sh"
         "run_harbor.sh"
         "run_gpu_operator.sh"
         "run_volcano.sh"
@@ -146,10 +143,6 @@ EOF
     echo "# ==================== run_kubeasz_setup.sh ====================" >> "$output_file"
     extract_file_content "run_kubeasz_setup.sh" >> "$output_file"
     
-    # print_info "添加Helm安装模块..."
-    # echo "" >> "$output_file"
-    # echo "# ==================== install_helm.sh ====================" >> "$output_file"
-    # extract_file_content "install_helm.sh" >> "$output_file"
     
     print_info "添加Longhorn安装模块..."
     echo "" >> "$output_file"
@@ -215,14 +208,6 @@ EOF
     echo "" >> "$output_file"
     echo "# ==================== run_uncordon.sh ====================" >> "$output_file"
     extract_file_content "run_uncordon.sh" >> "$output_file"
-    print_info "添加节点install_helm模块..."
-    echo "" >> "$output_file"
-    echo "# ==================== run_containerd_config.sh ====================" >> "$output_file"
-    extract_file_content "run_containerd_config.sh" >> "$output_file"
-    print_info "添加节点install_helm模块..."
-    echo "" >> "$output_file"
-    echo "# ==================== install_helm.sh ====================" >> "$output_file"
-    extract_file_content "install_helm.sh" >> "$output_file"
     
     print_info "添加主程序..."
     echo "" >> "$output_file"
@@ -248,8 +233,6 @@ EOF
         /^[[:space:]]*source[[:space:]]+.*run_harbor\.sh/d
         /^[[:space:]]*source[[:space:]]+.*run_gpu_operator\.sh/d
         /^[[:space:]]*source[[:space:]]+.*run_volcano\.sh/d
-        /^[[:space:]]*source[[:space:]]+.*run_containerd_config\.sh/d
-        /^[[:space:]]*source[[:space:]]+.*install_helm\.sh/d
         /^[[:space:]]*source[[:space:]]+.*run_quantanexus_mgr\.sh/d
         /^[[:space:]]*source[[:space:]]+.*run_quantanexus_cs\.sh/d
         /^[[:space:]]*source[[:space:]]+.*run_uncordon\.sh/d

@@ -108,7 +108,7 @@ show_usage() {
 
 # 收集信息命令
 cmd_collect() {
-    # print_banner
+    # # print_banner
     configure_nodes
     collect_auth_info
     show_config_summary
@@ -116,7 +116,7 @@ cmd_collect() {
 
 # 配置SSH命令
 cmd_ssh() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -145,7 +145,7 @@ cmd_ssh() {
 
 # 配置主机名命令
 cmd_hostname() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -164,7 +164,7 @@ cmd_hostname() {
 
 # 显示配置命令
 cmd_show() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -175,7 +175,7 @@ cmd_show() {
 
 # 生成hosts文件命令
 cmd_generate() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -186,7 +186,7 @@ cmd_generate() {
 
 # 下载源码命令
 cmd_download() {
-    print_banner
+    # print_banner
     if ! download_source_code; then
         print_error "源码下载失败"
         return 1
@@ -196,7 +196,7 @@ cmd_download() {
 
 # 安装kubeasz命令
 cmd_kubeasz() {
-    print_banner
+    # print_banner
     if ! install_kubeasz; then
         print_error "kubeasz安装失败"
         return 1
@@ -221,7 +221,7 @@ cmd_kubeasz() {
 
 # 配置kubeasz命令
 cmd_configure() {
-    print_banner
+    # print_banner
     if ! configure_kubeasz; then
         print_error "kubeasz配置失败"
         return 1
@@ -231,7 +231,7 @@ cmd_configure() {
 
 # 执行kubeasz分步安装命令
 cmd_setup() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -250,7 +250,7 @@ cmd_setup() {
 
 # 执行kubeasz指定步骤命令
 cmd_setup_step() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -276,7 +276,7 @@ cmd_setup_step() {
 
 # 检查集群状态命令
 cmd_status() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -294,7 +294,7 @@ cmd_status() {
 
 # 显示集群信息命令
 cmd_info() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -312,7 +312,7 @@ cmd_info() {
 
 # 安装Helm命令
 cmd_helm() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -330,7 +330,7 @@ cmd_helm() {
 
 # 执行Longhorn存储安装命令
 cmd_longhorn() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -348,7 +348,7 @@ cmd_longhorn() {
 
 # 执行MinIO对象存储安装命令
 cmd_minio() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -366,7 +366,7 @@ cmd_minio() {
 
 # 执行Redis Sentinel安装命令
 cmd_redis_sentinel() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -384,7 +384,7 @@ cmd_redis_sentinel() {
 
 # 执行JuiceFS存储安装命令
 cmd_juicefs() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -402,7 +402,7 @@ cmd_juicefs() {
 
 # 执行Cert-Manager安装命令
 cmd_cert_manager() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -420,7 +420,7 @@ cmd_cert_manager() {
 
 # 执行Prometheus监控安装命令
 cmd_prometheus() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -438,7 +438,7 @@ cmd_prometheus() {
 
 # 执行Ingress-Nginx安装命令
 cmd_ingress_nginx() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -456,7 +456,7 @@ cmd_ingress_nginx() {
 
 # 执行Harbor镜像仓库安装命令
 cmd_harbor() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -474,7 +474,7 @@ cmd_harbor() {
 
 # 执行GPU Operator安装命令
 cmd_gpu_operator() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -492,7 +492,7 @@ cmd_gpu_operator() {
 
 # 执行Volcano批处理系统安装命令
 cmd_volcano() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -510,7 +510,7 @@ cmd_volcano() {
 
 # 执行Quantanexus管理组件安装命令
 cmd_quantanexus_mgr() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -528,7 +528,7 @@ cmd_quantanexus_mgr() {
 
 # 执行Quantanexus计算服务安装命令
 cmd_quantanexus_cs() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
@@ -546,7 +546,7 @@ cmd_quantanexus_cs() {
 
 # 执行节点 uncordon 命令
 cmd_uncordon() {
-    print_banner
+    # print_banner
     if ! load_config; then
         print_error "无法加载配置，请先运行 '$0 collect'"
         exit 1
